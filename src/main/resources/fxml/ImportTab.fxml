@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox spacing="15" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="sk.bakaj.adreskobox.controller.ImportController"
+      style="-fx-padding: 20;">
+
+    <Label text="Import dát a nastavenie rozmerov etikiet" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+    <GridPane hgap="10" vgap="10">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+        <Label text="Zdrojový súbor:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <HBox spacing="10" GridPane.rowIndex="0" GridPane.columnIndex="1">
+            <TextField fx:id="filePathField" prefWidth="350" editable="false"/>
+            <Button text="Vybrať súbor" onAction="#handleSelectFile"/>
+        </HBox>
+
+        <Label text="Oddeľovač (CSV):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="hasHeaderChecKBox" selected="true" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Separator/>
+
+    <Label text="Nastavenia rozmerov etikiet" style="-fx-font-weight: bolt;"/>
+
+    <HBox spacing="10">
+        <VBox spacing="10">
+            <Label text="Prednastavené formaty:"/>
+            <ComboBox fx:id="predefinedFormatsComboBox" onAction="#handlePredefinedFormatSelection"/>
+        </VBox>
+
+        <VBox spacing="10">
+            <Label text="Vlastné rozmery:"/>
+            <GridPane hgap="10" vgap="5">
+                <Label text="Šírka etikety (mm)" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="widthField" prefWidth="80" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Výška etikety (mm)" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="heightField" prefWidth="80" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Počet etiket - stĺpce:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="columnsField" prefWidth="80" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Počet etiket - riadky:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="rowsField" prefWidth="80" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Ľavý okraj (mm):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="leftMarginField" prefWidth="80" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Pravý okraj (mm):" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="rightMarginField" prefWidth="80" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Horný okraj (mm):" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <TextField fx:id="topMarginField" prefWidth="80" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+                <Label text="Dolný okraj (mm):" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                <TextField fx:id="bottomMarginField" prefWidth="80" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                <Label text="Medzera medzi etiketami - stĺpcami (mm):" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                <TextField fx:id="horizontalGapField" prefWidth="80" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+                <Label text="Medzera medzi etiketami - riadkami (mm):" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                <TextField fx:id="verticalGapField" prefWidth="80" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+            </GridPane>
+        </VBox>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Náhľad dát" onAction="#handlePreviewData"/>
+        <Button text="Importovať" onAction="#handleImportData"/>
+    </HBox>
+</VBox>
