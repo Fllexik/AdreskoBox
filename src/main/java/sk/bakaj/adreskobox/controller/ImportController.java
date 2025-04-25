@@ -175,5 +175,49 @@ public class ImportController
         }
     }
 
+    @FXML
+    private void handleImportData(){
+        //implementácia importu dát a prechod na ďalšiu záložku
+        if (validateInput()){
+            try{
+                //Tu by mala byť skutočná implementácia dát
+                //1. načitanie dát zo súboru
+                //2. spracovanie podľa mapovania stĺpcov
+                //3. uloženie nastavení etikiet
+                //4. prechod na dalšiu záložku
+
+                showAlert(Alert.AlertType.INFORMATION, "Import dát",
+                        "Udaje boli úspešne importované. Môžete pokračovať na dalšiu záložku.");
+
+                //Prechod na dalšiu záložku by sa mohol implementovať takto:
+                //TabPane tabPane = (TabPane) filePathField.getScene().lookup("#mainTapPane");
+                //tabPane.getSelectionModel().select(1);
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Chyba pri importe",
+                    "Nastala chyba pri importe údajov: " + e.getMessage());
+            }
+        }
+    }
+
+    private boolean validateInput() {
+        //Validácia všetkych vstupov
+        StringBuilder errorMessage = new StringBuilder();
+
+        if (filePathField.getText().isEmpty()) {
+            errorMessage.append("- Nieje vybraný žiaden súbor.\n");
+        }
+
+        //Validácia výberu stĺpcov
+        if (parent1NameComboBox.getSelectionModel().isEmpty() && parent2NameComboBox.getSelectionModel().isEmpty()) {
+            errorMessage.append("- Musí byť vybraný aspoň jeden rodič.\n");
+        }
+
+        //Validácia rozmerov etikiet
+        try
+        {
+            double width = validateDoubleField(widthField, "šírka etikety");
+
+        }
+    }
 
 }
