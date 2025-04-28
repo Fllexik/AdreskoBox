@@ -1,6 +1,7 @@
 package sk.bakaj.adreskobox.controller;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
@@ -71,7 +72,8 @@ public class ImportController
     private final Map<String, double[]> predefinedFormats = new HashMap<>();
 
     @FXML
-    private void initialize() {
+    private void initialize()
+    {
         delimeterComboBox.setItems(FXCollections.observableArrayList(
                 "Čiarka (,)", "Bodkočiarka (;)", "Tabulátor (\\t)"
         ));
@@ -94,7 +96,8 @@ public class ImportController
     }
 
     @FXML
-    private void handleSelectFile(){
+    private void handleSelectFile()
+    {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Výberte súbor s údajmi");
 
@@ -111,7 +114,8 @@ public class ImportController
         //Výber súboru
         File selectedFile = fileChooser.showOpenDialog(filePathField.getScene().getWindow());
 
-        if (selectedFile != null) {
+        if (selectedFile != null)
+        {
             filePathField.setText(selectedFile.getAbsolutePath());
 
             //Automatická detekcia typu súboru podľa prípony
@@ -127,9 +131,11 @@ public class ImportController
     }
 
     @FXML
-    private void handlePredefinedFormatSelection() {
-        String selectedFormat = parent1AddressComboBox.getSelectionModel().getSelectedItem();
-        if (selectedFormat != null && predefinedFormats.containsKey(selectedFormat)) {
+    private void handlePredefinedFormatSelection()
+    {
+        String selectedFormat = predefinedFormatsComboBox.getSelectionModel().getSelectedItem();
+        if (selectedFormat != null && predefinedFormats.containsKey(selectedFormat))
+        {
             double[] dimensions = predefinedFormats.get(selectedFormat);
             widthField.setText(String.valueOf(dimensions[0]));
             heightField.setText(String.valueOf(dimensions[1]));
@@ -137,14 +143,16 @@ public class ImportController
             rowsField.setText(String.valueOf(dimensions[3]));
 
             //Nastavenie okrajov a medzier
-            if (dimensions.length > 4) {
+            if (dimensions.length > 4)
+            {
                 leftMarginField.setText(String.valueOf(dimensions[4]));
                 rightMarginField.setText(String.valueOf(dimensions[5]));
                 topMarginField.setText(String.valueOf(dimensions[6]));
                 bottomMarginField.setText(String.valueOf(dimensions[7]));
             }
 
-            if (dimensions.length > 8) {
+            if (dimensions.length > 8)
+            {
                 horizontalGapField.setText(String.valueOf(dimensions[8]));
                 verticalGapField.setText(String.valueOf(dimensions[9]));
             }
@@ -152,10 +160,12 @@ public class ImportController
     }
 
     @FXML
-    private void handlePreviewData() {
+    private void handlePreviewData()
+    {
         //Implementácia zobrazení náhľadu dát
         //Toto by malo otvoriť nové okno sos vzorkou dát
-        if (filePathField.getText().isEmpty()) {
+        if (filePathField.getText().isEmpty())
+        {
             showAlert(Alert.AlertType.WARNING, "Chýbajucí súbor", "Najprv vyberte súbor na import");
             return;
         }
@@ -168,18 +178,22 @@ public class ImportController
             //Dočasné riešenie - len Informácia
             showAlert(Alert.AlertType.INFORMATION, "Náhľad dát",
                     "Táto funkcia zobrazí náhľad prvých 10 riadkov importovaného súboru.\n\n" +
-                    "Cesta k súboru: " + filePathField.getText());
-        }catch (Exception e){
+                            "Cesta k súboru: " + filePathField.getText());
+        } catch (Exception e)
+        {
             showAlert(Alert.AlertType.ERROR, "Chyba pri načítaní",
                     "Nastala chyba pri načítaní súboru: " + e.getMessage());
         }
     }
 
     @FXML
-    private void handleImportData(){
+    private void handleImportData()
+    {
         //implementácia importu dát a prechod na ďalšiu záložku
-        if (validateInput()){
-            try{
+        if (validateInput())
+        {
+            try
+            {
                 //Tu by mala byť skutočná implementácia dát
                 //1. načitanie dát zo súboru
                 //2. spracovanie podľa mapovania stĺpcov
@@ -192,32 +206,151 @@ public class ImportController
                 //Prechod na dalšiu záložku by sa mohol implementovať takto:
                 //TabPane tabPane = (TabPane) filePathField.getScene().lookup("#mainTapPane");
                 //tabPane.getSelectionModel().select(1);
-            } catch (Exception e) {
+            } catch (Exception e)
+            {
                 showAlert(Alert.AlertType.ERROR, "Chyba pri importe",
-                    "Nastala chyba pri importe údajov: " + e.getMessage());
+                        "Nastala chyba pri importe údajov: " + e.getMessage());
             }
         }
     }
 
-    private boolean validateInput() {
+    private boolean validateInput()
+    {
         //Validácia všetkych vstupov
         StringBuilder errorMessage = new StringBuilder();
 
-        if (filePathField.getText().isEmpty()) {
+        if (filePathField.getText().isEmpty())
+        {
             errorMessage.append("- Nieje vybraný žiaden súbor.\n");
         }
 
         //Validácia výberu stĺpcov
-        if (parent1NameComboBox.getSelectionModel().isEmpty() && parent2NameComboBox.getSelectionModel().isEmpty()) {
+        if (parent1NameComboBox.getSelectionModel().isEmpty() && parent2NameComboBox.getSelectionModel().isEmpty())
+        {
             errorMessage.append("- Musí byť vybraný aspoň jeden rodič.\n");
         }
 
         //Validácia rozmerov etikiet
         try
         {
-            double width = validateDoubleField(widthField, "šírka etikety");
+            double width = validateDoubleField(widthField, "Šírka etikety");
+            double height = validateDoubleField(heightField, "Výška etikeety");
+            int colmnus = validateIntField(columnsField, "Počet stĺpcov");
+            int rows = validateIntField(rowsField, "Počet riadkov");
+            double leftMrgin = validateDoubleField(leftMarginField, "Ľavý okraj");
+            double rightMrgin = validateDoubleField(rightMarginField, "Pravý okraj");
+            double topMrgin = validateDoubleField(topMarginField, "Horný okraj");
+            double bottomMrgin = validateDoubleField(bottomMarginField, "Dolný okraj");
+            double horizontalGap = validateDoubleField(horizontalGapField, "Okraj medzi riadkami");
+            double verticalGap = validateDoubleField(verticalGapField, "Okraj medzi stĺpcami");
 
+            //Dodatočné validácie rozmerov...
+
+        } catch (NumberFormatException e)
+        {
+            errorMessage.append(e.getMessage());
+        }
+        if (errorMessage.length() > 0)
+        {
+            showAlert(Alert.AlertType.ERROR, "Chyba pri importe",
+                    "Opravte nasledujúce chyby:\n" + errorMessage.toString());
+            return false;
+        }
+        return true;
+    }
+
+    private double validateDoubleField(TextField field, String fieldName) throws NumberFormatException
+    {
+        try
+        {
+            double value = Double.parseDouble(field.getText().trim());
+            if (value <= 0)
+            {
+                throw new NumberFormatException("- " + fieldName + "musí byť kladné celé číslo.\n");
+            }
+            return value;
+        } catch (NumberFormatException e)
+        {
+            throw new NumberFormatException("- " + fieldName + "musí byť platné celé číslo.\n");
         }
     }
 
+    private void loadHeadersFromFile(File file)
+    {
+        //toto je len zjdnodušená implementácia
+        //v skutočnej aplikácii by sa mali čitať hlavičky zo súboru podľa typu
+        try
+        {
+            //Simuluje načítavanie hlavičiek z CSV/XLSX
+            // V skutočnej aplikácii by ste použili FileService na čitanie skutočných hlavičiek
+            ObservableList<String> headers;
+
+            if (file.getName().toLowerCase().endsWith(".csv"))
+            {
+                //Simulácia načitania hlavičky z csv
+                headers = FXCollections.observableArrayList(
+                        "Meno rodiča 1", "Adresa rodiča 1",
+                        "Meno rodiča 2", "Adresa rodiča 2",
+                        "Meno študenta", "Trieda", "Poznámka"
+                );
+            } else
+            {
+                //Simulácia načitania hlavičky z XLSX/XLS
+                headers = FXCollections.observableArrayList(
+                        "Rodič1_meno", "Rodič_adresa",
+                        "Rodič2_meno", "Rodič2_adresa",
+                        "Študent", "trieda", "Poznámka"
+                );
+            }
+            //Naplnenie comboboxov
+            parent1NameComboBox.setItems(headers);
+            parent1AddressComboBox.setItems(headers);
+            parent2NameComboBox.setItems(headers);
+            parent2AddressComboBox.setItems(headers);
+            studentNameComboBox.setItems(headers);
+
+            //Predvolený výber založený na názvoch stĺpcov
+            if (file.getName().toLowerCase().endsWith(".csv"))
+            {
+                selectDefaultColumns(parent1NameComboBox, "Meno rodiča 1");
+                selectDefaultColumns(parent1AddressComboBox, "Adresa rodiča 1");
+                selectDefaultColumns(parent2NameComboBox, "Meno rodiča 2");
+                selectDefaultColumns(parent2AddressComboBox, "Adresa rodiča 2");
+                selectDefaultColumns(studentNameComboBox, "Meno študenta");
+            } else
+            {
+                selectDefaultColumns(parent1NameComboBox, "Rodič1_meno");
+                selectDefaultColumns(parent1AddressComboBox, "Rodič1_adresa");
+                selectDefaultColumns(parent2NameComboBox, "Rodič2_meno");
+                selectDefaultColumns(parent2AddressComboBox, "Rodič2_adresa");
+                selectDefaultColumns(studentNameComboBox, "Študent");
+            }
+        }catch(Exception e)
+        {
+            showAlert(Alert.AlertType.ERROR, "Chyba pri načítaní súboru",
+                    "Nastala chyba pri čítaní hlavičiek: "+e.getMessage());
+        }
+    }
+
+    private void selectDefaultColumns(ComboBox<String> comboBox, String columnName)
+    {
+        ObservableList<String> items = comboBox.getItems();
+        for (int i = 0; i < items.size(); i++)
+        {
+            if (items.get(i).equals(columnName))
+            {
+             comboBox.getSelectionModel().select(i);
+             break;
+            }
+        }
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String content)
+    {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 }
