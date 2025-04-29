@@ -25,10 +25,12 @@ public class FileService
     public List<ImportedData> readFile(File file, String delimiter) throws IOException
     {
         if (file.getName().toLowerCase().endsWith(".csv"))
+        {
             return readCSV(file, delimiter);
-    }else
-    {
-        return readExcel(file);
+        }else
+        {
+            return readExcel(file);
+        }
     }
 }
 
@@ -39,13 +41,13 @@ private List<ImportedData> readCSV(File file, String delimiter) throws IOExcepti
     {
         String headliner = br.readLine();
         String[] headers = headliner.split(delimiter);
-        int[] columnIdexes = findColumnIdexes(headers);
+        int[] columnIndexes = findColumnIndexes(headers);
 
         String line;
         while ((line = br.readLine()) != null)
         {
             String[] values = line.split(delimiter);
-            dataList.add(createImportedData(values, columnIdexes));
+            dataList.add(createImportedData(values, columnIndexes));
         }
     }
     return dataList;
@@ -62,7 +64,7 @@ private List<ImportedData> readExcel(File file) throws IOException
         String[] headers = new String[headerRow.getLastCellNum()];
         for (int i = 0; i < headerRow.getLastCellNum(); i++)
         {
-            headers[i] = getCellValueAsString(headerRow.getLastCell(i));
+            headers[i] = getCellValueAsString(headerRow.getCell(i));
         }
         int[] columnIdexes = findColumnIndexes(headers);
 
@@ -85,6 +87,19 @@ private List<ImportedData> readExcel(File file) throws IOException
     }
     return dataList;
 }
+private String[] findColumnIndexes(String[] headers) {
+    // implementácia
+}
+
+private String getCellValueAsString(Cell cell) {
+    if (cell == null) return "";
+    switch (cell.getCellType()) {
+        case STRING: return cell.getStringCellValue().trim();
+        case NUMERIC: return String.valueOf(cell.getNumericCellValue()).trim();
+        default: return "";
+    }
+}
+
 
 private ImportedData createImportedData(String[] values, int[] columnIndexes)
 {

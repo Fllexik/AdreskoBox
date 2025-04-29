@@ -32,8 +32,25 @@ public class PDFService
                         (labelHeight + format.getVerticalGap()));
 
                 Paragraph label = new Paragraph(parent.getFullName() + "\n" + parent.getFullAddress());
+                label.setFixedPosition(x, y, labelWidth);
+                document.add(label);
 
+                currentColumn++;
+                if (currentColumn >= format.getColumns())
+                {
+                    currentColumn = 0;
+                    currentRow++;
+                }
+                if (currentRow >= format.getRows())
+                {
+                    currentRow = 0;
+                    document.add(new Paragraph("\n"))
+                }
             }
+            document.close();
+        }catch (Exception e)
+        {
+            throw  new RuntimeException("Chyba pri generovaní PDF" + e.getMessage(), e);
         }
     }
 }

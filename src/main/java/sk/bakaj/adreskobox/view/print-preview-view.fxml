@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox spacing="10" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml" fx:controller="sk.bakaj.adreskobox.controller.PrintPreviewController">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <TableView fx:id="labelsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="nameColumn" text="Meno a priezvisko"/>
+            <TableColumn fx:id="addressColumn" text="Adresa"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Label text="Celkový počet štítkov: "/>
+        <Label fx:id="totalLabelsLabel" style="-fx-font-weight: bold"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Uložiť PDF" onAction="#handleSavePDF"/>
+        <Button text="Tlačiť" onAction="#handlePrint"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+    </HBox>
+</VBox>
