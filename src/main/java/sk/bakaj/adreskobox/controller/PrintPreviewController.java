@@ -62,7 +62,7 @@ public class PrintPreviewController
         {
             try
             {
-                pdfService.generatelabels(parents,format, file);
+                pdfService.generateLabels(parents,format, file);
                 showAlert(Alert.AlertType.INFORMATION, "Úspech",
                         "PDF bolo úspešne vytvorené.");
             } catch (Exception e)

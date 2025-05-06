@@ -6,17 +6,18 @@ import sk.bakaj.adreskobox.model.Parent;
 
 import javax.swing.text.Document;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 
 public class PDFService
 {
-    public void generatelabels(List<Parent> parents, LabelFormat format, File outputFile)
+    public void generateLabels(List<Parent> parents, LabelFormat format, File outputFile)
     {
         try
         {
-            PdfWriter writer = new PdfWriter(outputFile);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
+            Document document = new Document();
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputFile));
+            document.open();
 
             float labelWidth = (float) format.getWidth();
             float labelHeight = (float) format.getHeight();
@@ -44,7 +45,7 @@ public class PDFService
                 if (currentRow >= format.getRows())
                 {
                     currentRow = 0;
-                    document.add(new Paragraph("\n"))
+                    document.newPage();
                 }
             }
             document.close();
@@ -52,5 +53,39 @@ public class PDFService
         {
             throw  new RuntimeException("Chyba pri generovaní PDF" + e.getMessage(), e);
         }
+    }
+
+    //Metoda pre skratenie adries  ak sú príliš dlhé
+    public String abbreviateAddressIfNeeded(String address, int maxLenght)
+    {
+        if (address == null || address.length() <= maxLenght)
+        {
+            return address;
+        }
+
+        //Tu implementujte logiku skracovania adries
+        String[] parts = address.split(",");
+        StringBuilder shortened = new StringBuilder();
+
+        for (String part : parts)
+        {
+            String trimmed = part.trim();
+            // skratiť slova podľa potreby
+            // napr. "ulica" -> "ul." ....
+            trimmed = trimmed.replace("ulica", "ul.")
+                    .replace("námestie", "nám.");
+            shortened.append(trimmed).append(", ");
+
+            if (shortened.length() > maxLenght - 5)
+            {
+                break;
+            }
+        }
+
+        if (shortened.length() > 2)
+        {
+            shortened.setLength(shortened.length() - 2); //Odstranenie poslednej čiarky a medzery
+        }
+        return shortened.toString();
     }
 }

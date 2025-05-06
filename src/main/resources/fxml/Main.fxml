@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -12,7 +10,7 @@
             prefHeight="600.0" prefWidth="800.0">
     <top>
         <VBox spacing="10" style="-fx-padding: 10;">
-            <Label text="Generátor adresných etikiet" style="-fx-font-size: 20; -fx-font-weight: bolt;"/>
+            <Label text="Generátor adresných etikiet" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
         </VBox>
     </top>
 
@@ -41,8 +39,8 @@
 
     <bottom>
         <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
-            <Button text="Predchadzajúci" fx:id="prevButton"/>
-            <Button text="Ďalšší" fx:id="nextButton"/>
+            <Button text="Späť" fx:id="prevButton"/>
+            <Button text="Ďalej" fx:id="nextButton"/>
         </HBox>
     </bottom>
 </BorderPane>
