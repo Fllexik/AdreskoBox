@@ -11,7 +11,7 @@ public class AdreskoboxApp extends Application
     @Override
     public void start(Stage primaryStage) throws Exception
     {
-        javafx.scene.Parent root = FXMLLoader.load(getClass().getResource("/main.fxml"));
+        javafx.scene.Parent root = FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
 
         Scene scene = new Scene(root);
         primaryStage.setTitle("AdreskoBox - Generátor štítkov");

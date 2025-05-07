@@ -21,8 +21,10 @@ public class MainController
     @FXML
     private TabPane tabPane;
 
+    @FXML
+    private PrintPreviewController printPreviewController;
+
     private List<ImportedData> importedData;
-    private ImportController importController = new ImportController();
     private FileService fileService = new FileService();
 
     @FXML

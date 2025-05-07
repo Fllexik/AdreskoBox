@@ -17,22 +17,22 @@
     <center>
         <TabPane tabClosingPolicy="UNAVAILABLE">
             <Tab text="1. Import dát">
-                <fx:include source="ImportTab.fxml"/>
+                <fx:include source="/fxml/ImportTab.fxml"/>
             </Tab>
             <Tab text="2. Výber rodičov">
-                <fx:include source="ParentsTab.fxml"/>
+                <fx:include source="/fxml/ParentsTab.fxml" />
             </Tab>
             <Tab text="3. Kontrola adries">
-                <fx:include source="AdressCheckTab.fxml"/>
+                <fx:include source="/fxml/AdressCheckTab.fxml"/>
             </Tab>
             <Tab text="4. Editor skratiek">
-                <fx:include source="AbbreviationsTab.fxml"/>
+                <fx:include source="/fxml/AbbreviationsTab.fxml"/>
             </Tab>
             <Tab text="5. Nastavenie výstupu">
-                <fx:include source="OutputSettingsTab.fxml"/>
+                <fx:include source="/fxml/OutputSettingsTab.fxml"/>
             </Tab>
             <Tab text="6. Generovanie">
-                <fx:include source="GenerateTab.fxml"/>
+                <fx:include source="/fxml/GenerateTab.fxml"/>
             </Tab>
         </TabPane>
     </center>
