@@ -1,6 +1,7 @@
 package sk.bakaj.adreskobox.controller;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,16 +9,13 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import sk.bakaj.adreskobox.model.ImportedData;
 import sk.bakaj.adreskobox.model.Parent;
-
-import javax.swing.text.TabableView;
-import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ParentsTabController
 {
     @FXML
-    private TabableView<ParentEntry> parentsTable;
+    private TableView<ParentEntry> parentsTable;
 
     @FXML
     private TableColumn<ParentEntry, Boolean> selectColumn;
@@ -29,27 +27,28 @@ public class ParentsTabController
     private TableColumn<ParentEntry, String> nameColumn;
 
     @FXML
-    private TableColumn<ParentEntry, String> adressColumn;
+    private TableColumn<ParentEntry, String> addressColumn;
 
     @FXML
     private Label selectedCountLabel;
 
     private ObservableList<ParentEntry> parentList = FXCollections.observableArrayList();
 
+
     @FXML
     public void initialize()
     {
         //Nastavenie stlpcov tabulky
-        selectColumn.setCellValueFactory(CellDataFeatures<ParentEntry, Boolean> cellData -> cellData.getValue().selectedProperty());
+        selectColumn.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
         selectColumn.setCellFactory(CheckBoxTableCell.forTableColumn(selectColumn));
 
-        studentColumn.setCellValueFactory(CellDataFeatures<ParentEntry, String> cellData ->
+        studentColumn.setCellValueFactory( cellData ->
                 new SimpleStringProperty(cellData.getValue().getStudentName()));
 
-        nameColumn.setCellValueFactory(CellDataFeatures<ParentEntry, String> cellData ->
+        nameColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getParentName()));
 
-        adressColumn.setCellValueFactory(CellDataFeatures<ParentEntry, String> cellData ->
+        addressColumn.setCellValueFactory( cellData ->
                 new SimpleStringProperty(cellData.getValue().getAddress()));
 
         //Nastavenie editovateľnosti tabuľky
@@ -92,14 +91,14 @@ public class ParentsTabController
 
                 //Pridaj listener na checkBox
                 entry.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        {updateSelectedCount();}
+                        updateSelectedCount()
                 );
             }
 
             //Pridať druheho rodiča
             if (data.getParent2Name() != null && !data.getParent2Name().isEmpty())
             {
-                ParetEntry entry = ParentEntry(
+                ParentEntry entry = new ParentEntry(
                         studentName,
                         data.getParent2Name(),
                         data.getAddress2(),
@@ -109,9 +108,8 @@ public class ParentsTabController
 
                 //Pridaj listener na chcekBox
                 entry.selectedProperty().addListener((obs, oldVal, newVal) ->
-                {
-                    updateSelectedCount();
-                });
+                        updateSelectedCount()
+                );
             }
         }
 
@@ -159,6 +157,56 @@ public class ParentsTabController
                 .filter(ParentEntry::isSelected)
                 .map(entry -> new Parent(entry.getParentName(), entry.getAddress()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Trieda reprezentujuca riadok v tabuľke rodičov
+     */
+
+    public static class ParentEntry
+    {
+        private final String studentName;
+        private final String parentName;
+        private final String address;
+        private final SimpleBooleanProperty selected;
+
+        public ParentEntry(String studentName, String parentName, String address, boolean selected)
+        {
+            this.studentName = studentName;
+            this.parentName = parentName;
+            this.address = address;
+            this.selected = new SimpleBooleanProperty(selected);
+        }
+
+        public String getStudentName()
+        {
+            return studentName;
+        }
+
+        public String getParentName()
+        {
+            return parentName;
+        }
+
+        public String getAddress()
+        {
+            return address;
+        }
+
+        public boolean isSelected()
+        {
+            return selected.get();
+        }
+
+        public void setSelected(boolean selected)
+        {
+            this.selected.set(selected);
+        }
+
+        public SimpleBooleanProperty selectedProperty()
+        {
+            return selected;
+        }
     }
 
 }

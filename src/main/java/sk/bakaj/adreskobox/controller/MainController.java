@@ -5,6 +5,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import sk.bakaj.adreskobox.model.ImportedData;
+import sk.bakaj.adreskobox.model.Parent;
 import sk.bakaj.adreskobox.service.FileService;
 
 import java.io.File;
@@ -22,9 +23,13 @@ public class MainController
     private TabPane tabPane;
 
     @FXML
-    private PrintPreviewController printPreviewController;
+    private ImportController importController;
+
+    @FXML
+    private ParentsTabController parentsTabController;
 
     private List<ImportedData> importedData;
+    private List<Parent> selectedParents;
     private FileService fileService = new FileService();
 
     @FXML
@@ -55,6 +60,7 @@ public class MainController
     {
         int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
 
+
         //Pokiaľ je na tabulatore "import dát", je potrebné spracovať dáta
         if (currentIndex == 0)
         {
@@ -70,12 +76,36 @@ public class MainController
             try
             {
                 importedData = fileService.readFile(selecteFile, detectedDelimiter);
+
+                //Posielame načitane data do kontrolera záložky rodičov
+                if (parentsTabController != null)
+                {
+                    parentsTabController.loadData(importedData);
+                }
             }
             catch (Exception e)
             {
                 showAlert(Alert.AlertType.ERROR, "Chyba načitania",
                          "Nepodarilo sa načítať data: " + e.getMessage());
                 return;
+            }
+        } else if (currentIndex ==1)// Výber rodičov
+        {
+            if (parentsTabController != null)
+            {
+                selectedParents = parentsTabController.getSelectedParents();
+
+                if (selectedParents.isEmpty())
+                {
+                    showAlert(Alert.AlertType.WARNING, "Žiadný výber",
+                            "Výber aspoň jedného rodiča pred pokračovaním.");
+                    return;
+                }
+                // Tu môžete poslať vybraných rodičov do ďalšieho controllera
+                // Napríklad, ak by ste mali AdressCheckTabController:
+                // if (adressCheckTabController != null) {
+                //     adressCheckTabController.setParents(selectedParents);
+                // }
             }
         }
         if (currentIndex < tabPane.getTabs().size() - 1)
@@ -97,5 +127,11 @@ public class MainController
         alert.setTitle(title);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    //Metoda pre ziskanie vybraných rodičov(može byť použota v iných controlleroch)
+    public List<Parent> getSelectedParents()
+    {
+        return selectedParents;
     }
 }

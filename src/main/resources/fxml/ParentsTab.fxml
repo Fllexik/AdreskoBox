@@ -7,12 +7,12 @@
 
     <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Výber rodičov" />
 
-    <TableView fx:id="parrentsTable" VBox.vgrow="ALWAYS">
+    <TableView fx:id="parentsTable" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="selectColumn" text="Vybrať" prefWidth="60"/>
             <TableColumn fx:id="studentColumn" text="Študent" prefWidth="150"/>
             <TableColumn fx:id="nameColumn" text="Rodič" prefWidth="200" />
-            <TableColumn fx:id="addressColumn" text="Adresa" prefWidth="300"
+            <TableColumn fx:id="addressColumn" text="Adresa" prefWidth="300"/>
         </columns>
     </TableView>
 

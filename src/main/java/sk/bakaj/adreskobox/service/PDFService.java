@@ -1,12 +1,19 @@
 package sk.bakaj.adreskobox.service;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.pdf.ColumnText;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.poi.wp.usermodel.Paragraph;
+import com.itextpdf.text.Rectangle;
 import sk.bakaj.adreskobox.model.LabelFormat;
 import sk.bakaj.adreskobox.model.Parent;
 
-import javax.swing.text.Document;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 public class PDFService
@@ -15,7 +22,7 @@ public class PDFService
     {
         try
         {
-            Document document = new Document();
+            Document document = new Document(new Rectangle(595, 842));
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputFile));
             document.open();
 
@@ -25,17 +32,29 @@ public class PDFService
             int currentColumn = 0;
             int currentRow = 0;
 
+            // Ziskame priamy prístup k obsahu PDF
+            PdfContentByte canvas = writer.getDirectContent();
+
             for (Parent parent : parents)
             {
+                // Výpočet pozicie štítka
                 float x = (float) (format.getLeftMargin() + currentColumn *
                         (labelWidth + format.getHorizontalGap()));
-                float y = (float) (format.getTopMargin() + currentRow *
-                        (labelHeight + format.getVerticalGap()));
+                float y = (float) (842 - format.getTopMargin() - currentRow *
+                        (labelHeight + format.getVerticalGap()));// obratenie vertikalnej pozicie povodne bolo bez cisal a + currentRow
 
+                //vytvorenie odstavca s adresou
                 Paragraph label = new Paragraph(parent.getFullName() + "\n" + parent.getFullAddress());
-                label.setFixedPosition(x, y, labelWidth);
-                document.add(label);
+                /*label.setFixedPosition(x, y, labelWidth);
+                document.add(label);*/
 
+                //Použitie Columntext na presne umiestnenie textu
+                ColumnText ct = new ColumnText(canvas);
+                ct.setSimpleColumn(x, y, x + labelWidth, y + labelHeight, 10, Element.ALIGN_LEFT);
+                ct.addElement(label);
+                ct.go();
+
+                //Presun na dalši štitok
                 currentColumn++;
                 if (currentColumn >= format.getColumns())
                 {
@@ -49,7 +68,7 @@ public class PDFService
                 }
             }
             document.close();
-        }catch (Exception e)
+        }catch (DocumentException | IOException e) //(Exception e)
         {
             throw  new RuntimeException("Chyba pri generovaní PDF" + e.getMessage(), e);
         }

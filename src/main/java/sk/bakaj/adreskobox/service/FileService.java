@@ -93,7 +93,7 @@ public class FileService
             }
             int[] columnIndexes = findColumnIndexes(headers);
 
-            for (int i = 0; i <= sheet.getLastRowNum(); i++)
+            for (int i = 1; i <= sheet.getLastRowNum(); i++)// zmena začina od 1 aby sme preskočili hlavičku
             {
                 Row row = sheet.getRow(i);
                 if (row != null)
@@ -115,7 +115,7 @@ public class FileService
         return dataList;
     }
 
-    private String[] findColumnIndexes(String[] headers)
+    private int[] findColumnIndexes(String[] headers)
     {
         int[] indexes = new int[6];
         for (int i = 0; i < indexes.length; i++)
