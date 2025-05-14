@@ -6,7 +6,7 @@ import com.itextpdf.text.Element;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
-import org.apache.poi.wp.usermodel.Paragraph;
+import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import sk.bakaj.adreskobox.model.LabelFormat;
 import sk.bakaj.adreskobox.model.Parent;

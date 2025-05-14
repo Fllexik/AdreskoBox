@@ -24,10 +24,11 @@
             </Tab>
             <Tab text="3. Kontrola adries">
                 <fx:include source="AdressCheckTab.fxml"/>
+                <!--
             </Tab>
             <Tab text="4. Editor skratiek">
                 <fx:include source="AbbreviationsTab.fxml"/>
-            </Tab>
+            </Tab>-->
             <Tab text="5. Nastavenie výstupu">
                 <fx:include source="OutputSettingsTab.fxml"/>
             </Tab>

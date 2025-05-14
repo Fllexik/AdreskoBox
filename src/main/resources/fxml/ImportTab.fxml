@@ -17,4 +17,16 @@
             <Button onAction="#handleSelectFile" text="Vybrať súbor" />
         </HBox>
     </GridPane>
+
+    <Separator />
+    <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Nastavenie štítkov"/>
+
+    <HBox spacing="15">
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <Label text="Prednastavené formáty:"/>
+            <ComboBox fx:id="predefinedFormatsComboBox" prefWidth="250" onAction="#handlePredefinedFormatSelection" promptText="Vyberte format štítku"/>
+        </VBox>
+
+        <Button fx:id="customFormatButton" onAction="#handleCustomFormat" text="Vlastný formát"/>
+    </HBox>
 </VBox>
