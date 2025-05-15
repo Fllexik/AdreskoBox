@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FileService
 {
@@ -19,30 +21,213 @@ public class FileService
     public static final String ADDRESS1_COLUMN = "Adresa 1.";
     public static final String ADDRESS2_COLUMN = "Adresa 2.";
 
-    public String detectFileDelimiter(File file) throws IOException {
-        if (file.getName().toLowerCase().endsWith(".csv")) {
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line = br.readLine();
-                if (line != null) {
-                    if (line.contains(",")) return ",";
-                    if (line.contains(";")) return ";";
-                    if (line.contains("\t")) return "\t";
-                }
-            }
-        }
-        return ",";
-    }
-
-
-    public List<ImportedData> readFile(File file, String delimiter) throws IOException
+    /**
+     * Detekuje typ a vrati ho ako reťazec: "CSV", "XLS", XLXS" alebo null
+     */
+    public String detectFileType(File file)
     {
-        if (file.getName().toLowerCase().endsWith(".csv"))
+        String fileName = file.getName().toLowerCase();
+        if (fileName.endsWith(".csv"))
         {
-            return readCSV(file, delimiter);
+            return "CSV";
+        } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
+        {
+            return "XLS";
         } else
         {
-            return readExcel(file);
+            return null;
         }
+    }
+
+    /**
+     * Detekuje oddeľovač pre CSV súbor
+     */
+
+    public String detectFileDelimiter(File file) throws IOException
+    {
+        String fileName = file.getName().toLowerCase();
+
+        //Ak to nie je CSV súbor, vratime null
+        if (!fileName.endsWith(".csv"))
+        {
+            return null;
+        }
+
+        //Definujeme potencialne oddeľovače a ich počty v súbore
+        String[] commonDelimiters = {",", ";", "\t", "|"};
+        Map<String, Integer> delimiterCounts = new HashMap<>();
+
+        for (String delimiter : commonDelimiters)
+        {
+            delimiterCounts.put(delimiter, 0);
+        }
+
+        //Prečítame prvých 10 riadkov(alebo menej, ak je súbor kratši)
+        try(BufferedReader br = new BufferedReader(new FileReader(file)))
+        {
+            String line;
+            int lineCount = 0;
+            while ((line = br.readLine()) != null && lineCount < 10)
+            {
+                for (String delimiter : commonDelimiters)
+                {
+                    int count = countOccurrences(line, delimiter);
+                    delimiterCounts.put(delimiter, delimiterCounts.get(delimiter) + count);
+                }
+                lineCount++;
+            }
+        }
+        //Vyberiem oddeľovač s najväčším počtom vyskytov
+        String bestDelimiter = ","; //Predvolený oddeľovač je čiarka
+        int maxCount = 0;
+
+        for (Map.Entry<String, Integer> entry : delimiterCounts.entrySet())
+        {
+            if (entry.getValue() > maxCount)
+            {
+                maxCount = entry.getValue();
+                bestDelimiter = entry.getKey();
+            }
+        }
+        // AK sme nenašli žiadený oddeľovač, vratime predvolený
+        return maxCount > 0 ? bestDelimiter : ",";
+    }
+
+    /**
+     * Počíta výskyty oddeľovača v reťazci
+     */
+
+    private int countOccurrences(String text, String delimiter)
+    {
+        int count = 0;
+        int index = 0;
+        while ((index = text.indexOf(delimiter, index)) != -1)
+        {
+            count++;
+            index += delimiter.length();
+        }
+        return count;
+    }
+
+    /**
+     * Overí či prvý riadok v súbore je hlavička
+     * Kontroluje, či obsahuje očakávané hlavičky stlpcov
+     */
+
+    public boolean hasHeaderRow(File file) throws IOException
+    {
+        String fileType = detectFileType(file);
+
+        if ("CSV".equals(fileType))
+        {
+            String delimiter = detectFileDelimiter(file);
+            return checkCSVHeaderRow(file, delimiter);
+        } else if ("XLS".equals(fileType) || "XLSX".equals(fileType))
+        {
+            return checkExcelHeaderRow(file);
+        }
+        return false;
+    }
+
+    /**
+     * Kontroluje, či prvý riadok CSV súboru obsahuje očakavané stlpce
+     */
+
+    private boolean checkCSVHeaderRow(File file, String delimiter) throws IOException
+    {
+        try(BufferedReader br = new BufferedReader(new FileReader(file)))
+        {
+            String headerLine = br.readLine();
+            if (headerLine == null)
+            {
+                return false;//Prazdný subor
+            }
+            String[] headers = headerLine.split(delimiter);
+            return containsExpectedColumns(headers);
+        }
+    }
+
+    /**
+     * Kontroluje , či prvý riadok Excel suboru obsahuje očakávane stlpce
+     */
+
+    private boolean checkExcelHeaderRow(File file) throws IOException
+    {
+        try(Workbook workbook = WorkbookFactory.create(file))
+        {
+            Sheet sheet = workbook.getSheetAt(0);
+            Row headerRow = sheet.getRow(0);
+
+            if (headerRow == null)
+            {
+                return false;//Prazdný hárok
+            }
+
+            String[] headers = new String[headerRow.getLastCellNum()];
+            for (int i = 0; i < headerRow.getLastCellNum(); i++)
+            {
+                Cell cell = headerRow.getCell(i);
+                headers[i] = getCellValueAsString(cell);
+            }
+            return containsExpectedColumns(headers);
+        }
+    }
+
+    /**
+     * Kontroluje, či pole hlavičiek obsahuje aspoň jeden očakávany stlpec
+     */
+    private boolean containsExpectedColumns(String[] headers)
+    {
+        if (headers == null || headers.length == 0)
+        {
+            return false;
+        }
+        //Kontroluje ci  hlavička obsahuje aspoň jeden z očakávanych stlpcov
+        for (String header : headers)
+        {
+            if (header == null) continue;
+
+            if (header.equalsIgnoreCase(STUDENT_FIRSTNAME_COLUMN) ||
+                    header.equalsIgnoreCase(STUDENT_LASTNAME_COLUMN) ||
+                    header.equalsIgnoreCase(PARENT1_NAME_COLUMN) ||
+                    header.equalsIgnoreCase(PARENT2_NAME_COLUMN) ||
+                    header.equalsIgnoreCase(ADDRESS1_COLUMN) ||
+                    header.equalsIgnoreCase(ADDRESS2_COLUMN))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Načíta data zo súboru, automaticky detekuje typ a oddeľovač
+     *  Ak prvý riadok nie je hlavička, može volajúci špecifikovať hasHeader=false
+     */
+    public List<ImportedData> readFile(File file, String delimiter) throws IOException
+    {
+        String fileType = detectFileType(file);
+
+        if ("CSV".equals(fileType))
+        {
+            String delimiter = detectFileDelimiter(file);
+            return readCSV(file, delimiter, hasHeader);
+        } else if ("XLS".equals(fileType) || "XLSX".equals(fileType))
+        {
+            return readExcel(file, hasHeader);
+        } else
+        {
+            throw new IOException("Nepodporovaný typ súboru");
+        }
+    }
+
+    /**
+     * Načíta data zo súboru s automatickou detekciou hlavičky
+     */
+    public List<ImportedData> readFile(File file) throws IOException
+    {
+        boolean hasHeader = hasHeaderRow(file);
+        return readFile(file, hasHeader);
     }
 
     private List<ImportedData> readCSV(File file, String delimiter) throws IOException

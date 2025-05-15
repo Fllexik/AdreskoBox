@@ -16,6 +16,18 @@
             <TextField fx:id="filePathField" editable="false" prefWidth="350" />
             <Button onAction="#handleSelectFile" text="Vybrať súbor" />
         </HBox>
+
+        <Label text="Typ súboru:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <Label fx:id="fileTypeLabel" text="" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Oddeľovač (CSV):" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <Label fx:id="delimiterLabel" text="" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Hlavička:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <HBox spacing="10" alignment="BASELINE_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <CheckBox fx:id="hasHeaderCheckBox" text="Súbor má hlavičku" selected="true"/>
+            <Label fx:id="headerStatusLabel" text=""/>
+        </HBox>
     </GridPane>
 
     <Separator />
@@ -25,6 +37,10 @@
         <VBox spacing="10" HBox.hgrow="ALWAYS">
             <Label text="Prednastavené formáty:"/>
             <ComboBox fx:id="predefinedFormatsComboBox" prefWidth="250" onAction="#handlePredefinedFormatSelection" promptText="Vyberte format štítku"/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="selectedFormatLabel" text=""/>
+            </HBox>
         </VBox>
 
         <Button fx:id="customFormatButton" onAction="#handleCustomFormat" text="Vlastný formát"/>
