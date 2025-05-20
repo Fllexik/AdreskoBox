@@ -64,9 +64,9 @@ public class MainController
         //Pokiaľ je na tabulatore "import dát", je potrebné spracovať dáta
         if (currentIndex == 0)
         {
-            File selecteFile = importController.getSelectedFile();
+            File selectedFile = importController.getSelectedFile();
             String detectedDelimiter = importController.getDetectedDelimiter();
-            if (selecteFile == null || detectedDelimiter == null)
+            if (selectedFile == null || detectedDelimiter == null)
             {
                 showAlert(Alert.AlertType.WARNING, "Chýba súbor",
                         "Pred prechodom na dalšiu kartu výberte súbor.");
@@ -75,7 +75,7 @@ public class MainController
 
             try
             {
-                importedData = fileService.readFile(selecteFile, detectedDelimiter);
+                importedData = fileService.readFile(selectedFile, detectedDelimiter);
 
                 //Posielame načitane data do kontrolera záložky rodičov
                 if (parentsTabController != null)
