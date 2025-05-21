@@ -204,7 +204,7 @@ public class FileService
      * Načíta data zo súboru, automaticky detekuje typ a oddeľovač
      *  Ak prvý riadok nie je hlavička, može volajúci špecifikovať hasHeader=false
      */
-    public List<ImportedData> readFile(File file, String delimiter) throws IOException
+    public List<ImportedData> readFile(File file, boolean hasHeader) throws IOException
     {
         String fileType = detectFileType(file);
 
@@ -230,7 +230,7 @@ public class FileService
         return readFile(file, hasHeader);
     }
 
-    private List<ImportedData> readCSV(File file, String delimiter) throws IOException
+    private List<ImportedData> readCSV(File file, String delimiter, boolean hasHeader) throws IOException
     {
         List<ImportedData> dataList = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file)))
@@ -243,6 +243,16 @@ public class FileService
 
             String[] headers = headerLine.split(delimiter);
             int[] columnIndexes = findColumnIndexes(headers);
+
+            if (!hasHeader)
+            {
+                String[] values = headerLine.split(delimiter);
+                ImportedData data = createImportedData(values, columnIndexes);
+                if (data != null)
+                {
+                    dataList.add(data);
+                }
+            }
 
             String line;
             while ((line = br.readLine()) != null)
@@ -258,7 +268,7 @@ public class FileService
         return dataList;
     }
 
-    private List<ImportedData> readExcel(File file) throws IOException
+    private List<ImportedData> readExcel(File file, boolean hasHeader) throws IOException
     {
         List<ImportedData> dataList = new ArrayList<>();
         try (Workbook workbook = WorkbookFactory.create(file))
@@ -278,7 +288,9 @@ public class FileService
             }
             int[] columnIndexes = findColumnIndexes(headers);
 
-            for (int i = 1; i <= sheet.getLastRowNum(); i++)// zmena začina od 1 aby sme preskočili hlavičku
+            int startRow = hasHeader ? 1 : 0;
+
+            for (int i = startRow; i <= sheet.getLastRowNum(); i++)// zmena začina od 1 aby sme preskočili hlavičku
             {
                 Row row = sheet.getRow(i);
                 if (row != null)

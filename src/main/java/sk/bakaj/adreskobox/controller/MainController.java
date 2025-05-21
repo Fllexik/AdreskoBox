@@ -65,8 +65,7 @@ public class MainController
         if (currentIndex == 0)
         {
             File selectedFile = importController.getSelectedFile();
-            String detectedDelimiter = importController.getDetectedDelimiter();
-            if (selectedFile == null || detectedDelimiter == null)
+            if (selectedFile == null)
             {
                 showAlert(Alert.AlertType.WARNING, "Chýba súbor",
                         "Pred prechodom na dalšiu kartu výberte súbor.");
@@ -75,7 +74,7 @@ public class MainController
 
             try
             {
-                importedData = fileService.readFile(selectedFile, detectedDelimiter);
+                importedData = fileService.readFile(selectedFile);
 
                 //Posielame načitane data do kontrolera záložky rodičov
                 if (parentsTabController != null)
@@ -89,7 +88,7 @@ public class MainController
                          "Nepodarilo sa načítať data: " + e.getMessage());
                 return;
             }
-        } else if (currentIndex ==1)// Výber rodičov
+        } else if (currentIndex == 1)// Výber rodičov
         {
             if (parentsTabController != null)
             {

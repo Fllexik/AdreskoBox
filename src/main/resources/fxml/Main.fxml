@@ -4,8 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="sk.bakaj.adreskobox.controller.MainController"
             prefHeight="600.0" prefWidth="800.0">
     <top>
@@ -18,23 +17,25 @@
         <TabPane tabClosingPolicy="UNAVAILABLE">
             <Tab text="1. Import dát">
                 <fx:include source="ImportTab.fxml"/>
-            </Tab>
+                </Tab>
             <Tab text="2. Výber rodičov">
                 <fx:include source="ParentsTab.fxml" />
             </Tab>
             <Tab text="3. Kontrola adries">
                 <fx:include source="AdressCheckTab.fxml"/>
-                <!--
             </Tab>
+            <!--
             <Tab text="4. Editor skratiek">
                 <fx:include source="AbbreviationsTab.fxml"/>
-            </Tab>-->
+            </Tab>
             <Tab text="5. Nastavenie výstupu">
                 <fx:include source="OutputSettingsTab.fxml"/>
             </Tab>
             <Tab text="6. Generovanie">
                 <fx:include source="GenerateTab.fxml"/>
             </Tab>
+            -->
+
         </TabPane>
     </center>
 

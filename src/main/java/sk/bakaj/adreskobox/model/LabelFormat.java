@@ -118,6 +118,6 @@ public class LabelFormat
     {
         return FXCollections.observableArrayList(
                 new LabelFormat("A4 - 48,3 x 16,9 mm (64 ks)", 48.3, 16.9, 4, 16, 8.4,
-                        8.4, 13.3, 13.3, 0, 0, 24);
+                        8.4, 13.3, 13.3, 0, 0, 24));
     }
 }
