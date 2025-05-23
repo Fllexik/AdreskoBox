@@ -28,8 +28,15 @@ public class MainController
     @FXML
     private ParentsTabController parentsTabController;
 
+    @FXML
+    private AdressCheckTabController adressCheckTabController;
+
+    @FXML
+    private PrintPreviewController printPreviewController;
+
     private List<ImportedData> importedData;
     private List<Parent> selectedParents;
+    private List<Parent> processedParents;
     private FileService fileService = new FileService();
 
     @FXML
@@ -72,6 +79,13 @@ public class MainController
                 return;
             }
 
+            if (importController.getSelectedLabelFormat() == null)
+            {
+                showAlert(Alert.AlertType.WARNING, "Chýba formát štítkov",
+                        "Pred prechodom na dalšiu kartu vyberte formát štítku.");
+                return;
+            }
+
             try
             {
                 importedData = fileService.readFile(selectedFile);
@@ -100,11 +114,29 @@ public class MainController
                             "Výber aspoň jedného rodiča pred pokračovaním.");
                     return;
                 }
-                // Tu môžete poslať vybraných rodičov do ďalšieho controllera
-                // Napríklad, ak by ste mali AdressCheckTabController:
-                // if (adressCheckTabController != null) {
-                //     adressCheckTabController.setParents(selectedParents);
-                // }
+                //Poslať vybraných rodičov do AdressCheckTabController
+                if (adressCheckTabController != null)
+                {
+                    adressCheckTabController.setData(selectedParents, importController.getSelectedLabelFormat());
+                }
+            }
+        } else if (currentIndex == 2)// kontrola adries
+        {
+            if (adressCheckTabController != null)
+            {
+                processedParents = adressCheckTabController.getParentsWithAbbreviatedAddresses();
+
+                if (processedParents.isEmpty())
+                {
+                    showAlert(Alert.AlertType.WARNING, "Žiadne adresy",
+                            "Neboli nájdené žiadne upravené adresy.");
+                    return;
+                }
+                //Poslať upravené adresy do PrintPreviewControler
+                if (printPreviewController != null)
+                {
+                    printPreviewController.setData(processedParents, importController.getSelectedLabelFormat());
+                }
             }
         }
         if (currentIndex < tabPane.getTabs().size() - 1)
@@ -132,5 +164,11 @@ public class MainController
     public List<Parent> getSelectedParents()
     {
         return selectedParents;
+    }
+
+    //Metoda pre ziskanie upravených rodičov(može byť použota v iných controlleroch)
+    public List<Parent> getProcessedParents()
+    {
+        return processedParents;
     }
 }

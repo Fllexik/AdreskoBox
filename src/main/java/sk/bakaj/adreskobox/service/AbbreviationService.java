@@ -52,7 +52,7 @@ public class AbbreviationService
     private void loadAbbreviationsFromProperties() throws IOException
     {
         abbreviations.clear();
-        File file = new File(PROPERTIES_FILE);
+        File file = new File(PROPERTIES_FILE_NAME);
 
         if (file.exists())
         {
@@ -84,7 +84,7 @@ public class AbbreviationService
             props.setProperty(entry.getKey(), entry.getValue());
         }
 
-        try (FileOutputStream fos = new FileOutputStream(PROPERTIES_FILE))
+        try (FileOutputStream fos = new FileOutputStream(PROPERTIES_FILE_NAME))
         {
             props.store(fos, "Address Abbreviations");
         }
@@ -145,7 +145,7 @@ public class AbbreviationService
     /**
      * Získanie všetkých skratiek
      */
-    public Map<String, String> getAbbreviations()
+    public Map<String, String> getAllAbbreviations()
     {
         return new HashMap<>(abbreviations);
     }
@@ -184,7 +184,7 @@ public class AbbreviationService
         multiWordAbbreviations.entrySet().stream()
                 .sorted((e1, e2) -> Integer.compare(e2.getKey().length(), e1.getKey().length()))
                 .forEach(entry -> {
-                    result = result.replaceAll("(?i)\\b" + entry.getKey() + "\\b", entry.getValue())
+                    result = result.replaceAll("(?i)\\b" + entry.getKey() + "\\b", entry.getValue());
                 });
 
         String afterMultiWord = result;
