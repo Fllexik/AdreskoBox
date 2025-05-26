@@ -3,12 +3,12 @@ package sk.bakaj.adreskobox.model;
 public class Parent
 {
     private String fullName;
-    private String FullAddress;
+    private String fullAddress;
 
     public Parent(String fullName, String fullAddress)
     {
         this.fullName = fullName;
-        FullAddress = fullAddress;
+        this.fullAddress = fullAddress;
     }
 
     public String getFullName()
@@ -23,11 +23,11 @@ public class Parent
 
     public String getFullAddress()
     {
-        return FullAddress;
+        return fullAddress;
     }
 
     public void setFullAddress(String fullAddress)
     {
-        FullAddress = fullAddress;
+        this.fullAddress = fullAddress;
     }
 }

@@ -32,7 +32,7 @@
 
     <Separator />
 
-    <Label style="-fx-font-weight: bolt;" text="Nastavenia rozmerov etikiet" />
+    <Label style="-fx-font-weight: bold;" text="Nastavenia rozmerov etikiet" />
 
     <HBox spacing="10">
         <VBox spacing="10">

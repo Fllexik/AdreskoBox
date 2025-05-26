@@ -23,7 +23,7 @@
         <columns>
             <TableColumn fx:id="nameColumn" text="Meno" prefWidth="150"/>
             <TableColumn fx:id="originalAddressColumn" text="Pôvodná adresa" prefWidth="200"/>
-            <TableColumn fx:id="abbreviatedAddressColunm" text="Skrátena adresa" prefWidth="200"/>
+            <TableColumn fx:id="abbreviatedAddressColumn" text="Skrátena adresa" prefWidth="200"/>
             <TableColumn fx:id="statusColumn" text="Stav" prefWidth="100"/>
         </columns>
         <placeholder>

@@ -24,8 +24,7 @@ import java.util.Optional;
 public class AdressCheckTabController
 {
     @FXML
-    private TableView<AdderessPreviewItem> addressTable;
-
+    private TableView<AddressPreviewItem> addressTable;
     @FXML
     private TableColumn<AddressPreviewItem, String> nameColumn;
 
@@ -100,23 +99,23 @@ public class AdressCheckTabController
                         .otherwise(contextMenu)
         );
         return row;
-    }
 
-    //Nastavenie akcie pre tlačidlo na pridanie skratky
-    addAbbreviationButton.setOnAction(event ->
+        //Nastavenie akcie pre tlačidlo na pridanie skratky
+        addAbbreviationButton.setOnAction(event ->
 
-    showAddAbbreviationDialog(null));
+                showAddAbbreviationDialog(null));
 
-    //Nastavenie akcie pre tlačidlo na spravu skratiek
-    if (manageAbbreviationsButton != null)
-    {
-        manageAbbreviationsButton.setOnAction(event -> showManageAbbreviationsDialog());
+        //Nastavenie akcie pre tlačidlo na spravu skratiek
+        if (manageAbbreviationsButton != null)
+        {
+            manageAbbreviationsButton.setOnAction(event -> showManageAbbreviationsDialog());
+        }
     }
 }
 /**
  * Nastavenie dát z predchadzajúcej karty
  */
-public void setData(List<Parent> parents, LabelFormat, LabelFormat)
+public void setData(List<Parent> parents, LabelFormat, labelFormat)
 {
     this.parents = parents;
     this.formatFormat = labelFormat;

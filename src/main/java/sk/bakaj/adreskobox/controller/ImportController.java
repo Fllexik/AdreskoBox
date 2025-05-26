@@ -254,5 +254,48 @@ public class ImportController
             alert.setContentText(content);
             alert.showAndWait();
         }
+    @FXML
+    private void handlePreviewData()
+    {
+        //implementacia pre nahlad dat
+        if (!isReadyToProceed())
+        {
+            showAlert(Alert.AlertType.WARNING, "Neuplné údaje",
+                    "Pred zobrazením náhľadu vyberte súbor a formát štítkov.");
+            return;
+        }
+        //Tu može iplementovať logiku pre zobrazenie náhľadu
+        // Napriklád môžete otvoriť nove okno s náhľadom dat
+        try
+        {
+            //Implementacia pre zobrazenie náhľadu
+        } catch (Exception e)
+        {
+            showAlert(Alert.AlertType.ERROR,"Chyba",
+                    "Nepodarilo sa zobraziť náhľad:" + e.getMessage());
+        }
+    }
 
+    @FXML
+    private void handleImportData()
+    {
+        //implementacia pre import dat
+        if (!isReadyToProceed())
+        {
+            showAlert(Alert.AlertType.WARNING, "Neúplné údaje",
+                    "Pred importom vyberte súbor a formát štítkov.");
+            return;
+        }
+
+        try
+        {
+            //Implementácia importu dát
+            showAlert(Alert.AlertType.INFORMATION, "Úspech",
+                    "Údaje boli úspešne importované.");
+        } catch (Exception e)
+        {
+            showAlert(Alert.AlertType.ERROR,"Chyba",
+                    "Nepodarilo sa importovať údaje:" + e.getMessage());
+        }
+    }
 }
