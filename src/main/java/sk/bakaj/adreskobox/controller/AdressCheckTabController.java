@@ -44,9 +44,11 @@ public class AdressCheckTabController
     private Button manageAbbreviationsButton;
 
     private List<Parent> parents;
-    private LabelFormat formatFormat;
+    private LabelFormat labelFormat;
     private AbbreviationService abbreviationService = new AbbreviationService();
     private PDFService pdfService = new PDFService();
+
+    private ObservableList<AddressPreviewItem> addressItems = FXCollections.observableArrayList();
 
     @FXML
     public void initialize()
@@ -67,21 +69,23 @@ public class AdressCheckTabController
         //Nastavenie CSS pre riadky s neplatnými adresami
         addressTable.setRowFactory(tv ->
         {
-            TableRow<AddressPreviewItem> row = updateItem(item, empty) ->{
-            super.updateItem(item, empty);
+            TableRow<AddressPreviewItem> row = new TableRow<AddressPreviewItem>() {
+            @Override
+                    protected void updateItem(AddressPreviewItem item, boolean empty) {
+                super.updateItem(item, empty);
 
-            if (item == null || empty)
-            {
-                setStyle("");
-            } else if (!checkIfAddressFits(item.getAbbreviatedAddress()))
-            {
-                setStyle("-fx-background-color: #ffcccc;");
-            } else
-            {
-                setStyle("");
+                if (item == null || empty)
+                {
+                    setStyle("");
+                } else if (!checkIfAddressFits(item.getAbbreviatedAddress()))
+                {
+                    setStyle("-fx-background-color: #ffcccc;");
+                } else
+                {
+                    setStyle("");
+                }
             }
-        }
-        });
+        };
 
         //Pridame kontext menu k riadku
         ContextMenu contextMenu = new ContextMenu();
@@ -115,10 +119,10 @@ public class AdressCheckTabController
 /**
  * Nastavenie dát z predchadzajúcej karty
  */
-public void setData(List<Parent> parents, LabelFormat, labelFormat)
+public void setData(List<Parent> parents, LabelFormat labelFormat)
 {
     this.parents = parents;
-    this.formatFormat = labelFormat;
+    this.labelFormat = labelFormat;
 
     processAddresses();
 }
@@ -170,7 +174,7 @@ private boolean checkIfAddressFits(String address)
 /**
  * Zobrazenie dialogu pre pridanie novej skratky
  */
-private void showAddAbbreviationDialog(AdderessPreviewItem item)
+private void showAddAbbreviationDialog(AddressPreviewItem item)
 {
     try
     {
@@ -208,7 +212,7 @@ private void showAddAbbreviationDialog(AdderessPreviewItem item)
             if (dialogButton == saveButtonType)
             {
                 String original = originalTextField.getText().trim();
-                String abbreviation = abbreviationTextField.getText().trim();
+                String abbreviation = abbreviatedTextField.getText().trim();
 
                 if (!original.isEmpty() && !abbreviation.isEmpty())
                 {
@@ -221,9 +225,9 @@ private void showAddAbbreviationDialog(AdderessPreviewItem item)
         //Zobrazenie dialogu a spracovanie výsledku
         Optional<Map.Entry<String, String>> result = dialog.showAndWait();
 
-        result.ifPresent(Entry<String, String> entry -> {
+        result.ifPresent( entry -> {
             //Pridanie novej skratky a uloženie do súboru
-            abbreviationService.saveAbbrevation(entry.getKey(), entry.getValue());
+            abbreviationService.saveAbbreviation(entry.getKey(), entry.getValue());
 
             //Obnovenie zobrazenia
             processAddresses();
@@ -353,13 +357,13 @@ private void showManageAbbreviationsDialog()
                     }
                 }
                 return null;
-            })
+            });
                     //Zobrazenie dialogu a spracovanie výsledku
             Optional<Map.Entry<String, String>> result = addDialog.showAndWait();
 
-            result.ifPresent(Entry<String, String> entry -> {
+            result.ifPresent( entry -> {
                 //Pridanie novej skratky a uloženie do súboru
-                abbreviationService.saveAbbrevation(entry.getKey(), entry.getValue());
+                abbreviationService.saveAbbreviation(entry.getKey(), entry.getValue());
 
                 //Obnovime zoznam v tabuľke
                 abbreviationItems.clear();
@@ -380,19 +384,19 @@ private void showManageAbbreviationsDialog()
                 editDialog.showAndWait().ifPresent(newAbbreviation -> {
                     if (!newAbbreviation.isEmpty())
                     {
-                        abbreviationService.saveAbbrevation(selected.getKey(), newAbbreviation);
+                        abbreviationService.saveAbbreviation(selected.getKey(), newAbbreviation);
 
                         //Obnovime zoznam v tabulke
                         abbreviationItems.clear();
                         abbreviationItems.addAll(abbreviationService.getAllAbbreviations().entrySet());
                         abbreviationsTable.refresh();
                     }
-                })
+                });
             }else {
                 showAlert(Alert.AlertType.INFORMATION, "Informácia",
                         "Vyberte skratku, ktoru chcete upraviť.");
             }
-        })
+        });
                 deleteButton.setOnAction(event -> {
                      Map.Entry<String, String> selected = abbreviationsTable.getSelectionModel().getSelectedItem();
                      if (selected != null)
@@ -402,10 +406,10 @@ private void showManageAbbreviationsDialog()
                          confirmAlert.setHeaderText("Odstranenie skratky");
                          confirmAlert.setContentText("Naozaj chcete odstraniť skratku '" + selected.getKey() + "'?");
 
-                         confirmAlert.showAndWait().ifPresent(reuslt -> {
-                             if (reuslt == ButtonType.OK)
+                         confirmAlert.showAndWait().ifPresent(result -> {
+                             if (result == ButtonType.OK)
                              {
-                                 abbreviationService.removeAbbrevation(selected.getKey());
+                                 abbreviationService.removeAbbreviation(selected.getKey());
 
                                  //Obnovime zoznam v tabulke
                                  abbreviationItems.clear();
@@ -417,7 +421,7 @@ private void showManageAbbreviationsDialog()
                          showAlert(Alert.AlertType.INFORMATION, "Informácia",
                                  "Vyberte skratku, ktoru chcete odstrániť.");
                      }
-                })
+                });
                         //Vytvorenie layout
         VBox vbox = new VBox(10);
         HBox buttonBox = new HBox(10);
@@ -441,14 +445,14 @@ private void showManageAbbreviationsDialog()
  */
 public List<Parent> getParentsWithAbbreviatedAddresses()
 {
-    List<Parent> parents = new ArrayList<>();
+    List<Parent> result = new ArrayList<>();
 
     if (parents == null || addressItems.isEmpty())
     {
         return result;
     }
 
-    for (int i = 0; i < parents.size() && i < addressItem.size(); i++)
+    for (int i = 0; i < parents.size() && i < addressItems.size(); i++)
     {
         Parent parent = parents.get(i);
         AddressPreviewItem item = addressItems.get(i);

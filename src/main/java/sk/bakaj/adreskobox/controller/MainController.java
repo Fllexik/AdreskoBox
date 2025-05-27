@@ -34,6 +34,12 @@ public class MainController
     @FXML
     private PrintPreviewController printPreviewController;
 
+    @FXML
+    private OutputSettingTabController outputSettingTabController;
+
+    @FXML
+    private GenerateTabController generateTabController;
+
     private List<ImportedData> importedData;
     private List<Parent> selectedParents;
     private List<Parent> processedParents;
@@ -136,6 +142,30 @@ public class MainController
                 if (printPreviewController != null)
                 {
                     printPreviewController.setData(processedParents, importController.getSelectedLabelFormat());
+                }
+            }
+        } else if (currentIndex == 3)
+        {
+            //Output Settings Tab
+            if (outputSettingTabController != null)
+            {
+                if (!outputSettingTabController.validateInput())
+                {
+                    return;
+                }
+
+                //Pošlem údaje do GenerateTabController
+                if (generateTabController !=null)
+                {
+                    generateTabController.setData(
+                            processedParents,
+                            importController.getSelectedLabelFormat(),
+                            outputSettingTabController.getSenderName(),
+                            outputSettingTabController.getSenderStreet(),
+                            outputSettingTabController.getSenderCity(),
+                            outputSettingTabController.getMailType(),
+                            outputSettingTabController.getTemplateFile()
+                    );
                 }
             }
         }

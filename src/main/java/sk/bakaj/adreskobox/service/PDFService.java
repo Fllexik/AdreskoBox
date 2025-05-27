@@ -18,7 +18,11 @@ import java.util.List;
 
 public class PDFService
 {
-    public void generateLabels(List<Parent> parents, LabelFormat format, File outputFile)
+    /**
+     * Generuje štítky pre zoznam rodičov
+     * Ak je rodičov viac ako sa zmestí na jednú stranu, vytvorí sa viac strán
+     */
+    public void generateLabels(List<Parent> parents, LabelFormat format, File outputFile) throws IOException, DocumentException
     {
         try
         {
@@ -37,37 +41,34 @@ public class PDFService
 
             for (Parent parent : parents)
             {
-                // Výpočet pozicie štítka
-                float x = (float) (format.getLeftMargin() + currentColumn *
-                        (labelWidth + format.getHorizontalGap()));
-                float y = (float) (842 - format.getTopMargin() - currentRow *
-                        (labelHeight + format.getVerticalGap()));// obratenie vertikalnej pozicie povodne bolo bez cisal a + currentRow
+              // Výpočet pozicie štítka
+              float x = (float) (format.getLeftMargin() + currentColumn *
+                      (labelWidth + format.getHorizontalGap()));
+              float y = (float) (842 - format.getTopMargin() - currentRow *
+                      (labelHeight + format.getVerticalGap()) - labelHeight);
 
-                //vytvorenie odstavca s adresou
-                Paragraph label = new Paragraph(parent.getFullName() + "\n" + parent.getFullAddress());
-                /*label.setFixedPosition(x, y, labelWidth);
-                document.add(label);*/
+              //vytvorenie odstavca s adresou
+              Paragraph label = new Paragraph(parent.getFullName() + "\n" + parent.getFullAddress());
 
-                //Použitie Columntext na presne umiestnenie textu
-                ColumnText ct = new ColumnText(canvas);
-                ct.setSimpleColumn(x, y, x + labelWidth, y + labelHeight, 10, Element.ALIGN_LEFT);
-                ct.addElement(label);
-                ct.go();
-
-                //Presun na dalši štitok
-                currentColumn++;
-                if (currentColumn >= format.getColumns())
-                {
-                    currentColumn = 0;
-                    currentRow++;
-                }
-                if (currentRow >= format.getRows())
-                {
-                    currentRow = 0;
-                    document.newPage();
-                }
-            }
-            document.close();
+              //Použitie Columntext na presne umiestnenie textu
+              ColumnText ct = new ColumnText(canvas);
+              ct.setSimpleColumn(x, y, x + labelWidth, y + labelHeight, 10, Element.ALIGN_LEFT);
+              ct.addElement(label);
+              ct.go();
+              //Presun na dalši štitok
+               currentColumn++;
+               if (currentColumn >= format.getColumns())
+               {
+                   currentColumn = 0;
+                   currentRow++;
+               }
+               if (currentRow >= format.getRows())
+               {
+                  currentRow = 0;
+                  document.newPage();
+               }
+           }
+           document.close();
         }catch (DocumentException | IOException e) //(Exception e)
         {
             throw  new RuntimeException("Chyba pri generovaní PDF" + e.getMessage(), e);

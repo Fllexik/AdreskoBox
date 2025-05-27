@@ -24,7 +24,7 @@
             <Tab text="3. Kontrola adries">
                 <fx:include source="AdressCheckTab.fxml"/>
             </Tab>
-            <!--
+
             <Tab text="4. Editor skratiek">
                 <fx:include source="AbbreviationsTab.fxml"/>
             </Tab>
@@ -34,7 +34,7 @@
             <Tab text="6. Generovanie">
                 <fx:include source="GenerateTab.fxml"/>
             </Tab>
-            -->
+
 
         </TabPane>
     </center>

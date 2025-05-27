@@ -57,7 +57,7 @@ public class PrintPreviewController
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
 
-        File file = fileChooser.showOpenDialog(labelsTable.getScene().getWindow());
+        File file = fileChooser.showSaveDialog(labelsTable.getScene().getWindow());
         if (file != null)
         {
             try
