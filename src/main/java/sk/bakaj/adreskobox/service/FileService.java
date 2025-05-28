@@ -30,10 +30,16 @@ public class FileService
         if (fileName.endsWith(".csv"))
         {
             return "CSV";
-        } else if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
+        }
+        else if (fileName.endsWith(".xls"))
         {
             return "XLS";
-        } else
+        }
+        else if (fileName.endsWith(".xlsx"))
+        {
+            return "XLSX";
+        }
+        else
         {
             return null;
         }

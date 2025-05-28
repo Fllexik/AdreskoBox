@@ -161,10 +161,10 @@ public class AbbreviationService
         }
 
         //Skusime najprv nájsť skratku pre celu adresu
-        String loweAddress = address.toLowerCase();
-        if (abbreviations.containsKey(loweAddress))
+        String lowerAddress = address.toLowerCase();
+        if (abbreviations.containsKey(lowerAddress))
         {
-            return abbreviations.get(loweAddress);
+            return abbreviations.get(lowerAddress);
         }
 
         //AK nemáme skratku pre celú adresu, skusíme nahradiť jednotlivé slová
@@ -180,14 +180,12 @@ public class AbbreviationService
             }
         }
 
-        // Zoradime viaceroslovné výrazy podľa dĺžky (od najdlšieho po najkratši)
-        multiWordAbbreviations.entrySet().stream()
+        // Zoradime viaceroslovné výrazy podľa dĺžky a aplikujeme ich pomocou reduce
+        result = multiWordAbbreviations.entrySet().stream()
                 .sorted((e1, e2) -> Integer.compare(e2.getKey().length(), e1.getKey().length()))
-                .forEach(entry -> {
-                    result = result.replaceAll("(?i)\\b" + entry.getKey() + "\\b", entry.getValue());
-                });
-
-        String afterMultiWord = result;
+                .reduce(result,
+                        (currentResult, entry) -> currentResult.replaceAll("(?i)\\b" + entry.getKey() + "\\b", entry.getValue()),
+                        (s1, s2) -> s2);
 
         //Potom jednoslovné výrazy
         for (Map.Entry<String, String> entry : abbreviations.entrySet())

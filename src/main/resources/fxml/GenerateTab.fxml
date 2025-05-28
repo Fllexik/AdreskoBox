@@ -21,7 +21,9 @@
 
     <TitledPane text="Súhrn" expanded="true">
         <GridPane hgap="15" vgap="10">
-            <padding><Insets top="10" right="10" bottom="10"left="10" /></padding>
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
 
             <Label text="Počet strán so štítkami:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
             <Label fx:id="labelPagesCountLabel" text="0" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>

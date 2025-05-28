@@ -31,6 +31,45 @@ public class ExcelService
     public static final int MAX_RECIPIENTS_PER_PAGE = 12;
 
     /**
+     * Enum pre typy zásielok
+     */
+    public enum MailType
+    {
+        REGISTERED("Doporučený list"),
+        INSURED("Poistený list"),
+        OFFICIAL("Úradná zasielka"),
+        PACKAGE("Balík"),
+        EXPRESS("Expresná zásielka"),
+        POSTAL_ORDER("Poštový poukaz");
+
+        private final String displayName;
+
+        MailType(String displayName)
+        {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName()
+        {
+            return displayName;
+        }
+
+        @Override
+        public String toString()
+        {
+            return displayName;
+        }
+    }
+
+    private File createSubmissionSheets(List<Parent> parents, String senderName,
+                                        String senderStreet, String senderCity,
+                                        MailType mailType, File templateFile, int groupNumber) throws IOException
+    {
+        return createSingleSubmissionSheet(parents, senderName, senderStreet, senderCity,
+                mailType, templateFile, groupNumber);
+    }
+
+    /**
      * Vytvorí podací hárok pre zadaných rodičov
      *
      * @param parents      Zoznam rodičov
@@ -276,7 +315,7 @@ public class ExcelService
         File templateFile = new File(templateDir, "Podaci_harok_template.xlsx");
 
         try(Workbook workbook = new XSSFWorkbook();
-        FileOutputStream fos = new FileOutputStream(templateFile))
+            FileOutputStream fos = new FileOutputStream(templateFile))
         {
             Sheet sheet = workbook.createSheet("Podaci_harok");
 
@@ -300,10 +339,10 @@ public class ExcelService
             for (int i = 0; i < mailTypes.length; i++)
             {
                 Row row = sheet.createRow(10 + i);
-               Cell labelCell = row.createCell(5);
-               labelCell.setCellValue(mailTypes[i]);
-               Cell checkCell = row.createCell(6);
-               checkCell.setCellValue("");
+                Cell labelCell = row.createCell(5);
+                labelCell.setCellValue(mailTypes[i]);
+                Cell checkCell = row.createCell(6);
+                checkCell.setCellValue("");
             }
 
             //Vytvorenie hlavičky pre príjemcov
@@ -319,35 +358,6 @@ public class ExcelService
             workbook.write(fos);
         }
 
-        /**
-         * Enum pre typy zásielok
-         */
-        public enum MailType
-        {
-            REGISTERED("Doporučený list"),
-            INSURED("Poistený list"),
-            OFFICIAL("Úradná zasielka"),
-            PACKAGE("Balík"),
-            EXPRESS("Expresná zásielka"),
-            POSTAL_ORDER("Poštový poukaz");
-
-            private final String displayName;
-
-            MailType(String displayName)
-            {
-                this.displayName = displayName;
-            }
-
-            public String getDisplayName()
-            {
-                return displayName;
-            }
-
-            @Override
-            public String toString()
-            {
-                return displayName;
-            }
-        }
+        return templateFile;
     }
 }

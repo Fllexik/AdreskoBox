@@ -26,7 +26,7 @@ public class OutputSettingTabController
     private ComboBox<ExcelService.MailType> mailTypeComboBox;
 
     @FXML
-    private TextField templateFileField;
+    private TextField templatePathField;
 
     @FXML
     private Button browseTemplateButton;
@@ -43,7 +43,7 @@ public class OutputSettingTabController
     public void initialize()
     {
         //Inicializácia comboboxu pre typ zásielky
-        mailTypeComboBox.setItems(FXCollections.observableArrayList(ExcelService.MailType.valuees()));
+        mailTypeComboBox.setItems(FXCollections.observableArrayList(ExcelService.MailType.values()));
         mailTypeComboBox.getSelectionModel().select(ExcelService.MailType.OFFICIAL); //Predvolená hodnota
 
         //Predvolená cesta k šablone

@@ -14,28 +14,26 @@
     </top>
 
     <center>
-        <TabPane tabClosingPolicy="UNAVAILABLE">
+        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
             <Tab text="1. Import dát">
-                <fx:include source="ImportTab.fxml"/>
+                <fx:include fx:id="importController" source="ImportTab.fxml"/>
                 </Tab>
             <Tab text="2. Výber rodičov">
-                <fx:include source="ParentsTab.fxml" />
+                <fx:include fx:id="parentsTabController" source="ParentsTab.fxml" />
             </Tab>
             <Tab text="3. Kontrola adries">
-                <fx:include source="AdressCheckTab.fxml"/>
+                <fx:include fx:id="adressCheckTabController" source="AdressCheckTab.fxml"/>
             </Tab>
 
             <Tab text="4. Editor skratiek">
-                <fx:include source="AbbreviationsTab.fxml"/>
+                <fx:include  source="AbbreviationsTab.fxml"/>
             </Tab>
             <Tab text="5. Nastavenie výstupu">
-                <fx:include source="OutputSettingsTab.fxml"/>
+                <fx:include fx:id="outputSettingTabController" source="OutputSettingsTab.fxml"/>
             </Tab>
             <Tab text="6. Generovanie">
-                <fx:include source="GenerateTab.fxml"/>
+                <fx:include fx:id="generateTabController" source="GenerateTab.fxml"/>
             </Tab>
-
-
         </TabPane>
     </center>
 

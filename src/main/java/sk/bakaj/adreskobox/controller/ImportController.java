@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -13,6 +14,9 @@ import java.io.File;
 
 public class ImportController
 {
+    @FXML
+    private VBox rootVbox;
+
     @FXML
     private TextField filePathField;
 
@@ -44,6 +48,9 @@ public class ImportController
     @FXML
     public void initialize()
     {
+        // Uložiť controller do properties
+        rootVbox.getProperties().put("controller", this);
+
         //naplnenie Comboboxu predefinovanymi formatami
         predefinedFormatsComboBox.setItems(LabelFormat.getPredefinedFormats());
 

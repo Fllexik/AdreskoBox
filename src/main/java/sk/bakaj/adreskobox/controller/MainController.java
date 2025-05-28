@@ -1,9 +1,12 @@
 package sk.bakaj.adreskobox.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.VBox;
 import sk.bakaj.adreskobox.model.ImportedData;
 import sk.bakaj.adreskobox.model.Parent;
 import sk.bakaj.adreskobox.service.FileService;
@@ -22,23 +25,13 @@ public class MainController
     @FXML
     private TabPane tabPane;
 
-    @FXML
     private ImportController importController;
-
-    @FXML
     private ParentsTabController parentsTabController;
-
-    @FXML
     private AdressCheckTabController adressCheckTabController;
-
-    @FXML
     private PrintPreviewController printPreviewController;
-
-    @FXML
     private OutputSettingTabController outputSettingTabController;
-
-    @FXML
     private GenerateTabController generateTabController;
+
 
     private List<ImportedData> importedData;
     private List<Parent> selectedParents;
@@ -48,6 +41,39 @@ public class MainController
     @FXML
     private void initialize()
     {
+
+        // Počkajme kým sa všetky taby načítajú
+        Platform.runLater(() -> {
+            // Získanie controllerov z jednotlivých tabov
+            try {
+                // Pre ImportController
+                Node importNode = tabPane.getTabs().get(0).getContent();
+                importController = getControllerFromNode(importNode, ImportController.class);
+
+                // Pre ParentsTabController
+                Node parentsNode = tabPane.getTabs().get(1).getContent();
+                parentsTabController = getControllerFromNode(parentsNode, ParentsTabController.class);
+
+                // Pre AdressCheckTabController
+                Node addressNode = tabPane.getTabs().get(2).getContent();
+                adressCheckTabController = getControllerFromNode(addressNode, AdressCheckTabController.class);
+
+                // Pre PrintPreviewController - predpokladám, že je na indexe 3
+                Node printPreviewNode = tabPane.getTabs().get(3).getContent();
+                printPreviewController = getControllerFromNode(printPreviewNode, PrintPreviewController.class);
+
+                // Pre OutputSettingTabController - predpokladám, že je na indexe 4
+                Node outputSettingNode = tabPane.getTabs().get(4).getContent();
+                outputSettingTabController = getControllerFromNode(outputSettingNode, OutputSettingTabController.class);
+
+                // Pre GenerateTabController - predpokladám, že je na indexe 5
+                Node generateNode = tabPane.getTabs().get(5).getContent();
+                generateTabController = getControllerFromNode(generateNode, GenerateTabController.class);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         //nastavenie listenerov pre tlačidlá
         prevButton.setOnAction(event -> navigateToPreviousTab());
         nextButton.setOnAction(event -> navigateToNextTab());
@@ -58,6 +84,14 @@ public class MainController
         //Listener pre zmenu záložky
         tabPane.getSelectionModel().selectedIndexProperty().addListener(
                 (observable, oldValue, newValue) -> updateButtonStates());
+    }
+    @SuppressWarnings("unchecked")
+    private <T> T getControllerFromNode(Node node, Class<T> controllerClass) {
+        Object controller = node.getProperties().get("controller");
+        if (controller != null && controllerClass.isInstance(controller)) {
+            return (T) controller;
+        }
+        return null;
     }
 
     public void navigateToPreviousTab()
@@ -73,10 +107,14 @@ public class MainController
     {
         int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
 
-
         //Pokiaľ je na tabulatore "import dát", je potrebné spracovať dáta
         if (currentIndex == 0)
         {
+            if (importController == null) {
+                showAlert(Alert.AlertType.ERROR, "Chyba", "ImportController nie je inicializovaný.");
+                return;
+            }
+
             File selectedFile = importController.getSelectedFile();
             if (selectedFile == null)
             {
@@ -105,7 +143,7 @@ public class MainController
             catch (Exception e)
             {
                 showAlert(Alert.AlertType.ERROR, "Chyba načitania",
-                         "Nepodarilo sa načítať data: " + e.getMessage());
+                        "Nepodarilo sa načítať data: " + e.getMessage());
                 return;
             }
         } else if (currentIndex == 1)// Výber rodičov
@@ -144,7 +182,7 @@ public class MainController
                     printPreviewController.setData(processedParents, importController.getSelectedLabelFormat());
                 }
             }
-        } else if (currentIndex == 3)
+        } else if (currentIndex == 4) // Zmenil som index na 4, pretože predpokladám, že OutputSettings je na indexe 4
         {
             //Output Settings Tab
             if (outputSettingTabController != null)
@@ -202,3 +240,24 @@ public class MainController
         return processedParents;
     }
 }
+/**
+    private void showAlert(Alert.AlertType type, String title, String content)
+    {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    //Metoda pre ziskanie vybraných rodičov(može byť použota v iných controlleroch)
+    public List<Parent> getSelectedParents()
+    {
+        return selectedParents;
+    }
+
+    //Metoda pre ziskanie upravených rodičov(može byť použota v iných controlleroch)
+    public List<Parent> getProcessedParents()
+    {
+        return processedParents;
+    }
+}*/

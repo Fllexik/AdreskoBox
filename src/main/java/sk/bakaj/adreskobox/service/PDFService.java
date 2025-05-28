@@ -67,7 +67,7 @@ public class PDFService
                   currentRow = 0;
                   document.newPage();
                }
-           }
+            }
            document.close();
         }catch (DocumentException | IOException e) //(Exception e)
         {
@@ -76,9 +76,9 @@ public class PDFService
     }
 
     //Metoda pre skratenie adries  ak sú príliš dlhé
-    public String abbreviateAddressIfNeeded(String address, int maxLenght)
+    public String abbreviateAddressIfNeeded(String address, int maxLength)
     {
-        if (address == null || address.length() <= maxLenght)
+        if (address == null || address.length() <= maxLength)
         {
             return address;
         }
@@ -96,7 +96,7 @@ public class PDFService
                     .replace("námestie", "nám.");
             shortened.append(trimmed).append(", ");
 
-            if (shortened.length() > maxLenght - 5)
+            if (shortened.length() > maxLength - 5)
             {
                 break;
             }
