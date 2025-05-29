@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.layout.VBox;
 import sk.bakaj.adreskobox.model.ImportedData;
 import sk.bakaj.adreskobox.model.Parent;
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.stream.Collectors;
 
 public class ParentsTabController
 {
+    @FXML
+    private VBox rootVbox;
+
     @FXML
     private TableView<ParentEntry> parentsTable;
 
@@ -38,6 +42,18 @@ public class ParentsTabController
     @FXML
     public void initialize()
     {
+        System.out.println("ParentsTabController.initialize()");
+        System.out.println("Stĺpce v parentsTable: " + parentsTable.getColumns().size());
+        System.out.println("Riadkov v parentList: " + parentList.size());
+        parentList.add(new ParentEntry("Test Student", "Test Parent", "Test Address", false));
+        parentsTable.setItems(parentList);
+        // DÔLEŽITÉ: Uložiť controller do properties root elementu
+        // Toto je kľúčové pre načítanie controllera v MainController
+        if (rootVbox != null)
+        {
+            rootVbox.getProperties().put("controller", this);
+        }
+
         //Nastavenie stlpcov tabulky
         selectColumn.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
         selectColumn.setCellFactory(CheckBoxTableCell.forTableColumn(selectColumn));
@@ -56,6 +72,8 @@ public class ParentsTabController
 
         //Nastavenie parentsTable pre zobrazenie udajov
         parentsTable.setItems(parentList);
+
+        parentsTable.setPlaceholder(new Label("Tabuľka je prázdna"));
     }
     /**
      * Aktualizuje počet vybraných rodičov
@@ -70,17 +88,16 @@ public class ParentsTabController
     /**
      * Načita rodičov z importovaných dát
      */
-    public void loadData(List<ImportedData> importedDataList)
-    {
+    public void loadData(List<ImportedData> importedDataList) {
+        System.out.println("Volám loadData, veľkosť dát: " + importedDataList.size());
         parentList.clear();
+        int addedCount = 0; // Nový počítadlo
 
-        for (ImportedData data : importedDataList)
-        {
+        for (ImportedData data : importedDataList) {
             String studentName = data.getStudentFirstName() + " " + data.getStudentLastName();
 
             // Pridať prveho rodiča
-            if (data.getParent1Name() != null && !data.getParent1Name().isEmpty())
-            {
+            if (data.getParent1Name() != null && !data.getParent1Name().isEmpty()) {
                 ParentEntry entry = new ParentEntry(
                         studentName,
                         data.getParent1Name(),
@@ -88,16 +105,15 @@ public class ParentsTabController
                         false
                 );
                 parentList.add(entry);
-
-                //Pridaj listener na checkBox
-                entry.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        updateSelectedCount()
-                );
+                addedCount++; // Inkrementujeme počítadlo
+                System.out.println("Pridaný Rodič 1 pre študenta: " + studentName + ", Meno: " + data.getParent1Name()); // Ladenie
+                entry.selectedProperty().addListener((obs, oldVal, newVal) -> updateSelectedCount());
+            } else {
+                System.out.println("Rodič 1 je prázdny pre študenta: " + studentName); // Ladnie
             }
 
             //Pridať druheho rodiča
-            if (data.getParent2Name() != null && !data.getParent2Name().isEmpty())
-            {
+            if (data.getParent2Name() != null && !data.getParent2Name().isEmpty()) {
                 ParentEntry entry = new ParentEntry(
                         studentName,
                         data.getParent2Name(),
@@ -105,16 +121,17 @@ public class ParentsTabController
                         false
                 );
                 parentList.add(entry);
-
-                //Pridaj listener na chcekBox
-                entry.selectedProperty().addListener((obs, oldVal, newVal) ->
-                        updateSelectedCount()
-                );
+                addedCount++; // Inkrementujeme počítadlo
+                System.out.println("Pridaný Rodič 2 pre študenta: " + studentName + ", Meno: " + data.getParent2Name()); // Ladnenie
+                entry.selectedProperty().addListener((obs, oldVal, newVal) -> updateSelectedCount());
+            } else {
+                System.out.println("Rodič 2 je prázdny pre študenta: " + studentName); // Ladnie
             }
         }
-
-        //Aktualizujem počet vybraných rodičov
+        System.out.println("Celkový počet riadkov pridaných do parentList: " + addedCount); // Nový výpis
         updateSelectedCount();
+        // Požiadajte o explicitné obnovenie tabuľky, ak to automaticky nefunguje
+        parentsTable.refresh();
     }
 
     /**

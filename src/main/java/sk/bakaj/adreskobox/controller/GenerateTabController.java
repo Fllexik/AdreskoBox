@@ -2,6 +2,7 @@ package sk.bakaj.adreskobox.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +21,10 @@ import java.util.List;
 public class GenerateTabController
 {
     private static final Log log = LogFactory.getLog(GenerateTabController.class);
+
+    @FXML
+    private VBox rootVbox;
+
     @FXML
     private TextField outputDirField;
 
@@ -58,6 +63,13 @@ public class GenerateTabController
     @FXML
     public void initialize()
     {
+        // DÔLEŽITÉ: Uložiť controller do properties root elementu
+        // Toto je kľúčové pre načítanie controllera v MainController
+        if (rootVbox != null)
+        {
+            rootVbox.getProperties().put("controller", this);
+        }
+
         //Predvolená cesta k výstupnému adresáru
         outputDirectory = new File(System.getProperty("user.home") + "/Documents/AdreskoBox");
         if (!outputDirectory.exists())

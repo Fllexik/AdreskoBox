@@ -3,6 +3,7 @@ package sk.bakaj.adreskobox.controller;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import sk.bakaj.adreskobox.model.LabelFormat;
 import sk.bakaj.adreskobox.model.Parent;
@@ -13,6 +14,9 @@ import java.util.List;
 
 public class OutputSettingTabController
 {
+    @FXML
+    private VBox rootVbox;
+
     @FXML
     private TextField senderNameField;
 
@@ -42,6 +46,13 @@ public class OutputSettingTabController
     @FXML
     public void initialize()
     {
+        // DÔLEŽITÉ: Uložiť controller do properties root elementu
+        // Toto je kľúčové pre načítanie controllera v MainController
+        if (rootVbox != null)
+        {
+            rootVbox.getProperties().put("controller", this);
+        }
+
         //Inicializácia comboboxu pre typ zásielky
         mailTypeComboBox.setItems(FXCollections.observableArrayList(ExcelService.MailType.values()));
         mailTypeComboBox.getSelectionModel().select(ExcelService.MailType.OFFICIAL); //Predvolená hodnota

@@ -25,6 +25,7 @@ public class MainController
     @FXML
     private TabPane tabPane;
 
+
     private ImportController importController;
     private ParentsTabController parentsTabController;
     private AdressCheckTabController adressCheckTabController;
@@ -42,38 +43,6 @@ public class MainController
     private void initialize()
     {
 
-        // Počkajme kým sa všetky taby načítajú
-        Platform.runLater(() -> {
-            // Získanie controllerov z jednotlivých tabov
-            try {
-                // Pre ImportController
-                Node importNode = tabPane.getTabs().get(0).getContent();
-                importController = getControllerFromNode(importNode, ImportController.class);
-
-                // Pre ParentsTabController
-                Node parentsNode = tabPane.getTabs().get(1).getContent();
-                parentsTabController = getControllerFromNode(parentsNode, ParentsTabController.class);
-
-                // Pre AdressCheckTabController
-                Node addressNode = tabPane.getTabs().get(2).getContent();
-                adressCheckTabController = getControllerFromNode(addressNode, AdressCheckTabController.class);
-
-                // Pre PrintPreviewController - predpokladám, že je na indexe 3
-                Node printPreviewNode = tabPane.getTabs().get(3).getContent();
-                printPreviewController = getControllerFromNode(printPreviewNode, PrintPreviewController.class);
-
-                // Pre OutputSettingTabController - predpokladám, že je na indexe 4
-                Node outputSettingNode = tabPane.getTabs().get(4).getContent();
-                outputSettingTabController = getControllerFromNode(outputSettingNode, OutputSettingTabController.class);
-
-                // Pre GenerateTabController - predpokladám, že je na indexe 5
-                Node generateNode = tabPane.getTabs().get(5).getContent();
-                generateTabController = getControllerFromNode(generateNode, GenerateTabController.class);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
         //nastavenie listenerov pre tlačidlá
         prevButton.setOnAction(event -> navigateToPreviousTab());
         nextButton.setOnAction(event -> navigateToNextTab());
@@ -84,14 +53,72 @@ public class MainController
         //Listener pre zmenu záložky
         tabPane.getSelectionModel().selectedIndexProperty().addListener(
                 (observable, oldValue, newValue) -> updateButtonStates());
+
+        //Načitanie vnorených controllerov
+        loadNestedControllers();
     }
-    @SuppressWarnings("unchecked")
-    private <T> T getControllerFromNode(Node node, Class<T> controllerClass) {
-        Object controller = node.getProperties().get("controller");
-        if (controller != null && controllerClass.isInstance(controller)) {
-            return (T) controller;
-        }
-        return null;
+
+    private void loadNestedControllers()
+    {
+        Platform.runLater(() -> {
+            try {
+                // Načítanie ImportController z prvej záložky (index 0)
+                Node importTabContent = tabPane.getTabs().get(0).getContent();
+                if (importTabContent instanceof VBox) {
+                    VBox vbox = (VBox) importTabContent;
+                    importController = (ImportController) vbox.getProperties().get("controller");
+                }
+
+                // Načítanie ParentsTabController z druhej záložky (index 1)
+                Node parentsTabContent = tabPane.getTabs().get(1).getContent();
+                if (parentsTabContent != null) {
+                    Object controller = parentsTabContent.getProperties().get("controller");
+                    if (controller instanceof ParentsTabController) {
+                        parentsTabController = (ParentsTabController) controller;
+                    }
+                }
+
+                // Načítanie AdressCheckTabController z tretej záložky (index 2)
+                Node addressCheckContent = tabPane.getTabs().get(2).getContent();
+                if (addressCheckContent != null) {
+                    Object controller = addressCheckContent.getProperties().get("controller");
+                    if (controller instanceof AdressCheckTabController) {
+                        adressCheckTabController = (AdressCheckTabController) controller;
+                    }
+                }
+
+                // Načítanie OutputSettingTabController zo štvrtej záložky (index 3) - OPRAVA!
+                if (tabPane.getTabs().size() > 3) {
+                    Node outputSettingsContent = tabPane.getTabs().get(3).getContent();
+                    if (outputSettingsContent != null) {
+                        Object controller = outputSettingsContent.getProperties().get("controller");
+                        if (controller instanceof OutputSettingTabController) {
+                            outputSettingTabController = (OutputSettingTabController) controller;
+                        }
+                    }
+                }
+
+                // Načítanie GenerateTabController z piatej záložky (index 4) - OPRAVA!
+                if (tabPane.getTabs().size() > 4) {
+                    Node generateContent = tabPane.getTabs().get(4).getContent();
+                    if (generateContent != null) {
+                        Object controller = generateContent.getProperties().get("controller");
+                        if (controller instanceof GenerateTabController) {
+                            generateTabController = (GenerateTabController) controller;
+                        }
+                    }
+                }
+
+                System.out.println("ImportController načítaný: " + (importController != null));
+                System.out.println("ParentsTabController načítaný: " + (parentsTabController != null));
+                System.out.println("AdressCheckTabController načítaný: " + (adressCheckTabController != null));
+                System.out.println("OutputSettingTabController načítaný: " + (outputSettingTabController != null));
+                System.out.println("GenerateTabController načítaný: " + (generateTabController != null));
+            } catch (Exception e) {
+                System.err.println("Chyba pri načítavaní controllerov: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
 
     public void navigateToPreviousTab()
@@ -107,7 +134,7 @@ public class MainController
     {
         int currentIndex = tabPane.getSelectionModel().getSelectedIndex();
 
-        //Pokiaľ je na tabulatore "import dát", je potrebné spracovať dáta
+        // Pokiaľ je na tabulatore "import dát", je potrebné spracovať dáta
         if (currentIndex == 0)
         {
             if (importController == null) {
@@ -119,14 +146,14 @@ public class MainController
             if (selectedFile == null)
             {
                 showAlert(Alert.AlertType.WARNING, "Chýba súbor",
-                        "Pred prechodom na dalšiu kartu výberte súbor.");
+                        "Pred prechodom na ďalšiu kartu vyberte súbor.");
                 return;
             }
 
             if (importController.getSelectedLabelFormat() == null)
             {
                 showAlert(Alert.AlertType.WARNING, "Chýba formát štítkov",
-                        "Pred prechodom na dalšiu kartu vyberte formát štítku.");
+                        "Pred prechodom na ďalšiu kartu vyberte formát štítku.");
                 return;
             }
 
@@ -134,7 +161,7 @@ public class MainController
             {
                 importedData = fileService.readFile(selectedFile);
 
-                //Posielame načitane data do kontrolera záložky rodičov
+                // Posielame načítané dáta do kontrolera záložky rodičov
                 if (parentsTabController != null)
                 {
                     parentsTabController.loadData(importedData);
@@ -142,11 +169,12 @@ public class MainController
             }
             catch (Exception e)
             {
-                showAlert(Alert.AlertType.ERROR, "Chyba načitania",
-                        "Nepodarilo sa načítať data: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Chyba načítania",
+                        "Nepodarilo sa načítať dáta: " + e.getMessage());
                 return;
             }
-        } else if (currentIndex == 1)// Výber rodičov
+        }
+        else if (currentIndex == 1) // Výber rodičov
         {
             if (parentsTabController != null)
             {
@@ -154,17 +182,18 @@ public class MainController
 
                 if (selectedParents.isEmpty())
                 {
-                    showAlert(Alert.AlertType.WARNING, "Žiadný výber",
-                            "Výber aspoň jedného rodiča pred pokračovaním.");
+                    showAlert(Alert.AlertType.WARNING, "Žiadny výber",
+                            "Vyberte aspoň jedného rodiča pred pokračovaním.");
                     return;
                 }
-                //Poslať vybraných rodičov do AdressCheckTabController
+                // Poslať vybraných rodičov do AdressCheckTabController
                 if (adressCheckTabController != null)
                 {
                     adressCheckTabController.setData(selectedParents, importController.getSelectedLabelFormat());
                 }
             }
-        } else if (currentIndex == 2)// kontrola adries
+        }
+        else if (currentIndex == 2) // Kontrola adries
         {
             if (adressCheckTabController != null)
             {
@@ -176,15 +205,15 @@ public class MainController
                             "Neboli nájdené žiadne upravené adresy.");
                     return;
                 }
-                //Poslať upravené adresy do PrintPreviewControler
+                // Poslať upravené adresy do PrintPreviewControler (ak existuje)
                 if (printPreviewController != null)
                 {
                     printPreviewController.setData(processedParents, importController.getSelectedLabelFormat());
                 }
             }
-        } else if (currentIndex == 4) // Zmenil som index na 4, pretože predpokladám, že OutputSettings je na indexe 4
+        }
+        else if (currentIndex == 3) // Output Settings Tab - OPRAVA indexu z 4 na 3!
         {
-            //Output Settings Tab
             if (outputSettingTabController != null)
             {
                 if (!outputSettingTabController.validateInput())
@@ -192,8 +221,8 @@ public class MainController
                     return;
                 }
 
-                //Pošlem údaje do GenerateTabController
-                if (generateTabController !=null)
+                // Pošlem údaje do GenerateTabController
+                if (generateTabController != null)
                 {
                     generateTabController.setData(
                             processedParents,
@@ -207,6 +236,7 @@ public class MainController
                 }
             }
         }
+
         if (currentIndex < tabPane.getTabs().size() - 1)
         {
             tabPane.getSelectionModel().select(currentIndex + 1);

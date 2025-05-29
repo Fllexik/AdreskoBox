@@ -6,7 +6,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextArea?>
-<VBox spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.13" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.bakaj.adreskobox.controller.GenerateTabController">
+<VBox fx:id="rootVbox" spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.13" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.bakaj.adreskobox.controller.GenerateTabController">
 
     <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Generovanie výstupných súborov"/>
 

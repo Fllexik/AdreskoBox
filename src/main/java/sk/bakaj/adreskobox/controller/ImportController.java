@@ -8,9 +8,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import sk.bakaj.adreskobox.model.ImportedData;
 import sk.bakaj.adreskobox.model.LabelFormat;
 import sk.bakaj.adreskobox.service.FileService;
 import java.io.File;
+import java.util.List;
 
 public class ImportController
 {
@@ -67,6 +69,8 @@ public class ImportController
             }
         });
     }
+
+
 
     @FXML
     private void handleSelectFile()
@@ -282,7 +286,7 @@ public class ImportController
                     "Nepodarilo sa zobraziť náhľad:" + e.getMessage());
         }
     }
-
+    /**
     @FXML
     private void handleImportData()
     {
@@ -304,5 +308,52 @@ public class ImportController
             showAlert(Alert.AlertType.ERROR,"Chyba",
                     "Nepodarilo sa importovať údaje:" + e.getMessage());
         }
+    }*/
+
+    @FXML
+    private void handleImportData()
+    {
+        if (!isReadyToProceed())
+        {
+            showAlert(Alert.AlertType.WARNING, "Neúplné údaje",
+                    "Pred importom vyberte súbor a formát štítkov.");
+            return;
+        }
+
+        try
+        {
+            List<ImportedData> dataList = fileService.readFile(selectedFile, hasHeader());
+
+            // Získať ParentsTabController zo scény (ak rootVbox bol uložený s controllerom)
+            TabPane tabPane = (TabPane) rootVbox.getScene().lookup("#mainTabPane"); // alebo upraviť podľa tvojho ID
+
+            if (tabPane != null)
+            {
+                Tab parentsTab = tabPane.getTabs().stream()
+                        .filter(t -> t.getText().equalsIgnoreCase("Rodičia"))
+                        .findFirst().orElse(null);
+
+                if (parentsTab != null && parentsTab.getContent() instanceof VBox parentsVBox)
+                {
+                    Object controllerObj = parentsVBox.getProperties().get("controller");
+
+                    if (controllerObj instanceof ParentsTabController parentsTabController)
+                    {
+                        parentsTabController.loadData(dataList);
+                        showAlert(Alert.AlertType.INFORMATION, "Import hotový", "Údaje boli úspešne importované.");
+                    }
+                    else
+                    {
+                        System.err.println("Nebolo možné získať ParentsTabController.");
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Chyba", "Nepodarilo sa načítať dáta: " + e.getMessage());
+        }
     }
+
 }

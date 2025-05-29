@@ -24,6 +24,8 @@ import java.util.Optional;
 public class AdressCheckTabController
 {
     @FXML
+    private VBox rootVbox;
+    @FXML
     private TableView<AddressPreviewItem> addressTable;
     @FXML
     private TableColumn<AddressPreviewItem, String> nameColumn;
@@ -48,6 +50,12 @@ public class AdressCheckTabController
     @FXML
     public void initialize()
     {
+        // DÔLEŽITÉ: Uložiť controller do properties root elementu
+        // Toto je kľúčové pre načítanie controllera v MainController
+        if (rootVbox != null)
+        {
+            rootVbox.getProperties().put("controller", this);
+        }
         //Nastavenie stĺpcov tabuľky
         nameColumn.setCellValueFactory(data ->
                 new SimpleStringProperty(data.getValue().getName()));

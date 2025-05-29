@@ -130,7 +130,7 @@ public class FileService
             return checkCSVHeaderRow(file, delimiter);
         } else if ("XLS".equals(fileType) || "XLSX".equals(fileType))
         {
-            return checkExcelHeaderRow(file);
+            return checkExcelHeaderRow(file).getKey().booleanValue(); //return checkExcelHeaderRow(file);
         }
         return false;
     }
@@ -143,39 +143,71 @@ public class FileService
     {
         try(BufferedReader br = new BufferedReader(new FileReader(file)))
         {
-            String headerLine = br.readLine();
-            if (headerLine == null)
+            String headerLine1 = br.readLine();//Prvý riadok
+            String headerLine2 = br.readLine();//Druhý riadok
+
+            //Skusíme najprv druhý riadok, či existuju a obsahuju relevantné hlavičky:
+            if (headerLine2 == null)
             {
-                return false;//Prazdný subor
+                String[] headers2 = headerLine2.split(delimiter);
+                if (containsExpectedColumns(headers2))
+                {
+                    return true;
+                }
             }
-            String[] headers = headerLine.split(delimiter);
-            return containsExpectedColumns(headers);
+            //Ak druhý riadok neobsahuje, alebo neexistuje, skusím prvý riadok
+            if (headerLine1 != null)
+            {
+                String[] headers1 = headerLine1.split(delimiter);
+                return containsExpectedColumns(headers1);
+            }
+            return false;
         }
     }
 
     /**
-     * Kontroluje , či prvý riadok Excel suboru obsahuje očakávane stlpce
+     * Kontroluje , či prvý riadok alebo druhý riadok Excel suboru obsahuje očakávane stlpce
+     * Vracia pár (boolean isHeaderPresent, int headerRowIndex).
      */
 
-    private boolean checkExcelHeaderRow(File file) throws IOException
+    private Map.Entry<Boolean, Integer> checkExcelHeaderRow(File file) throws IOException
     {
         try(Workbook workbook = WorkbookFactory.create(file))
         {
             Sheet sheet = workbook.getSheetAt(0);
-            Row headerRow = sheet.getRow(0);
 
-            if (headerRow == null)
+            // Skúsime riadok s indexom 0 (prvý riadok)
+            Row headerRow0 = sheet.getRow(0);
+            if (headerRow0 != null)
             {
-                return false;//Prazdný hárok
+                String[] headers0 = new String[headerRow0.getLastCellNum()];
+                for (int i = 0; i < headerRow0.getLastCellNum(); i++)
+                {
+                    Cell cell = headerRow0.getCell(i);
+                    headers0[i] = getCellValueAsString(cell);
+                }
+                if (containsExpectedColumns(headers0))
+                {
+                    return new java.util.AbstractMap.SimpleEntry<>(true, 0); // Hlavička nájdená na riadku 0
+                }
             }
 
-            String[] headers = new String[headerRow.getLastCellNum()];
-            for (int i = 0; i < headerRow.getLastCellNum(); i++)
+            // Ak neboli nájdené na riadku 0, skúsime riadok s indexom 1 (druhý riadok)
+            Row headerRow1 = sheet.getRow(1);
+            if (headerRow1 != null)
             {
-                Cell cell = headerRow.getCell(i);
-                headers[i] = getCellValueAsString(cell);
+                String[] headers1 = new String[headerRow1.getLastCellNum()];
+                for (int i = 0; i < headerRow1.getLastCellNum(); i++)
+                {
+                    Cell cell = headerRow1.getCell(i);
+                    headers1[i] = getCellValueAsString(cell);
+                }
+                if (containsExpectedColumns(headers1))
+                {
+                    return new java.util.AbstractMap.SimpleEntry<>(true, 1); // Hlavička nájdená na riadku 1
+                }
             }
-            return containsExpectedColumns(headers);
+            return new java.util.AbstractMap.SimpleEntry<>(false, -1); // Hlavička nebola nájdená
         }
     }
 
@@ -209,6 +241,11 @@ public class FileService
     /**
      * Načíta data zo súboru, automaticky detekuje typ a oddeľovač
      *  Ak prvý riadok nie je hlavička, može volajúci špecifikovať hasHeader=false
+     *
+     * @param file Súbor na načítanie.
+     * @param hasHeader True, ak sa očakáva hlavička a ma sa preskočit/použiť  False, ak sú dáta od prvého riadku.
+     * @return Zoznam načítaných dát.
+     * @throws IOException Ak nastane chyba pri čítaní súboru.
      */
     public List<ImportedData> readFile(File file, boolean hasHeader) throws IOException
     {
@@ -220,7 +257,14 @@ public class FileService
             return readCSV(file, delimiter, hasHeader);
         } else if ("XLS".equals(fileType) || "XLSX".equals(fileType))
         {
-            return readExcel(file, hasHeader);
+            // Potrebujeme vedieť, kde sa hlavička nachádza (ak vôbec)
+            Map.Entry<Boolean, Integer> headerInfo = checkExcelHeaderRow(file);
+            // Ak 'hasHeader' z UI je false, ale detekujeme hlavičku, tak sa riadime detekciou.
+            // Ak 'hasHeader' z UI je true, a detekujeme ju, tak super.
+            // Ak 'hasHeader' z UI je true, ale detekujeme, že nie je, tak je problém.
+            // Zjednodušíme to: 'hasHeader' z UI bude len indikátorom pre používateľa,
+            // ale pre čítanie sa budeme riadiť tým, čo detekuje 'checkExcelHeaderRow'.
+            return readExcel(file, headerInfo.getValue()); // Posielame index riadku s hlavičkou, nie boolean
         } else
         {
             throw new IOException("Nepodporovaný typ súboru");
@@ -232,71 +276,125 @@ public class FileService
      */
     public List<ImportedData> readFile(File file) throws IOException
     {
-        boolean hasHeader = hasHeaderRow(file);
-        return readFile(file, hasHeader);
+        // Táto metóda už len deleguje na metódu s parametrom 'hasHeader',
+        // kde 'hasHeader' je získané z detekcie.
+        return readFile(file, hasHeaderRow(file));
     }
 
     private List<ImportedData> readCSV(File file, String delimiter, boolean hasHeader) throws IOException
     {
         List<ImportedData> dataList = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(file)))
-        {
-            String headerLine = br.readLine();
-            if (headerLine == null)
-            {
-                throw new IOException("Súbor je prázdny");
-            }
+        List<String> allLines = new ArrayList<>();
 
-            String[] headers = headerLine.split(delimiter);
-            int[] columnIndexes = findColumnIndexes(headers);
-
-            if (!hasHeader)
-            {
-                String[] values = headerLine.split(delimiter);
-                ImportedData data = createImportedData(values, columnIndexes);
-                if (data != null)
-                {
-                    dataList.add(data);
-                }
-            }
-
+        // Načítanie všetkých riadkov do zoznamu
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
-            while ((line = br.readLine()) != null)
-            {
-                String[] values = line.split(delimiter);
-                ImportedData data = createImportedData(values, columnIndexes);
-                if (data != null)
-                {
-                    dataList.add(data);
+            while ((line = br.readLine()) != null) {
+                allLines.add(line);
+            }
+        }
+
+        if (allLines.isEmpty()) {
+            throw new IOException("Súbor je prázdny.");
+        }
+
+        String[] headersToUse = null;
+        int startDataRowIndex = 0; // Index v zozname allLines, odkiaľ začínajú skutočné dáta
+
+        // Určenie riadku s hlavičkami a odkiaľ začínajú dáta
+        if (hasHeader) { // Ak UI/detekcia naznačuje, že by mala byť hlavička
+            // Skúsime nájsť hlavičku na druhom riadku (index 1 v allLines)
+            if (allLines.size() > 1) { // Kontrola, či existuje druhý riadok
+                String[] headers2 = allLines.get(1).split(delimiter);
+                if (containsExpectedColumns(headers2)) {
+                    headersToUse = headers2;
+                    startDataRowIndex = 2; // Dáta začínajú po dvoch riadkoch hlavičiek (index 2)
                 }
+            }
+            // Ak druhý riadok neobsahoval hlavičky, alebo súbor má len jeden riadok, skúsime prvý riadok (index 0)
+            if (headersToUse == null && allLines.size() > 0) {
+                String[] headers1 = allLines.get(0).split(delimiter);
+                if (containsExpectedColumns(headers1)) {
+                    headersToUse = headers1;
+                    startDataRowIndex = 1; // Dáta začínajú po jednom riadku hlavičky (index 1)
+                }
+            }
+        }
+
+        // Ak sa ani po hasHeader=true nenašli rozpoznateľné hlavičky, alebo hasHeader bolo false,
+        // predpokladáme, že prvý riadok obsahuje potenciálne informácie o stĺpcoch, ale je zároveň dátami.
+        if (headersToUse == null && !allLines.isEmpty()) {
+            headersToUse = allLines.get(0).split(delimiter); // Použijeme štruktúru prvého riadku
+            startDataRowIndex = 0; // Dáta začínajú od prvého riadku
+        } else if (headersToUse == null && allLines.isEmpty()) {
+            // Tento prípad by už mal byť ošetrený počiatočnou kontrolou allLines.isEmpty()
+            return dataList; // Vrátiť prázdny zoznam
+        }
+
+        int[] columnIndexes = findColumnIndexes(headersToUse);
+
+        // Spracovanie skutočných riadkov s dátami
+        for (int i = startDataRowIndex; i < allLines.size(); i++) {
+            String line = allLines.get(i);
+            String[] values = line.split(delimiter);
+            ImportedData data = createImportedData(values, columnIndexes);
+            if (data != null) {
+                dataList.add(data);
             }
         }
         return dataList;
     }
 
-    private List<ImportedData> readExcel(File file, boolean hasHeader) throws IOException
+    /**
+     * Načíta dáta z Excel súboru s dynamickým určením riadku hlavičky.
+     * @param file Súbor na načítanie.
+     * @param headerRowIndex Index riadku, na ktorom bola nájdená platná hlavička. Ak -1, hlavička nebola nájdená.
+     * @return Zoznam načítaných dát.
+     * @throws IOException Ak nastane chyba pri čítaní súboru.
+     */
+    private List<ImportedData> readExcel(File file, int headerRowIndex) throws IOException
     {
         List<ImportedData> dataList = new ArrayList<>();
         try (Workbook workbook = WorkbookFactory.create(file))
         {
             Sheet sheet = workbook.getSheetAt(0);
-            Row headerRow = sheet.getRow(0);
-            if (headerRow == null)
+
+            String[] headers;
+            int startRowForData;
+
+            if (headerRowIndex != -1) // Hlavička bola nájdená
             {
-                throw new IOException("Súbor je prázdny alebo neobsahuje hlavičku");
+                Row actualHeaderRow = sheet.getRow(headerRowIndex);
+                if (actualHeaderRow == null) {
+                    throw new IOException("Nájdená hlavička na riadku " + (headerRowIndex + 1) + " sa nedá načítať.");
+                }
+
+                headers = new String[actualHeaderRow.getLastCellNum()];
+                for (int i = 0; i < actualHeaderRow.getLastCellNum(); i++)
+                {
+                    Cell cell = actualHeaderRow.getCell(i);
+                    headers[i] = getCellValueAsString(cell);
+                }
+                startRowForData = headerRowIndex + 1; // Dáta začínajú hneď po riadku s hlavičkou
+            }
+            else // Hlavička nebola nájdená - predpokladáme dáta od prvého riadku
+            {
+                Row firstRow = sheet.getRow(0);
+                if (firstRow == null) {
+                    throw new IOException("Súbor je prázdny alebo neobsahuje žiadne dáta.");
+                }
+                headers = new String[firstRow.getLastCellNum()];
+                for (int i = 0; i < firstRow.getLastCellNum(); i++)
+                {
+                    Cell cell = firstRow.getCell(i);
+                    headers[i] = getCellValueAsString(cell);
+                }
+                startRowForData = 0; // Dáta začínajú od prvého riadku (bude sa snažiť parsovať prvý riadok ako dáta)
             }
 
-            String[] headers = new String[headerRow.getLastCellNum()];
-            for (int i = 0; i < headerRow.getLastCellNum(); i++)
-            {
-                Cell cell = headerRow.getCell(i);
-                headers[i] = getCellValueAsString(cell);
-            }
             int[] columnIndexes = findColumnIndexes(headers);
 
-            int startRow = hasHeader ? 1 : 0;
-
-            for (int i = startRow; i <= sheet.getLastRowNum(); i++)// zmena začina od 1 aby sme preskočili hlavičku
+            for (int i = startRowForData; i <= sheet.getLastRowNum(); i++)
             {
                 Row row = sheet.getRow(i);
                 if (row != null)
@@ -362,7 +460,22 @@ public class FileService
             case STRING:
                 return cell.getStringCellValue().trim();
             case NUMERIC:
+                // Pozor na dátumy, ak sa čísla používajú aj na dátumy
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().toString(); // Ak sú dátumy, môžete to formátovať inak
+                }
                 return String.valueOf((int) cell.getNumericCellValue()).trim();
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue()).trim();
+            case FORMULA:
+                try {
+                    return cell.getStringCellValue().trim();
+                } catch (IllegalStateException e) {
+                    // Ak formula vráti číslo
+                    return String.valueOf((int) cell.getNumericCellValue()).trim();
+                }
+            case BLANK:
+                return "";
             default:
                 return "";
         }
@@ -370,31 +483,33 @@ public class FileService
 
     private ImportedData createImportedData(String[] values, int[] columnIndexes)
     {
-        if (values.length == 0) return null;
+        if (values == null || values.length == 0) return null;
         ImportedData data = new ImportedData();
-        if (columnIndexes[0] != -1 && columnIndexes[0] < values.length)
-        {
-            data.setStudentFirstName(values[columnIndexes[0]]);
+
+        // Bezpečné získanie hodnoty, ak je index platný a hodnota existuje
+        if (columnIndexes[0] != -1 && columnIndexes[0] < values.length) {
+            data.setStudentFirstName(values[columnIndexes[0]].trim());
         }
-        if (columnIndexes[1] != -1 && columnIndexes[1] < values.length)
-        {
-            data.setStudentLastName(values[columnIndexes[1]]);
+        if (columnIndexes[1] != -1 && columnIndexes[1] < values.length) {
+            data.setStudentLastName(values[columnIndexes[1]].trim());
         }
-        if (columnIndexes[2] != -1 && columnIndexes[2] < values.length)
-        {
-            data.setParent1Name(values[columnIndexes[2]]);
+        if (columnIndexes[2] != -1 && columnIndexes[2] < values.length) {
+            data.setParent1Name(values[columnIndexes[2]].trim());
         }
-        if (columnIndexes[3] != -1 && columnIndexes[3] < values.length)
-        {
-            data.setParent2Name(values[columnIndexes[3]]);
+        if (columnIndexes[3] != -1 && columnIndexes[3] < values.length) {
+            data.setParent2Name(values[columnIndexes[3]].trim());
         }
-        if (columnIndexes[4] != -1 && columnIndexes[4] < values.length)
-        {
-            data.setAddress1(values[columnIndexes[4]]);
+        if (columnIndexes[4] != -1 && columnIndexes[4] < values.length) {
+            data.setAddress1(values[columnIndexes[4]].trim());
         }
-        if (columnIndexes[5] != -1 && columnIndexes[5] < values.length)
-        {
-            data.setAddress2(values[columnIndexes[5]]);
+        if (columnIndexes[5] != -1 && columnIndexes[5] < values.length) {
+            data.setAddress2(values[columnIndexes[5]].trim());
+        }
+
+        // Ak sú mená študentov prázdne, vráťte null, aby sa riadok ignoroval
+        if ((data.getStudentFirstName() == null || data.getStudentFirstName().isEmpty()) &&
+                (data.getStudentLastName() == null || data.getStudentLastName().isEmpty())) {
+            return null; // Alebo môžete vrátiť data, ale potom je na volajúcom, aby to odfiltroval
         }
 
         return data;
