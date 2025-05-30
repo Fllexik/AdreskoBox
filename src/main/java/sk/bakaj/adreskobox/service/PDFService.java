@@ -30,6 +30,9 @@ public class PDFService
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputFile));
             document.open();
 
+            // Vždy pridaj prvú stránku na začiatku, aby dokument nebol prázdny
+            document.newPage();
+
             float labelWidth = (float) format.getWidth();
             float labelHeight = (float) format.getHeight();
 
@@ -48,7 +51,7 @@ public class PDFService
                       (labelHeight + format.getVerticalGap()) - labelHeight);
 
               //vytvorenie odstavca s adresou
-              Paragraph label = new Paragraph(parent.getFullName() + "\n" + parent.getFullAddress());
+                Paragraph label = new Paragraph(parent.getFormattedLabel());
 
               //Použitie Columntext na presne umiestnenie textu
               ColumnText ct = new ColumnText(canvas);

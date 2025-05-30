@@ -75,7 +75,7 @@ public class Parent
         {
             return fullName;
         }
-        return (fullName != null ? firstName : "") + "" + (lastName != null ? lastName : "");
+        return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
     }
 
     public String getFullAddress()
@@ -90,16 +90,54 @@ public class Parent
         {
             sb.append(address);
         }
-        if (city != null && !city.isEmpty())
+        if ((zipCode != null && !zipCode.isEmpty()) || (city != null && !city.isEmpty()))
         {
-            if (sb.length() > 0) sb.append(", ");
-            sb.append(city);
+            if (sb.length() > 0) sb.append("\n"); // nový riadok
+            if (zipCode != null && !zipCode.isEmpty())
+            {
+                sb.append(zipCode);
+                if (city != null && !city.isEmpty())
+                {
+                    sb.append(" ");
+                }
+            }
+            if (city != null && !city.isEmpty())
+            {
+                sb.append(city);
+            }
         }
-        if (zipCode != null && !zipCode.isEmpty())
-        {
-            if (sb.length() > 0) sb.append(" ");
-            sb.append(zipCode);
+        return sb.toString();
+    }
+
+    public String getFormattedLabel() {
+        StringBuilder sb = new StringBuilder();
+
+        String fName = firstName != null ? firstName : "";
+        String lName = lastName != null ? lastName : "";
+        if (!fName.isEmpty() || !lName.isEmpty()) {
+            sb.append(fName);
+            if (!fName.isEmpty() && !lName.isEmpty()) {
+                sb.append(" ");
+            }
+            sb.append(lName);
         }
+        sb.append("\n");
+
+        if (address != null && !address.isEmpty()) {
+            sb.append(address);
+        }
+        sb.append("\n");
+
+        String zip = zipCode != null ? zipCode : "";
+        String cty = city != null ? city : "";
+        if (!zip.isEmpty()) {
+            sb.append(zip);
+            if (!cty.isEmpty()) {
+                sb.append(" ");
+            }
+        }
+        sb.append(cty);
+
         return sb.toString();
     }
 }

@@ -58,7 +58,7 @@ public class OutputSettingTabController
         mailTypeComboBox.getSelectionModel().select(ExcelService.MailType.OFFICIAL); //Predvolená hodnota
 
         //Predvolená cesta k šablone
-        File defaultTemplate = new File("templates/podaci-harok.xls");
+        File defaultTemplate = new File("templates/podaci-harok.xlsx");
         if (defaultTemplate.exists())
         {
             templateFile = defaultTemplate;
