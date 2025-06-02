@@ -1,5 +1,8 @@
 package sk.bakaj.adreskobox.model;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Parent
 {
     private String firstName;
@@ -25,7 +28,7 @@ public class Parent
         this.fullName = fullName;
         this.fullAddress = fullAddress;
 
-        //Pokusiť sa rozdeliť celé mená na meno a priezvisko
+        // Pokus o rozdelenie celého mena na meno a priezvisko
         if (fullName != null)
         {
             String[] nameParts = fullName.split(" ", 2);
@@ -33,40 +36,93 @@ public class Parent
             this.lastName = nameParts.length > 1 ? nameParts[1] : "";
         }
 
-        //Pokusiť sa rozdeliť adresu
-        if (fullAddress != null)
-        {
-            //Jednoducha logika pre rozdelenie adresy
-            this.address = fullAddress;//Zatia pouzije e celu adresu
+        // Pokus o rozdelenie adresy na komponenty
+        parseFullAddress(fullAddress);
+    }
+
+    /**
+     * Pokus o inteligentné rozdelenie plnej adresy na komponenty
+     */
+    private void parseFullAddress(String fullAddr) {
+        if (fullAddr == null || fullAddr.trim().isEmpty()) {
+            this.address = "";
             this.city = "";
-            this.zipCode = ";";
+            this.zipCode = "";
+            return;
         }
 
+        String trimmedAddr = fullAddr.trim();
+
+        // Vzor pre PSČ (slovenské: 123 45 alebo 12345)
+        Pattern zipPattern = Pattern.compile("\\b(\\d{3}\\s?\\d{2})\\b");
+        Matcher zipMatcher = zipPattern.matcher(trimmedAddr);
+
+        if (zipMatcher.find()) {
+            this.zipCode = zipMatcher.group(1).trim();
+
+            // Rozdelenie na časti pred a po PSČ
+            String beforeZip = fullAddr.substring(0, zipMatcher.start()).trim();
+            String afterZip = fullAddr.substring(zipMatcher.end()).trim();
+
+            // Ulica je všetko pred PSČ
+            if (beforeZip.endsWith(",")) {
+                this.address = beforeZip.substring(0, beforeZip.length() - 1).trim();
+            } else {
+                this.address = beforeZip;
+            }
+
+            // Mesto je všetko po PSČ
+            this.city = afterZip;
+
+        } else {
+            // Ak sa PSČ nenašlo, pokus o rozdelenie podľa čiarok
+            String[] parts = trimmedAddr.split(",");
+            if (parts.length >= 2) {
+                this.address = parts[0].trim();
+                // Posledná časť by mala byť mesto
+                this.city = parts[parts.length - 1].trim();
+                this.zipCode = "";
+
+                // Ak je v poslednej časti číselný kód na začiatku, rozdeľ ho
+                String lastPart = this.city;
+                Pattern zipInCityPattern = Pattern.compile("^(\\d{3}\\s?\\d{2})\\s+(.+)$");
+                Matcher cityMatcher = zipInCityPattern.matcher(lastPart);
+                if (cityMatcher.find()) {
+                    this.zipCode = cityMatcher.group(1);
+                    this.city = cityMatcher.group(2);
+                }
+            } else {
+                // Ak nie sú čiarky, celá adresa ide do address
+                this.address = trimmedAddr;
+                this.city = "";
+                this.zipCode = "";
+            }
+        }
     }
 
     public String getFirstName()
     {
-        return firstName;
+        return firstName != null ? firstName : "";
     }
 
     public String getLastName()
     {
-        return lastName;
+        return lastName != null ? lastName : "";
     }
 
     public String getAddress()
     {
-        return address;
+        return address != null ? address : "";
     }
 
     public String getCity()
     {
-        return city;
+        return city != null ? city : "";
     }
 
     public String getZipCode()
     {
-        return zipCode;
+        return zipCode != null ? zipCode : "";
     }
 
     public String getFullName()
@@ -80,64 +136,110 @@ public class Parent
 
     public String getFullAddress()
     {
-        if (fullAddress != null)
+        if (fullAddress != null && !fullAddress.trim().isEmpty())
         {
-            return fullAddress;
+            return fullAddress.trim();
         }
 
         StringBuilder sb = new StringBuilder();
-        if (address != null && !address.isEmpty())
+        String addr = getAddress();
+        String zip = getZipCode();
+        String cty = getCity();
+
+        if (!addr.isEmpty())
         {
-            sb.append(address);
+            sb.append(addr);
         }
-        if ((zipCode != null && !zipCode.isEmpty()) || (city != null && !city.isEmpty()))
+
+        if (!zip.isEmpty() || !cty.isEmpty())
         {
-            if (sb.length() > 0) sb.append("\n"); // nový riadok
-            if (zipCode != null && !zipCode.isEmpty())
-            {
-                sb.append(zipCode);
-                if (city != null && !city.isEmpty())
-                {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+
+            if (!zip.isEmpty()) {
+                sb.append(zip);
+                if (!cty.isEmpty()) {
                     sb.append(" ");
                 }
             }
-            if (city != null && !city.isEmpty())
-            {
-                sb.append(city);
+
+            if (!cty.isEmpty()) {
+                sb.append(cty);
             }
         }
+
         return sb.toString();
     }
+
+    /**
+     * Vráti formátovaný štítok s 3 riadkami:
+     * Riadok 1: Meno a priezvisko
+     * Riadok 2: Ulica a číslo
+     * Riadok 3: PSČ a mesto
+     */
 
     public String getFormattedLabel() {
         StringBuilder sb = new StringBuilder();
 
-        String fName = firstName != null ? firstName : "";
-        String lName = lastName != null ? lastName : "";
-        if (!fName.isEmpty() || !lName.isEmpty()) {
-            sb.append(fName);
-            if (!fName.isEmpty() && !lName.isEmpty()) {
-                sb.append(" ");
-            }
-            sb.append(lName);
-        }
+        // Riadok 1: Meno a priezvisko
+        String fullNameStr = getFullName();
+        sb.append(fullNameStr);
         sb.append("\n");
 
-        if (address != null && !address.isEmpty()) {
-            sb.append(address);
-        }
+        // Riadok 2: Ulica a číslo
+        String addressStr = getAddress();
+        sb.append(addressStr);
         sb.append("\n");
 
-        String zip = zipCode != null ? zipCode : "";
-        String cty = city != null ? city : "";
-        if (!zip.isEmpty()) {
-            sb.append(zip);
-            if (!cty.isEmpty()) {
+        // Riadok 3: PSČ a mesto
+        String zipStr = getZipCode();
+        String cityStr = getCity();
+
+        if (!zipStr.isEmpty()) {
+            sb.append(zipStr);
+            if (!cityStr.isEmpty()) {
                 sb.append(" ");
             }
         }
-        sb.append(cty);
+        if (!cityStr.isEmpty()) {
+            sb.append(cityStr);
+        }
 
         return sb.toString();
+    }
+    /**
+     * Získa jednotlivé riadky štítka ako array
+     * Index 0: Meno a priezvisko
+     * Index 1: Ulica a číslo
+     * Index 2: PSČ a mesto
+     */
+    public String[] getLabelLines() {
+        String[] lines = new String[3];
+
+        // Riadok 1: Meno a priezvisko
+        lines[0] = getFullName();
+
+        // Riadok 2: Ulica a číslo
+        lines[1] = getAddress();
+
+        // Riadok 3: PSČ a mesto
+        String zipStr = getZipCode();
+        String cityStr = getCity();
+        StringBuilder line3 = new StringBuilder();
+
+        if (!zipStr.isEmpty()) {
+            line3.append(zipStr);
+            if (!cityStr.isEmpty()) {
+                line3.append(" ");
+            }
+        }
+        if (!cityStr.isEmpty()) {
+            line3.append(cityStr);
+        }
+
+        lines[2] = line3.toString();
+
+        return lines;
     }
 }
