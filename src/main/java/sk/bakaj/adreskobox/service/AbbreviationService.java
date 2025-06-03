@@ -204,7 +204,7 @@ public class AbbreviationService
      */
     public String getBestAbbreviation(String address, int maxLength, PDFService pdfService)
     {
-        if (address == null || address.length() <= maxLength)
+        if (address == null)
         {
             return address;
         }
@@ -214,20 +214,12 @@ public class AbbreviationService
         if (abbreviations.containsKey(lowerAddress))
         {
             String abbr = abbreviations.get(lowerAddress);
-            if (abbr.length() <= maxLength)
-            {
-                return abbr;
-            }
+            return abbr;
+
         }
 
         // skúsime aplikovať všetky skratky
         String abbreviatedAddress = abbreviateAddress(address);
-
-        // ak sa stale nezmestí, použijeme existujúcu metodu pre skratenie
-        if (abbreviatedAddress.length() > maxLength)
-        {
-            return pdfService.abbreviateAddressIfNeeded(address, maxLength);
-        }
         return abbreviatedAddress;
     }
 }

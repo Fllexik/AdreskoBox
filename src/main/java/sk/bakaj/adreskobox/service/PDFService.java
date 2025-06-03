@@ -1,6 +1,7 @@
 package sk.bakaj.adreskobox.service;
 
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -16,14 +17,41 @@ public class PDFService
 {
     private static final float DEFAULT_FONT_SIZE = 10f;
     private static final float LINE_HEIGHT = 12f; // Výška riadku v bodoch
+    private static final float POINTS_PER_MM = 2.834645669f; // Konverzia mm na body
     private Font defaultFont;
+    private BaseFont baseFont;
 
     public PDFService() {
         try {
-            // Inicializácia fontu
+            // Inicializácia fontu a BaseFont pre presné meranie
+            baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
             defaultFont = new Font(Font.FontFamily.HELVETICA, DEFAULT_FONT_SIZE);
         } catch (Exception e) {
             defaultFont = new Font(Font.FontFamily.HELVETICA, DEFAULT_FONT_SIZE);
+            try {
+                baseFont = BaseFont.createFont();
+            } catch (Exception ex) {
+                // Fallback - použijeme odhad
+                baseFont = null;
+            }
+        }
+    }
+
+    /**
+     * Presné meranie šírky textu v bodoch
+     */
+    private float getTextWidth(String text) {
+        if (text == null || text.isEmpty()) {
+            return 0f;
+        }
+
+        if (baseFont != null) {
+            // Presné meranie pomocí BaseFont
+            return baseFont.getWidthPoint(text, DEFAULT_FONT_SIZE);
+        } else {
+            // Fallback - vylepšený odhad pre slovenské znaky
+            float avgCharWidth = DEFAULT_FONT_SIZE * 0.55f; // Mierne znížené pre lepšiu presnosť
+            return text.length() * avgCharWidth;
         }
     }
     /**
@@ -52,13 +80,13 @@ public class PDFService
 
             for (Parent parent : parents)
             {
-              // Výpočet pozicie štítka
-              float x = (float) (format.getLeftMargin() + currentColumn *
-                      (labelWidth + format.getHorizontalGap()));
-              float y = (float) (842 - format.getTopMargin() - currentRow *
-                      (labelHeight + format.getVerticalGap()) - labelHeight);
+                // Výpočet pozície štítka
+                float x = (float) (format.getLeftMargin() * POINTS_PER_MM + currentColumn *
+                        (labelWidth + format.getHorizontalGap() * POINTS_PER_MM));
+                float y = (float) (842 - format.getTopMargin() * POINTS_PER_MM - currentRow *
+                        (labelHeight + format.getVerticalGap() * POINTS_PER_MM) - labelHeight);
 
-              //vytvorenie odstavca s adresou
+                //vytvorenie odstavca s adresou
                 Paragraph label = new Paragraph(parent.getFormattedLabel(), defaultFont);
 
               //Použitie Columntext na presne umiestnenie textu
@@ -88,34 +116,56 @@ public class PDFService
 
     /**
      * Kontroluje, či sa text zmestí na štítok s danými rozmermi
-     * Berie do úvahy skutočné rozmery textu, nie len počet znakov
+     * OPRAVENÁ VERZIA - rozmery štítka sú už v mm, netreba ich konvertovať
      */
     public boolean checkIfTextFitsOnLabel(String line1, String line2, String line3, LabelFormat format) {
         try {
-            // Konverzia mm na body (1 mm = 2.834645 bodov)
-            float labelWidthPoints = (float) (format.getWidth() * 2.834645);
-            float labelHeightPoints = (float) (format.getHeight() * 2.834645);
+            // Rozmery štítka v mm konvertujeme na body
+            float labelWidthPoints = (float) format.getWidth() * POINTS_PER_MM;
+            float labelHeightPoints = (float) format.getHeight() * POINTS_PER_MM;
 
-            // Odhad šírky znakov (pre Helvetica, veľkosť 10)
-            float avgCharWidth = DEFAULT_FONT_SIZE * 0.6f; // Priemerná šírka znaku
+            // Presné meranie šírky každého riadku
+            float line1Width = getTextWidth(line1 != null ? line1 : "");
+            float line2Width = getTextWidth(line2 != null ? line2 : "");
+            float line3Width = getTextWidth(line3 != null ? line3 : "");
 
-            // Kontrola šírky každého riadku
-            float line1Width = (line1 != null ? line1.length() : 0) * avgCharWidth;
-            float line2Width = (line2 != null ? line2.length() : 0) * avgCharWidth;
-            float line3Width = (line3 != null ? line3.length() : 0) * avgCharWidth;
+            // Kontrola šírky - rezerva pre okraje
+            float widthReserve = 6f; // 6 bodov rezerva pre okraje (približne 2mm)
+            float maxLineWidth = Math.max(Math.max(line1Width, line2Width), line3Width);
 
-            // Kontrola, či sa riadky zmestia na šírku
-            if (line1Width > labelWidthPoints || line2Width > labelWidthPoints || line3Width > labelWidthPoints) {
+            if (maxLineWidth > (labelWidthPoints - widthReserve)) {
+                System.out.println("DEBUG: Štítok je príliš úzky");
+                System.out.println("  Najširší riadok: " + maxLineWidth + " bodov");
+                System.out.println("  Dostupná šírka: " + (labelWidthPoints - widthReserve) + " bodov");
                 return false;
             }
 
-            // Kontrola výšky (3 riadky + medzery)
-            float totalHeight = 3 * LINE_HEIGHT + 2; // 3 riadky + malá medzera
+            // Kontrola výšky - počítame len neprázdne riadky
+            int nonEmptyLines = 0;
+            if (line1 != null && !line1.trim().isEmpty()) nonEmptyLines++;
+            if (line2 != null && !line2.trim().isEmpty()) nonEmptyLines++;
+            if (line3 != null && !line3.trim().isEmpty()) nonEmptyLines++;
 
-            return totalHeight <= labelHeightPoints;
+            float totalHeight = nonEmptyLines * LINE_HEIGHT;
+            float heightReserve = 4f; // 4 body rezerva pre okraje
+
+            if (totalHeight > (labelHeightPoints - heightReserve)) {
+                System.out.println("DEBUG: Štítok je príliš nízky");
+                System.out.println("  Potrebná výška: " + totalHeight + " bodov");
+                System.out.println("  Dostupná výška: " + (labelHeightPoints - heightReserve) + " bodov");
+                return false;
+            }
+
+            System.out.println("DEBUG: Štítok vyhovuje");
+            System.out.println("  Rozmery štítka: " + format.getWidth() + "x" + format.getHeight() + " mm");
+            System.out.println("  V bodoch: " + labelWidthPoints + "x" + labelHeightPoints);
+            System.out.println("  Najširší riadok: " + maxLineWidth + " bodov");
+            System.out.println("  Potrebná výška: " + totalHeight + " bodov");
+
+            return true;
 
         } catch (Exception e) {
-            // V prípade chyby vrátime false
+            System.err.println("Chyba pri kontrole veľkosti štítka: " + e.getMessage());
             return false;
         }
     }
@@ -136,10 +186,9 @@ public class PDFService
     public String getLongestLine(Parent parent) {
         String[] lines = parent.getLabelLines();
 
-        // Nájdi najdlhší riadok
-        String longest = lines[0];
+        String longest = lines[0] != null ? lines[0] : "";
         for (int i = 1; i < lines.length; i++) {
-            if (lines[i].length() > longest.length()) {
+            if (lines[i] != null && getTextWidth(lines[i]) > getTextWidth(longest)) {
                 longest = lines[i];
             }
         }
@@ -147,7 +196,28 @@ public class PDFService
         return longest;
     }
 
-    //Metoda pre skratenie adries  ak sú príliš dlhé
+    /**
+     * Získa šírku najdlhšieho riadku v bodoch (pre debugging)
+     */
+    public float getLongestLineWidth(Parent parent) {
+        String[] lines = parent.getLabelLines();
+
+        float maxWidth = 0f;
+        for (String line : lines) {
+            if (line != null) {
+                float width = getTextWidth(line);
+                if (width > maxWidth) {
+                    maxWidth = width;
+                }
+            }
+        }
+
+        return maxWidth;
+    }
+
+    /**
+     * Metóda pre skratenie adries ak sú príliš dlhé
+     */
     public String abbreviateAddressIfNeeded(String address, int maxLength)
     {
         if (address == null || address.length() <= maxLength)
@@ -155,29 +225,86 @@ public class PDFService
             return address;
         }
 
-        //Tu implementujte logiku skracovania adries
-        String[] parts = address.split(",");
-        StringBuilder shortened = new StringBuilder();
+        // Inteligentnejšie skracovanie pre slovenské adresy
+        String result = address;
 
-        for (String part : parts)
-        {
-            String trimmed = part.trim();
-            // skratiť slova podľa potreby
-            // napr. "ulica" -> "ul." ....
-            trimmed = trimmed.replace("ulica", "ul.")
-                    .replace("námestie", "nám.");
-            shortened.append(trimmed).append(", ");
+        // Najprv skúsime základné skratky
+        result = result.replace("ulica", "ul.")
+                .replace("Ulica", "Ul.")
+                .replace("námestie", "nám.")
+                .replace("Námestie", "Nám.")
+                .replace("trieda", "tr.")
+                .replace("Trieda", "Tr.");
 
-            if (shortened.length() > maxLength - 5)
-            {
-                break;
+        // Ak je stále príliš dlhé, skúsime rozdeliť a skrátiť
+        if (result.length() > maxLength) {
+            String[] parts = result.split(",");
+            StringBuilder shortened = new StringBuilder();
+
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (shortened.length() + trimmed.length() + 2 <= maxLength) {
+                    if (shortened.length() > 0) {
+                        shortened.append(", ");
+                    }
+                    shortened.append(trimmed);
+                } else {
+                    break;
+                }
+            }
+            result = shortened.toString();
+        }
+
+        return result;
+    }
+
+    /**
+     * Testovacia metóda pre debugging rozmerov štítka
+     */
+    public void debugLabelSize(Parent parent, LabelFormat format) {
+        String[] lines = parent.getLabelLines();
+
+        float labelWidthPoints = (float) format.getWidth() * POINTS_PER_MM;
+        float labelHeightPoints = (float) format.getHeight() * POINTS_PER_MM;
+        float widthReserve = 6f;  // rezervy ako v checkIfTextFitsOnLabel
+        float heightReserve = 4f;
+
+        float allowedWidth = labelWidthPoints - widthReserve;
+        float allowedHeight = labelHeightPoints - heightReserve;
+
+        System.out.println("=== DEBUG INFO PRE ŠTÍTOK ===");
+        System.out.println("Meno: " + parent.getFullName());
+        System.out.printf("Rozmery štítka: %.2f mm x %.2f mm\n", format.getWidth(), format.getHeight());
+        System.out.printf("Rozmery v bodoch: %.2f x %.2f (šírka x výška)\n", labelWidthPoints, labelHeightPoints);
+        System.out.printf("Dostupná šírka (bez rezervy): %.2f bodov\n", allowedWidth);
+        System.out.printf("Dostupná výška (bez rezervy): %.2f bodov\n\n", allowedHeight);
+
+        float totalHeight = 0f;
+        float maxLineWidth = 0f;
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i] != null ? lines[i].trim() : "";
+            if (!line.isEmpty()) {
+                float width = getTextWidth(line);
+                totalHeight += LINE_HEIGHT;
+                maxLineWidth = Math.max(maxLineWidth, width);
+                System.out.printf("Riadok %d: '%s' → %.2f bodov\n", i + 1, line, width);
             }
         }
 
-        if (shortened.length() > 2)
-        {
-            shortened.setLength(shortened.length() - 2); //Odstranenie poslednej čiarky a medzery
-        }
-        return shortened.toString();
+        System.out.println();
+        System.out.printf("Najširší riadok: %.2f bodov\n", maxLineWidth);
+        System.out.printf("Celková výška: %.2f bodov\n", totalHeight);
+
+        boolean fitsWidth = maxLineWidth <= allowedWidth;
+        boolean fitsHeight = totalHeight <= allowedHeight;
+        boolean fits = fitsWidth && fitsHeight;
+
+        System.out.println("\nVýsledok kontroly:");
+        System.out.println(" - Šírka " + (fitsWidth ? "VYHOVUJE ✅" : "NEVYHOVUJE ❌"));
+        System.out.println(" - Výška " + (fitsHeight ? "VYHOVUJE ✅" : "NEVYHOVUJE ❌"));
+        System.out.println("CELKOVÝ STAV: " + (fits ? "VYHOVUJE ✅" : "NEVYHOVUJE ❌"));
+        System.out.println("===========================\n");
     }
+
 }
