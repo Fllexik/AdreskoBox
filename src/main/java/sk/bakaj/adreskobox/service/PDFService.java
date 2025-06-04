@@ -55,62 +55,130 @@ public class PDFService
         }
     }
     /**
-     * Generuje štítky pre zoznam rodičov
+     * Generuje štítky pre zoznam rodičov - OPRAVENÁ VERZIA
      * Ak je rodičov viac ako sa zmestí na jednú stranu, vytvorí sa viac strán
      */
     public void generateLabels(List<Parent> parents, LabelFormat format, File outputFile) throws IOException, DocumentException
     {
         try
         {
-            Document document = new Document(new Rectangle(595, 842));
+            Document document = new Document(new Rectangle(595, 842)); // A4
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputFile));
             document.open();
 
-            // Vždy pridaj prvú stránku na začiatku, aby dokument nebol prázdny
-            document.newPage();
-
-            float labelWidth = (float) format.getWidth();
-            float labelHeight = (float) format.getHeight();
+            float labelWidth = (float) format.getWidth() * POINTS_PER_MM;
+            float labelHeight = (float) format.getHeight() * POINTS_PER_MM;
 
             int currentColumn = 0;
             int currentRow = 0;
 
-            // Ziskame priamy prístup k obsahu PDF
+            // Získame priamy prístup k obsahu PDF
             PdfContentByte canvas = writer.getDirectContent();
 
-            for (Parent parent : parents)
+            System.out.println("=== PDF GENEROVANIE ===");
+            System.out.println("Počet štítkov: " + parents.size());
+            System.out.println("Rozmery štítka: " + format.getWidth() + "x" + format.getHeight() + " mm");
+            System.out.println("Rozmery v bodoch: " + labelWidth + "x" + labelHeight);
+            System.out.println("Stĺpce x riadky: " + format.getColumns() + "x" + format.getRows());
+
+            for (int parentIndex = 0; parentIndex < parents.size(); parentIndex++)
             {
-                // Výpočet pozície štítka
-                float x = (float) (format.getLeftMargin() * POINTS_PER_MM + currentColumn *
-                        (labelWidth + format.getHorizontalGap() * POINTS_PER_MM));
-                float y = (float) (842 - format.getTopMargin() * POINTS_PER_MM - currentRow *
-                        (labelHeight + format.getVerticalGap() * POINTS_PER_MM) - labelHeight);
+                Parent parent = parents.get(parentIndex);
 
-                //vytvorenie odstavca s adresou
-                Paragraph label = new Paragraph(parent.getFormattedLabel(), defaultFont);
+                // Výpočet pozície štítka - OPRAVENÝ
+                float x = (float) (format.getLeftMargin() * POINTS_PER_MM +
+                        currentColumn * (labelWidth + format.getHorizontalGap() * POINTS_PER_MM));
 
-              //Použitie Columntext na presne umiestnenie textu
-              ColumnText ct = new ColumnText(canvas);
-              ct.setSimpleColumn(x, y, x + labelWidth, y + labelHeight, LINE_HEIGHT, Element.ALIGN_LEFT);
-              ct.addElement(label);
-              ct.go();
-              //Presun na dalši štitok
-               currentColumn++;
-               if (currentColumn >= format.getColumns())
-               {
-                   currentColumn = 0;
-                   currentRow++;
-               }
-               if (currentRow >= format.getRows())
-               {
-                  currentRow = 0;
-                  document.newPage();
-               }
+                // OPRAVA: Y súradnica - správny výpočet zhora dole
+                float y = (float) (842 - format.getTopMargin() * POINTS_PER_MM -
+                        currentRow * (labelHeight + format.getVerticalGap() * POINTS_PER_MM) - labelHeight);
+
+                System.out.println("\nŠtítok " + (parentIndex + 1) + " (" + parent.getFullName() + "):");
+                System.out.println("  Pozícia: [" + currentColumn + "," + currentRow + "]");
+                System.out.println("  Súradnice: x=" + x + ", y=" + y);
+
+                // Získanie riadkov štítka
+                String[] labelLines = parent.getLabelLines();
+
+                // Vytvorenie textu pre štítok
+                StringBuilder labelText = new StringBuilder();
+                int validLines = 0;
+
+                for (String line : labelLines) {
+                    if (line != null && !line.trim().isEmpty()) {
+                        if (validLines > 0) {
+                            labelText.append("\n");
+                        }
+                        labelText.append(line.trim());
+                        validLines++;
+                    }
+                }
+
+                if (labelText.length() == 0) {
+                    System.out.println("  VAROVANIE: Prázdny štítok!");
+                    labelText.append("Prázdny štítok");
+                }
+
+                System.out.println("  Text štítka (" + validLines + " riadky):");
+                System.out.println("    " + labelText.toString().replace("\n", "\n    "));
+
+                // Vytvorenie odstavca
+                Paragraph label = new Paragraph(labelText.toString(), defaultFont);
+                label.setAlignment(Element.ALIGN_LEFT);
+                label.setLeading(LINE_HEIGHT);
+
+                // OPRAVA: Použitie ColumnText s správnymi súradnicami
+                ColumnText ct = new ColumnText(canvas);
+
+                // Nastavenie obdĺžnika pre text - y súradnice opravené
+                float textAreaX1 = x + 2; // Malý okraj zleva
+                float textAreaY1 = y + 2; // Malý okraj zdola
+                float textAreaX2 = x + labelWidth - 2; // Malý okraj zprava
+                float textAreaY2 = y + labelHeight - 2; // Malý okraj zhora
+
+                ct.setSimpleColumn(textAreaX1, textAreaY1, textAreaX2, textAreaY2,
+                        LINE_HEIGHT, Element.ALIGN_LEFT);
+
+                ct.addElement(label);
+
+                // Vyrenderovanie textu
+                int result = ct.go();
+
+                if (result == ColumnText.NO_MORE_TEXT) {
+                    System.out.println("  ✓ Štítok úspešne vytvorený");
+                } else {
+                    System.out.println("  ⚠ Štítok nemusí byť kompletný (kód: " + result + ")");
+                }
+
+                // DEBUG: Nakreslenie rámčeka okolo štítka (voliteľné)
+                if (System.getProperty("debug.pdf.borders", "false").equals("true")) {
+                    canvas.rectangle(x, y, labelWidth, labelHeight);
+                    canvas.stroke();
+                }
+
+                // Presun na ďalší štítok
+                currentColumn++;
+                if (currentColumn >= format.getColumns())
+                {
+                    currentColumn = 0;
+                    currentRow++;
+                }
+                if (currentRow >= format.getRows())
+                {
+                    currentRow = 0;
+                    System.out.println("\n=== NOVÁ STRÁNKA ===");
+                    document.newPage();
+                }
             }
-           document.close();
-        }catch (DocumentException | IOException e) //(Exception e)
-        {
-            throw  new RuntimeException("Chyba pri generovaní PDF" + e.getMessage(), e);
+
+            document.close();
+            System.out.println("\n=== PDF DOKONČENÉ ===");
+            System.out.println("Súbor uložený: " + outputFile.getAbsolutePath());
+
+        } catch (DocumentException | IOException e) {
+            System.err.println("CHYBA pri generovaní PDF: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Chyba pri generovaní PDF: " + e.getMessage(), e);
         }
     }
 
@@ -130,7 +198,7 @@ public class PDFService
             float line3Width = getTextWidth(line3 != null ? line3 : "");
 
             // Kontrola šírky - rezerva pre okraje
-            float widthReserve = 6f; // 6 bodov rezerva pre okraje (približne 2mm)
+            float widthReserve = 2f; // 6 bodov rezerva pre okraje (približne 2mm)
             float maxLineWidth = Math.max(Math.max(line1Width, line2Width), line3Width);
 
             if (maxLineWidth > (labelWidthPoints - widthReserve)) {

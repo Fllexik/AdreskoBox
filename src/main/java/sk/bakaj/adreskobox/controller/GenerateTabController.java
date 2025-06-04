@@ -114,52 +114,110 @@ public class GenerateTabController
         {
             log("Začínam generovanie výstupných súborov...");
 
-            //Generovanie štitkov
+            // DEBUGGING: Kontrola vstupných údajov
+            log("DEBUG - Kontrola vstupných údajov:");
+            log("- Počet vybraných rodičov: " + (selectedParents != null ? selectedParents.size() : "NULL"));
+            log("- Formát štítkov: " + (selectedLabelFormat != null ? selectedLabelFormat.getName() : "NULL"));
+            log("- Odosielateľ: " + senderName);
+            log("- Šablóna: " + (templateFile != null ? templateFile.getAbsolutePath() : "NULL"));
+
+            if (selectedParents == null || selectedParents.isEmpty()) {
+                throw new IllegalStateException("Žiadni rodičia nie sú vybraní!");
+            }
+
+            if (selectedLabelFormat == null) {
+                throw new IllegalStateException("Formát štítkov nie je vybraný!");
+            }
+
+            //Generovanie štítkov
             int labelsPerPage = selectedLabelFormat.getColumns() * selectedLabelFormat.getRows();
             int totalPages = (int) Math.ceil(selectedParents.size() / (double) labelsPerPage);
 
-            log("Generujem štítky:");
-            log("- počet štítkov:" + selectedParents.size());
-            log("- Štítkov na stranu: " + labelsPerPage);
+            log("\nGenerujem štítky:");
+            log("- Počet štítkov: " + selectedParents.size());
+            log("- Štítkov na stranu: " + labelsPerPage + " (" + selectedLabelFormat.getColumns() + "x" + selectedLabelFormat.getRows() + ")");
             log("- Celkový počet strán: " + totalPages);
+            log("- Rozmer štítku: " + selectedLabelFormat.getWidth() + "x" + selectedLabelFormat.getHeight() + "mm");
 
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             File labelsFile = new File(outputDirectory, "Stitky_" + timestamp + ".pdf");
 
-            pdfService.generateLabels(selectedParents, selectedLabelFormat, labelsFile);
-            generatedFiles.add(labelsFile);
+            log("- Začínam generovanie PDF súboru: " + labelsFile.getName());
 
-            log("- Štítky boli úspešne vygenerované do súboru: " + labelsFile.getName());
+            try {
+                pdfService.generateLabels(selectedParents, selectedLabelFormat, labelsFile);
+                generatedFiles.add(labelsFile);
+                log("- ✓ Štítky boli úspešne vygenerované do súboru: " + labelsFile.getName());
+            } catch (Exception e) {
+                log("- ✗ CHYBA pri generovaní štítkov: " + e.getMessage());
+                e.printStackTrace(); // Pre detailné ladenie
+                throw e;
+            }
 
             //Generovanie podacích hárkov
             log("\nGenerujem podacie hárky:");
             log("- Počet príjemcov: " + selectedParents.size());
+            log("- Typ zásielky: " + mailType);
+            log("- Šablóna: " + (templateFile != null && templateFile.exists() ? "OK" : "CHÝBA"));
 
-            List<File> submissionSheets = excelService.createSubmissionSheets(
-                    selectedParents, senderName, senderStreet, senderCity,
-                    mailType, templateFile.getAbsolutePath());
+            // DÔLEŽITÉ: Nastavenie výstupného adresára pre ExcelService
+            excelService.setOutputDirectory(outputDirectory);
 
-            generatedFiles.addAll(submissionSheets);
+            if (templateFile == null || !templateFile.exists()) {
+                log("- ⚠ VAROVANIE: Šablóna podacieho hárku nebola nájdená!");
+                log("- Pokúšam sa vytvoriť novú šablónu...");
 
-            log("- Počet vygenerovaných podacích hárkov: " + submissionSheets.size());
-            for (int i = 0; i < submissionSheets.size(); i++)
-            {
-                log("  " + (i + 1) + ". " + submissionSheets.get(i).getName());
+                try {
+                    templateFile = excelService.createNewSubmissionTemplate();
+                    log("- ✓ Nová šablóna vytvorená: " + templateFile.getAbsolutePath());
+                } catch (Exception e) {
+                    log("- ✗ CHYBA pri vytváraní šablóny: " + e.getMessage());
+                    throw new RuntimeException("Nepodarilo sa vytvoriť šablónu podacieho hárku", e);
+                }
             }
 
-            log("\nGenerovanie dokončené. Všetky súbory boli uložené do: " + outputDirectory.getAbsolutePath());
+            try {
+                List<File> submissionSheets = excelService.createSubmissionSheets(
+                        selectedParents, senderName, senderStreet, senderCity,
+                        mailType, templateFile.getAbsolutePath());
+
+                generatedFiles.addAll(submissionSheets);
+
+                log("- ✓ Počet vygenerovaných podacích hárkov: " + submissionSheets.size());
+                for (int i = 0; i < submissionSheets.size(); i++)
+                {
+                    log("  " + (i + 1) + ". " + submissionSheets.get(i).getName());
+                }
+            } catch (Exception e) {
+                log("- ✗ CHYBA pri generovaní podacích hárkov: " + e.getMessage());
+                e.printStackTrace();
+                // Neprerušujeme proces - aspoň štítky sú vygenerované
+                log("- Pokračujem bez podacích hárkov...");
+            }
+
+            log("\n✓ Generovanie dokončené. Všetky súbory boli uložené do: " + outputDirectory.getAbsolutePath());
 
             //Aktualizácia počítadiel
             labelPagesCountLabel.setText(String.valueOf(totalPages));
-            submissionSheetsCountLabel.setText(String.valueOf(submissionSheets.size()));
 
-            showAlert(Alert.AlertType.INFORMATION, "Generovnanie dokončené",
-                    "Všetky súbory boli úspešne vygenerované do vystupného adresára.");
+            // Bezpečný výpočet podacích hárkov
+            int sheetsCount = (int) Math.ceil(selectedParents.size() / 12.0);
+            submissionSheetsCountLabel.setText(String.valueOf(sheetsCount));
+
+            showAlert(Alert.AlertType.INFORMATION, "Generovanie dokončené",
+                    "Štítky boli úspešne vygenerované.\n" +
+                            "Súbory sa nachádzajú v: " + outputDirectory.getAbsolutePath());
+
         } catch (Exception e)
         {
-            log("\nCHYBA: pri generovaní: " + e.getMessage());
+            log("\n✗ KRITICKÁ CHYBA pri generovaní: " + e.getMessage());
+            log("Stack trace:");
+            e.printStackTrace();
+
             showAlert(Alert.AlertType.ERROR, "Chyba pri generovaní",
-                    "Nastala chyba pri generovaní súborov: " + e.getMessage());
+                    "Nastala chyba pri generovaní súborov:\n\n" +
+                            e.getMessage() + "\n\n" +
+                            "Skontrolujte log pre viac detailov.");
         }
     }
 
@@ -199,17 +257,26 @@ public class GenerateTabController
         this.mailType = mailType;
         this.templateFile = templateFile;
 
-        //Aktualizácia počitadiel
-        int labelsPerPage = selectedLabelFormat.getColumns() * selectedLabelFormat.getRows();
-        int totalPages = (int) Math.ceil(selectedParents.size() / (double) labelsPerPage);
-        labelPagesCountLabel.setText(String.valueOf(totalPages));
+        // DEBUG výpis
+        log("setData() volaná:");
+        log("- Rodičia: " + (parents != null ? parents.size() : "NULL"));
+        log("- Formát: " + (labelFormat != null ? labelFormat.getName() : "NULL"));
+        log("- Odosielateľ: " + senderName);
 
-        int sheetsCount = (int) Math.ceil(selectedParents.size() / 12.0);
-        submissionSheetsCountLabel.setText(String.valueOf(sheetsCount));
+        //Aktualizácia počítadiel
+        if (selectedLabelFormat != null && selectedParents != null) {
+            int labelsPerPage = selectedLabelFormat.getColumns() * selectedLabelFormat.getRows();
+            int totalPages = (int) Math.ceil(selectedParents.size() / (double) labelsPerPage);
+            labelPagesCountLabel.setText(String.valueOf(totalPages));
+
+            int sheetsCount = (int) Math.ceil(selectedParents.size() / 12.0);
+            submissionSheetsCountLabel.setText(String.valueOf(sheetsCount));
+        }
     }
 
     private void log(String message)
     {
+        System.out.println(message); // Aj do konzoly pre ladenie
         generationLogArea.appendText(message + "\n");
     }
 

@@ -30,6 +30,9 @@ public class ExcelService
     public static final int RECIPIENTS_CITY_START_COLUMN = 7; // Stĺpec H
     public static final int MAX_RECIPIENTS_PER_PAGE = 12;
 
+    // Výstupný adresár pre generované súbory
+    private File outputDirectory;
+
     /**
      * Enum pre typy zásielok
      */
@@ -61,13 +64,22 @@ public class ExcelService
         }
     }
 
-    private File createSubmissionSheets(List<Parent> parents, String senderName,
+    /**private File createSubmissionSheets(List<Parent> parents, String senderName,
                                         String senderStreet, String senderCity,
                                         MailType mailType, File templateFile, int groupNumber) throws IOException
     {
         return createSingleSubmissionSheet(parents, senderName, senderStreet, senderCity,
                 mailType, templateFile, groupNumber);
     }
+     */
+    /**
+     * Nastaví výstupný adresár pre generované súbory
+     */
+    public void setOutputDirectory(File outputDirectory)
+    {
+        this.outputDirectory = outputDirectory;
+    }
+
 
     /**
      * Vytvorí podací hárok pre zadaných rodičov
@@ -84,16 +96,40 @@ public class ExcelService
                                              String senderStreet, String senderCity,
                                              MailType mailType, String templatePath) throws IOException
     {
+        System.out.println("ExcelService.createSubmissionSheets() - ZAČIATOK");
+        System.out.println("- Počet rodičov: " + (parents != null ? parents.size() : "NULL"));
+        System.out.println("- Šablóna: " + templatePath);
+        System.out.println("- Výstupný adresár: " + (outputDirectory != null ? outputDirectory.getAbsolutePath() : "NULL"));
+
         //Kontrola existencie šablony
         File templateFile = new File(templatePath);
         if (!templateFile.exists())
         {
-            throw new FileNotFoundException("Šablóna podacieho hárku nebola nájdená" + templatePath);
+            throw new FileNotFoundException("Šablóna podacieho hárku nebola nájdená: " + templatePath);
+        }
+
+        // Ak nie je nastavený výstupný adresár, použije sa domovský adresár
+        if (outputDirectory == null)
+        {
+            outputDirectory = new File(System.getProperty("user.home") + "/Documents/AdreskoBox");
+            if (!outputDirectory.exists())
+            {
+                outputDirectory.mkdirs();
+            }
         }
 
         List<File> createdFiles = new ArrayList<>();
+
+        // DEBUG: Výpis prvých pár rodičov
+        System.out.println("DEBUG - Prvých 3 rodičov pre Excel:");
+        for (int i = 0; i < Math.min(3, parents.size()); i++) {
+            Parent p = parents.get(i);
+            System.out.println("  " + (i+1) + ". " + p.getFullName() + " - " + p.getFullAddress());
+        }
+
         //Rozdelenie rodičov do skupín po 12 (maximálny počet na jeden hárok)
         int totalGroups = (int) Math.ceil(parents.size() / (double) MAX_RECIPIENTS_PER_PAGE);
+        System.out.println("- Celkový počet skupín: " + totalGroups);
 
         for (int groupIndex = 0; groupIndex < totalGroups; groupIndex++)
         {
@@ -101,12 +137,17 @@ public class ExcelService
             int startIndex = groupIndex * MAX_RECIPIENTS_PER_PAGE;
             int endIndex = Math.min(startIndex + MAX_RECIPIENTS_PER_PAGE, parents.size());
 
+            System.out.println("- Spracovávam skupinu " + (groupIndex + 1) + " (indexy " + startIndex + "-" + (endIndex-1) + ")");
+
             //Vytvorenie súboru podacieho hárku
-            File sheetFile = createSubmissionSheets(parents.subList(startIndex, endIndex),
+            File sheetFile = createSingleSubmissionSheet(parents.subList(startIndex, endIndex),
                     senderName, senderStreet, senderCity, mailType, templateFile, groupIndex + 1);
 
             createdFiles.add(sheetFile);
+            System.out.println("- Vytvorený súbor: " + sheetFile.getName());
         }
+
+        System.out.println("ExcelService.createSubmissionSheets() - KONIEC, vytvorených " + createdFiles.size() + " súborov");
         return createdFiles;
     }
 
@@ -117,9 +158,11 @@ public class ExcelService
                                              String senderStreet, String senderCity,
                                              MailType mailType, File templateFile, int groupNumber) throws IOException
     {
-        //Vytvorenie výstupného súboru
+        //Vytvorenie výstupného súboru - OPRAVA: používame správny výstupný adresár
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        File outputFile = new File("Podaci_harok_" + groupNumber + "_" + timestamp + ".xlsx");
+        File outputFile = new File(outputDirectory, "Podaci_harok_" + groupNumber + "_" + timestamp + ".xlsx");
+
+        System.out.println("  Vytváram Excel súbor: " + outputFile.getAbsolutePath());
 
         //Kopirovanie šablóny
         try (FileInputStream fis = new FileInputStream(templateFile);
@@ -129,17 +172,28 @@ public class ExcelService
             Sheet sheet = templateWorkbook.getSheetAt(0);
 
             //Vyplnenie údajov odosieľateľa
+            System.out.println("  Vyplňujem odosielateľa: " + senderName);
             fillSenderInfo(sheet, senderName, senderStreet, senderCity);
 
             //Označenie typu zásielky
+            System.out.println("  Označujem typ zásielky: " + mailType);
             markMailType(sheet, mailType);
 
             //Vyplnenie údajov o prijemcoch
+            System.out.println("  Vyplňujem " + groupParents.size() + " príjemcov");
             fillRecipients(sheet, groupParents);
 
             //Uloženie workbooku
             templateWorkbook.write(fos);
+            System.out.println("  Excel súbor úspešne uložený");
         }
+        catch (Exception e)
+        {
+            System.err.println("  CHYBA pri vytváraní Excel súboru: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+
         return outputFile;
     }
 
@@ -148,84 +202,127 @@ public class ExcelService
      */
     private void fillSenderInfo(Sheet sheet, String senderName, String senderStreet, String senderCity)
     {
-        //Meno odosielateľa(B10-F10)
-        Row nameRow = getOrCreateRow(sheet, SENDER_NAME_ROW);
-        Cell nameCell = getOrCreateCell(nameRow, 1);//Stĺpec B
-        nameCell.setCellValue(senderName);
+        try {
+            //Meno odosielateľa(B10-F10)
+            Row nameRow = getOrCreateRow(sheet, SENDER_NAME_ROW);
+            Cell nameCell = getOrCreateCell(nameRow, 1);//Stĺpec B
+            nameCell.setCellValue(senderName);
 
-        //Ulica odosielateľa (B11-F11)
-        Row streetRow = getOrCreateRow(sheet, SENDER_STREET_ROW);
-        Cell streetCell = getOrCreateCell(streetRow, 1);//Stĺpec B
-        streetCell.setCellValue(senderStreet);
+            //Ulica odosielateľa (B11-F11)
+            Row streetRow = getOrCreateRow(sheet, SENDER_STREET_ROW);
+            Cell streetCell = getOrCreateCell(streetRow, 1);//Stĺpec B
+            streetCell.setCellValue(senderStreet);
 
-        //PČS a Mesto odosielateľa (B12-F12)
-        Row cityRow = getOrCreateRow(sheet, SENDER_CITY_ROW);
-        Cell cityCell = getOrCreateCell(cityRow, 1);//Stĺpec B
-        cityCell.setCellValue(senderCity);
-    }
+            //PČS a Mesto odosielateľa (B12-F12)
+            Row cityRow = getOrCreateRow(sheet, SENDER_CITY_ROW);
+            Cell cityCell = getOrCreateCell(cityRow, 1);//Stĺpec B
+            cityCell.setCellValue(senderCity);
 
-    /**
-     * Označí typ zásielky v hárkoch
-     */
-    private void markMailType(Sheet sheet, MailType mailType)
-    {
-        int rowIndex;
-        switch (mailType)
-        {
-            case REGISTERED:
-                rowIndex = 10;//Riadok pre "Doporučený list"
-                break;
-            case INSURED:
-                rowIndex = 11;//Riadok pre "Poistený list"
-                break;
-            case OFFICIAL:
-                rowIndex = 12;//Riadok pre "Úradná zasielka"
-                break;
-            case PACKAGE:
-                rowIndex = 13;//Riadok pre "Balík"
-                break;
-            case EXPRESS:
-                rowIndex = 14;//Riadok pre "Expresná zasielka"
-                break;
-            case POSTAL_ORDER:
-                rowIndex = 15;//Riadok pre "Poštový poukaz"
-                break;
-            default:
-                rowIndex = 12;//Predvolené"úradná zasielka"
-                break;
+            System.out.println("    Odosielateľ vyplnený: " + senderName + ", " + senderStreet + ", " + senderCity);
+        } catch (Exception e) {
+            System.err.println("    CHYBA pri vyplňovaní odosielateľa: " + e.getMessage());
+            throw e;
         }
-        Row row = getOrCreateRow(sheet, rowIndex);
-        Cell cell = getOrCreateCell(row, MAIL_TYPE_COLUMN);
-        cell.setCellValue("X"); //Označenie "X" pre vybraný typ
     }
+
 
     /**
      * Vyplní údaje o prijemcoch
      */
     private void fillRecipients(Sheet sheet, List<Parent> parents)
     {
-        for (int i = 0; i < parents.size(); i++)
-        {
-            Parent parent = parents.get(i);
-            int rowIndex = RECIPIENTS_START_ROW + i;
+        try {
+            for (int i = 0; i < parents.size(); i++)
+            {
+                Parent parent = parents.get(i);
+                int rowIndex = RECIPIENTS_START_ROW + i;
 
-            //Rozdelenie adresy na časti (ulica, mesto s PČS)
-            String[] addressParts = splitAddress(parent.getFullAddress());
-            String street = addressParts[0];
-            String city = addressParts[1];
+                System.out.println("    Vyplňujem príjemcu " + (i+1) + ": " + parent.getFullName());
 
-            //Meno príjemcu(C-D)
+                //Rozdelenie adresy na časti (ulica, mesto s PČS)
+                String[] addressParts = splitAddress(parent.getFullAddress());
+                String street = addressParts[0];
+                String city = addressParts[1];
+
+                System.out.println("      Adresa rozdelená: ulica='" + street + "', mesto='" + city + "'");
+
+                //Meno príjemcu(C-D)
+                Row row = getOrCreateRow(sheet, rowIndex);
+                Cell nameCell = getOrCreateCell(row, RECIPIENTS_NAME_START_COLUMN);
+                nameCell.setCellValue(parent.getFullName());
+
+                //Ulica príjemcu(E-F)
+                Cell streetCell = getOrCreateCell(row, RECIPIENTS_ADDRESS_START_COLUMN);
+                streetCell.setCellValue(street);
+
+                //PČS a Mesto príjemcu(H)
+                Cell cityCell = getOrCreateCell(row, RECIPIENTS_CITY_START_COLUMN);
+                cityCell.setCellValue(city);
+            }
+            System.out.println("    Všetci príjemcovia vyplnení (" + parents.size() + ")");
+        } catch (Exception e) {
+            System.err.println("    CHYBA pri vyplňovaní príjemcov: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    /**
+     * Označí typ zásielky v hárkoch - OPRAVENÁ VERZIA
+     */
+    private void markMailType(Sheet sheet, MailType mailType)
+    {
+        try {
+            int rowIndex;
+            switch (mailType)
+            {
+                case REGISTERED:
+                    rowIndex = 10; // "Doporučený list" - riadok 11 v Excel (0-based)
+                    break;
+                case INSURED:
+                    rowIndex = 11; // "Poistený list" - riadok 12 v Excel
+                    break;
+                case OFFICIAL:
+                    rowIndex = 12; // "Úradná zasielka" - riadok 13 v Excel
+                    break;
+                case PACKAGE:
+                    rowIndex = 13; // "Balík" - riadok 14 v Excel
+                    break;
+                case EXPRESS:
+                    rowIndex = 14; // "Expresná zasielka" - riadok 15 v Excel
+                    break;
+                case POSTAL_ORDER:
+                    rowIndex = 15; // "Poštový poukaz" - riadok 16 v Excel
+                    break;
+                default:
+                    rowIndex = 12; // Predvolené "úradná zasielka"
+                    break;
+            }
+
             Row row = getOrCreateRow(sheet, rowIndex);
-            Cell nameCell = getOrCreateCell(row, RECIPIENTS_NAME_START_COLUMN);
-            nameCell.setCellValue(parent.getFullName());
 
-            //Ulica príjemcu(E-F)
-            Cell streetCell = getOrCreateCell(row, RECIPIENTS_ADDRESS_START_COLUMN);
-            streetCell.setCellValue(street);
+            // OPRAVA: Označenie v správnom stĺpci (G = index 6) a zachovanie existujúceho textu
+            Cell checkboxCell = getOrCreateCell(row, MAIL_TYPE_COLUMN); // stĺpec G
 
-            //PČS a Mesto príjemcu(H)
-            Cell cityCell = getOrCreateCell(row, RECIPIENTS_CITY_START_COLUMN);
-            cityCell.setCellValue(city);
+            // Namiesto prepísania celej bunky, len pridáme X na začiatok
+            String existingValue = "";
+            if (checkboxCell.getCellType() == CellType.STRING) {
+                existingValue = checkboxCell.getStringCellValue();
+            }
+
+            // Ak bunka už obsahuje text typu zásielky, zachováme ho a pridáme X
+            if (existingValue.isEmpty()) {
+                checkboxCell.setCellValue("X");
+            } else {
+                // Ak už tam je text, X dáme na začiatok s medzerou
+                checkboxCell.setCellValue("X " + existingValue);
+            }
+
+            System.out.println("    Typ zásielky označený: " + mailType + " na riadku " + (rowIndex + 1) + ", stĺpec G");
+        } catch (Exception e) {
+            System.err.println("    CHYBA pri označovaní typu zásielky: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -234,42 +331,61 @@ public class ExcelService
      */
     private String[] splitAddress(String fullAddress)
     {
+        if (fullAddress == null || fullAddress.trim().isEmpty()) {
+            return new String[]{"", ""};
+        }
+
         String street = fullAddress;
         String city = "";
 
-        //Skusíme nájsť oddeľovač medzi ulicou a mestom
-        int commaIndex = fullAddress.lastIndexOf(",");
-        if (commaIndex > 0)
-        {
-            street = fullAddress.substring(0, commaIndex).trim();
-            city = fullAddress.substring(commaIndex + 1).trim();
-        } else
-        {
-            //Skusime detekciu PSČ (5 čislíc)
-            String[] parts = fullAddress.split(" ");
-            for (int i = 0; i < parts.length; i++)
+        try {
+            //Skusíme nájsť oddeľovač medzi ulicou a mestom
+            int commaIndex = fullAddress.lastIndexOf(",");
+            if (commaIndex > 0 && commaIndex < fullAddress.length() - 1)
             {
-                if (parts[i].matches("\\d{5}") || parts[i].matches("\\d{3}\\s?\\d{2}"))
-                {
-                    // Našli sme PSČ, rozdelíme adresu
-                    StringBuilder cityPart = new StringBuilder();
-                    for (int j = 0; j < parts.length; j++)
-                    {
-                        cityPart.append(parts[j]).append(" ");
-                    }
-                    city = cityPart.toString().trim();
+                street = fullAddress.substring(0, commaIndex).trim();
+                city = fullAddress.substring(commaIndex + 1).trim();
+            } else
+            {
+                //Skusime detekciu PSČ (5 čislíc alebo 3+2 číslice)
+                String[] parts = fullAddress.split("\\s+");
+                int pscIndex = -1;
 
-                    StringBuilder streetPart = new StringBuilder();
-                    for (int j = 0; j < i; j++)
+                for (int i = 0; i < parts.length; i++)
+                {
+                    if (parts[i].matches("\\d{5}") || parts[i].matches("\\d{3}\\d{2}"))
                     {
-                        streetPart.append(parts[j]).append(" ");
+                        pscIndex = i;
+                        break;
+                    }
+                }
+
+                if (pscIndex > 0) {
+                    // Našli sme PSČ, rozdelíme adresu
+                    StringBuilder streetPart = new StringBuilder();
+                    for (int j = 0; j < pscIndex; j++)
+                    {
+                        if (j > 0) streetPart.append(" ");
+                        streetPart.append(parts[j]);
                     }
                     street = streetPart.toString().trim();
 
-                    break;
+                    StringBuilder cityPart = new StringBuilder();
+                    for (int j = pscIndex; j < parts.length; j++)
+                    {
+                        if (j > pscIndex) cityPart.append(" ");
+                        cityPart.append(parts[j]);
+                    }
+                    city = cityPart.toString().trim();
                 }
             }
+        } catch (Exception e) {
+            System.err.println("CHYBA pri rozdeľovaní adresy '" + fullAddress + "': " + e.getMessage());
+            // Ak sa rozdelenie nepodarí, celá adresa ide do ulica
+            street = fullAddress;
+            city = "";
         }
+
         return new String[]{street, city};
     }
 
@@ -300,16 +416,17 @@ public class ExcelService
     }
 
     /**
-     * Vytvorí novú šablonu podacieho hárku
-     *
-     * @return Výtvorený súbor šablony
+     * Vytvorí novú šablonu podacieho hárku - OPRAVENÁ VERZIA
      */
     public File createNewSubmissionTemplate() throws IOException
     {
+        System.out.println("Vytváram novú šablónu podacieho hárku...");
+
         File templateDir = new File("templates");
         if (!templateDir.exists())
         {
-            templateDir.mkdir();
+            templateDir.mkdirs();
+            System.out.println("Vytvorený adresár templates");
         }
 
         File templateFile = new File(templateDir, "Podaci_harok_template.xlsx");
@@ -319,7 +436,7 @@ public class ExcelService
         {
             Sheet sheet = workbook.createSheet("Podaci_harok");
 
-            //Nastavenie zlučených budniek pre adresu odosielateľa
+            //Nastavenie zlučených buniek pre adresu odosielateľa
             sheet.addMergedRegion(CellRangeAddress.valueOf(MERGED_CELLS_SENDER_NAME));
             sheet.addMergedRegion(CellRangeAddress.valueOf(MERGED_CELLS_SENDER_ADDRESS));
             sheet.addMergedRegion(CellRangeAddress.valueOf(MERGED_CELLS_SENDER_CITY));
@@ -329,20 +446,29 @@ public class ExcelService
             Cell titleCell = titleRow.createCell(0);
             titleCell.setCellValue("PODACÍ HÁROK");
 
-            //Vytvorenie hlavičky pre typ Zasielky
-            Row mailTypeHeaderRow = sheet.createRow(8);
-            Cell mailTypeHeaderCell = mailTypeHeaderRow.createCell(6);
-            mailTypeHeaderCell.setCellValue("Druh zásielky");
+            //Sekcia odosielateľa
+            Row senderHeaderRow = sheet.createRow(8);
+            Cell senderHeaderCell = senderHeaderRow.createCell(1);
+            senderHeaderCell.setCellValue("Odosielateľ:");
 
-            //Vytvorenie možnosti pre typ zasielky
+            //Vytvorenie hlavičky pre typ zásielky
+            Row mailTypeHeaderRow = sheet.createRow(8);
+            Cell mailTypeHeaderCell = mailTypeHeaderRow.createCell(5); // Stĺpec F pre názov
+            mailTypeHeaderCell.setCellValue("Druh zásielky:");
+
+            //Vytvorenie možnosti pre typ zásielky - OPRAVENÉ
             String[] mailTypes = {"Doporučený list", "Poistený list", "Úradná zasielka", "Balík", "Expresná zasielka", "Poštový poukaz"};
             for (int i = 0; i < mailTypes.length; i++)
             {
                 Row row = sheet.createRow(10 + i);
+
+                // Názov typu zásielky v stĺpci F (index 5)
                 Cell labelCell = row.createCell(5);
                 labelCell.setCellValue(mailTypes[i]);
+
+                // Checkbox v stĺpci G (index 6) - prázdny pre zaškrtnutie
                 Cell checkCell = row.createCell(6);
-                checkCell.setCellValue("");
+                checkCell.setCellValue("☐"); // Prázdny checkbox symbol
             }
 
             //Vytvorenie hlavičky pre príjemcov
@@ -354,8 +480,25 @@ public class ExcelService
             Cell cityHeaderCell = recipientsHeaderRow.createCell(7);
             cityHeaderCell.setCellValue("PSČ a mesto");
 
+            // Vytvorenie prázdnych riadkov pre príjemcov (12 riadkov)
+            for (int i = 0; i < MAX_RECIPIENTS_PER_PAGE; i++)
+            {
+                Row recipientRow = sheet.createRow(RECIPIENTS_START_ROW + i);
+                // Vytvorenie prázdnych buniek pre meno, adresu a mesto
+                recipientRow.createCell(RECIPIENTS_NAME_START_COLUMN);
+                recipientRow.createCell(RECIPIENTS_ADDRESS_START_COLUMN);
+                recipientRow.createCell(RECIPIENTS_CITY_START_COLUMN);
+            }
+
             //Uloženie workbooku
             workbook.write(fos);
+            System.out.println("Šablóna úspešne vytvorená: " + templateFile.getAbsolutePath());
+        }
+        catch (Exception e)
+        {
+            System.err.println("CHYBA pri vytváraní šablóny: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
 
         return templateFile;

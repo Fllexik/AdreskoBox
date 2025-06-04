@@ -217,28 +217,38 @@ public class Parent
     public String[] getLabelLines() {
         String[] lines = new String[3];
 
-        // Riadok 1: Meno a priezvisko
-        lines[0] = getFullName();
+        // Meno a priezvisko
+        lines[0] = getFullName() != null ? getFullName() : "";
 
-        // Riadok 2: Ulica a číslo
-        lines[1] = getAddress();
+        // Prvotné adresné časti
+        String addressLine = getAddress() != null ? getAddress().trim() : "";
+        String zip = getZipCode() != null ? getZipCode().trim() : "";
+        String city = getCity() != null ? getCity().trim() : "";
 
-        // Riadok 3: PSČ a mesto
-        String zipStr = getZipCode();
-        String cityStr = getCity();
-        StringBuilder line3 = new StringBuilder();
-
-        if (!zipStr.isEmpty()) {
-            line3.append(zipStr);
-            if (!cityStr.isEmpty()) {
-                line3.append(" ");
-            }
+        // Ak adresa omylom obsahuje aj PSČ alebo mesto, odstránime to
+        if (!zip.isEmpty() && addressLine.contains(zip)) {
+            addressLine = addressLine.replace(zip, "").trim();
         }
-        if (!cityStr.isEmpty()) {
-            line3.append(cityStr);
+        if (!city.isEmpty() && addressLine.contains(city)) {
+            addressLine = addressLine.replace(city, "").trim();
         }
 
-        lines[2] = line3.toString();
+        // Taktiež odstrániť zvyšné čiarky a medzery na konci
+        if (addressLine.endsWith(",")) {
+            addressLine = addressLine.substring(0, addressLine.length() - 1).trim();
+        }
+
+        lines[1] = addressLine;
+
+        // PSČ a mesto do posledného riadku
+        lines[2] = (!zip.isEmpty() || !city.isEmpty()) ? (zip + " " + city).trim() : "";
+
+        // DEBUG výpis
+        System.out.println("=== DEBUG Štítok ===");
+        System.out.println("Meno: " + lines[0]);
+        System.out.println("Adresa: " + lines[1]);
+        System.out.println("PSČ a mesto: " + lines[2]);
+        System.out.println("====================");
 
         return lines;
     }
