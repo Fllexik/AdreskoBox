@@ -21,7 +21,6 @@ public class ExcelService
     public static final String MERGED_CELLS_SENDER_CITY = "B11:F11";
     public static final String MERGED_CELLS_SENDER_NAME = "B9:F9";
 
-    public static final int MAIL_TYPE_OFFICIAL_ROW = 12;
     public static final int MAIL_TYPE_COLUMN = 6; // stĺpec G
 
     public static final int RECIPIENTS_START_ROW = 22;
@@ -34,7 +33,7 @@ public class ExcelService
     private File outputDirectory;
 
     /**
-     * Enum pre typy zásielok
+     * Enum pre typy zásielok - zachované pre spätnosť, ale už sa nepoužíva automaticky
      */
     public enum MailType
     {
@@ -64,14 +63,6 @@ public class ExcelService
         }
     }
 
-    /**private File createSubmissionSheets(List<Parent> parents, String senderName,
-                                        String senderStreet, String senderCity,
-                                        MailType mailType, File templateFile, int groupNumber) throws IOException
-    {
-        return createSingleSubmissionSheet(parents, senderName, senderStreet, senderCity,
-                mailType, templateFile, groupNumber);
-    }
-     */
     /**
      * Nastaví výstupný adresár pre generované súbory
      */
@@ -92,9 +83,10 @@ public class ExcelService
      * @param templatePath Cesta k šablóne podacieho hárku
      * @return Zoznam vytvorených súborov
      */
+
     public List<File> createSubmissionSheets(List<Parent> parents, String senderName,
                                              String senderStreet, String senderCity,
-                                             MailType mailType, String templatePath) throws IOException
+                                             String templatePath) throws IOException
     {
         System.out.println("ExcelService.createSubmissionSheets() - ZAČIATOK");
         System.out.println("- Počet rodičov: " + (parents != null ? parents.size() : "NULL"));
@@ -141,7 +133,7 @@ public class ExcelService
 
             //Vytvorenie súboru podacieho hárku
             File sheetFile = createSingleSubmissionSheet(parents.subList(startIndex, endIndex),
-                    senderName, senderStreet, senderCity, mailType, templateFile, groupIndex + 1);
+                    senderName, senderStreet, senderCity, templateFile, groupIndex + 1);
 
             createdFiles.add(sheetFile);
             System.out.println("- Vytvorený súbor: " + sheetFile.getName());
@@ -151,12 +143,14 @@ public class ExcelService
         return createdFiles;
     }
 
+
+
     /**
      * Vytvorí jeden podací hárok pre zadanú skupinu rodičov
      */
     private File createSingleSubmissionSheet(List<Parent> groupParents, String senderName,
                                              String senderStreet, String senderCity,
-                                             MailType mailType, File templateFile, int groupNumber) throws IOException
+                                             File templateFile, int groupNumber) throws IOException
     {
         //Vytvorenie výstupného súboru - OPRAVA: používame správny výstupný adresár
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
@@ -174,10 +168,6 @@ public class ExcelService
             //Vyplnenie údajov odosieľateľa
             System.out.println("  Vyplňujem odosielateľa: " + senderName);
             fillSenderInfo(sheet, senderName, senderStreet, senderCity);
-
-            //Označenie typu zásielky
-            System.out.println("  Označujem typ zásielky: " + mailType);
-            markMailType(sheet, mailType);
 
             //Vyplnenie údajov o prijemcoch
             System.out.println("  Vyplňujem " + groupParents.size() + " príjemcov");
@@ -266,65 +256,7 @@ public class ExcelService
             throw e;
         }
     }
-
-    /**
-     * Označí typ zásielky v hárkoch - OPRAVENÁ VERZIA
-     */
-    private void markMailType(Sheet sheet, MailType mailType)
-    {
-        try {
-            int rowIndex;
-            switch (mailType)
-            {
-                case REGISTERED:
-                    rowIndex = 10; // "Doporučený list" - riadok 11 v Excel (0-based)
-                    break;
-                case INSURED:
-                    rowIndex = 11; // "Poistený list" - riadok 12 v Excel
-                    break;
-                case OFFICIAL:
-                    rowIndex = 12; // "Úradná zasielka" - riadok 13 v Excel
-                    break;
-                case PACKAGE:
-                    rowIndex = 13; // "Balík" - riadok 14 v Excel
-                    break;
-                case EXPRESS:
-                    rowIndex = 14; // "Expresná zasielka" - riadok 15 v Excel
-                    break;
-                case POSTAL_ORDER:
-                    rowIndex = 15; // "Poštový poukaz" - riadok 16 v Excel
-                    break;
-                default:
-                    rowIndex = 12; // Predvolené "úradná zasielka"
-                    break;
-            }
-
-            Row row = getOrCreateRow(sheet, rowIndex);
-
-            // OPRAVA: Označenie v správnom stĺpci (G = index 6) a zachovanie existujúceho textu
-            Cell checkboxCell = getOrCreateCell(row, MAIL_TYPE_COLUMN); // stĺpec G
-
-            // Namiesto prepísania celej bunky, len pridáme X na začiatok
-            String existingValue = "";
-            if (checkboxCell.getCellType() == CellType.STRING) {
-                existingValue = checkboxCell.getStringCellValue();
-            }
-
-            // Ak bunka už obsahuje text typu zásielky, zachováme ho a pridáme X
-            if (existingValue.isEmpty()) {
-                checkboxCell.setCellValue("X");
-            } else {
-                // Ak už tam je text, X dáme na začiatok s medzerou
-                checkboxCell.setCellValue("X " + existingValue);
-            }
-
-            System.out.println("    Typ zásielky označený: " + mailType + " na riadku " + (rowIndex + 1) + ", stĺpec G");
-        } catch (Exception e) {
-            System.err.println("    CHYBA pri označovaní typu zásielky: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
-    }
+    
 
     /**
      * Rozdelí adresu na ulicu a mesto s PSČ

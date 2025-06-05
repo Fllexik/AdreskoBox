@@ -56,6 +56,22 @@ public class ImportController
         //naplnenie Comboboxu predefinovanymi formatami
         predefinedFormatsComboBox.setItems(LabelFormat.getPredefinedFormats());
 
+        predefinedFormatsComboBox.setCellFactory(comboBox -> new ListCell<>() {
+            @Override
+            protected void updateItem(LabelFormat format, boolean empty) {
+                super.updateItem(format, empty);
+                setText((empty || format == null) ? null : format.getName());
+            }
+        });
+
+        predefinedFormatsComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(LabelFormat format, boolean empty) {
+                super.updateItem(format, empty);
+                setText((empty || format == null) ? null : format.getName());
+            }
+        });
+
         //Na začiatku predpokladame, že subor ma hlavičku
         hasHeaderCheckBox.setSelected(true);
 

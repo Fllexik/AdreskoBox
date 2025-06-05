@@ -51,7 +51,6 @@ public class GenerateTabController
     private String senderName;
     private String senderStreet;
     private String senderCity;
-    private ExcelService.MailType mailType;
     private File templateFile;
 
     private File outputDirectory;
@@ -157,7 +156,6 @@ public class GenerateTabController
             //Generovanie podacích hárkov
             log("\nGenerujem podacie hárky:");
             log("- Počet príjemcov: " + selectedParents.size());
-            log("- Typ zásielky: " + mailType);
             log("- Šablóna: " + (templateFile != null && templateFile.exists() ? "OK" : "CHÝBA"));
 
             // DÔLEŽITÉ: Nastavenie výstupného adresára pre ExcelService
@@ -179,7 +177,7 @@ public class GenerateTabController
             try {
                 List<File> submissionSheets = excelService.createSubmissionSheets(
                         selectedParents, senderName, senderStreet, senderCity,
-                        mailType, templateFile.getAbsolutePath());
+                        templateFile.getAbsolutePath());
 
                 generatedFiles.addAll(submissionSheets);
 
@@ -247,14 +245,13 @@ public class GenerateTabController
 
     public void setData(List<Parent> parents, LabelFormat labelFormat,
                         String senderName, String senderStreet, String senderCity,
-                        ExcelService.MailType mailType, File templateFile)
+                        File templateFile)
     {
         this.selectedParents = parents;
         this.selectedLabelFormat = labelFormat;
         this.senderName = senderName;
         this.senderStreet = senderStreet;
         this.senderCity = senderCity;
-        this.mailType = mailType;
         this.templateFile = templateFile;
 
         // DEBUG výpis

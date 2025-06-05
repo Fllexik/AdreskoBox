@@ -26,8 +26,6 @@ public class OutputSettingTabController
     @FXML
     private TextField senderCityField;
 
-    @FXML
-    private ComboBox<ExcelService.MailType> mailTypeComboBox;
 
     @FXML
     private TextField templatePathField;
@@ -53,9 +51,8 @@ public class OutputSettingTabController
             rootVbox.getProperties().put("controller", this);
         }
 
-        //Inicializácia comboboxu pre typ zásielky
-        mailTypeComboBox.setItems(FXCollections.observableArrayList(ExcelService.MailType.values()));
-        mailTypeComboBox.getSelectionModel().select(ExcelService.MailType.OFFICIAL); //Predvolená hodnota
+        // Načítať posledné údaje odosielateľa
+        loadSenderData();
 
         //Predvolená cesta k šablone
         File defaultTemplate = new File("templates/podaci-harok.xlsx");
@@ -74,11 +71,25 @@ public class OutputSettingTabController
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Excel súbory", "*.xls", "*xlsx"));
 
+        // Nastaviť počiatočný adresár na posledne použitý adresár
+        if (templateFile != null && templateFile.getParentFile() != null) {
+            fileChooser.setInitialDirectory(templateFile.getParentFile());
+        } else {
+            // Ak neexistuje predchádzajúci súbor, nastaviť na templates folder
+            File templatesDir = new File("templates");
+            if (templatesDir.exists() && templatesDir.isDirectory()) {
+                fileChooser.setInitialDirectory(templatesDir);
+            }
+        }
+
         File file = fileChooser.showOpenDialog(senderNameField.getScene().getWindow());
         if (file != null)
         {
             templateFile = file;
             templatePathField.setText(file.getAbsolutePath());
+
+            // Automaticky nastaviť FileChooser na tento adresár pre ďalšie použitie
+            updateFileChooserDirectory(file.getParentFile());
         }
     }
 
@@ -90,6 +101,10 @@ public class OutputSettingTabController
             File newTemplate = excelService.createNewSubmissionTemplate();
             templateFile = newTemplate;
             templatePathField.setText(newTemplate.getAbsolutePath());
+
+            // Automaticky nastaviť adresár na adresár novo vytvorenej šablóny
+            updateFileChooserDirectory(newTemplate.getParentFile());
+
             showAlert(Alert.AlertType.INFORMATION,"Šablóna vytvorená",
                     "Nová šablóna podacieho hárku bola úspešne vytvorená: " + newTemplate.getAbsolutePath());
         } catch (Exception e)
@@ -97,6 +112,53 @@ public class OutputSettingTabController
             showAlert(Alert.AlertType.ERROR,"Chyba",
                     "Nepodarilo sa vytvoriť šablonu: " + e.getMessage());
         }
+    }
+
+    /**
+     * Načítanie posledných údajov odosielateľa
+     */
+    private void loadSenderData() {
+        String lastName = System.getProperty("senderName", "");
+        String lastStreet = System.getProperty("senderStreet", "");
+        String lastCity = System.getProperty("senderCity", "");
+
+        senderNameField.setText(lastName);
+        senderStreetField.setText(lastStreet);
+        senderCityField.setText(lastCity);
+    }
+
+    /**
+     * Uloženie údajov odosielateľa
+     */
+    private void saveSenderData() {
+        System.setProperty("senderName", senderNameField.getText().trim());
+        System.setProperty("senderStreet", senderStreetField.getText().trim());
+        System.setProperty("senderCity", senderCityField.getText().trim());
+    }
+
+    /**
+     * Pomocná metóda na aktualizáciu posledne použitého adresára
+     */
+    private void updateFileChooserDirectory(File directory) {
+        if (directory != null && directory.exists() && directory.isDirectory()) {
+            // Tu môžete uložiť adresár do properties alebo konfiguračného súboru
+            // pre zachovanie medzi reštartmi aplikácie
+            System.setProperty("lastUsedTemplateDirectory", directory.getAbsolutePath());
+        }
+    }
+
+    /**
+     * Získanie posledne použitého adresára
+     */
+    private File getLastUsedDirectory() {
+        String lastDir = System.getProperty("lastUsedTemplateDirectory");
+        if (lastDir != null) {
+            File dir = new File(lastDir);
+            if (dir.exists() && dir.isDirectory()) {
+                return dir;
+            }
+        }
+        return null;
     }
 
     /**
@@ -118,10 +180,6 @@ public class OutputSettingTabController
         {
             errors.append("- PSČ a mesto odosielateľa nemôže byť prázdne\n");
         }
-        if (mailTypeComboBox.getValue() == null)
-        {
-            errors.append("- Vyberte typ zásielky\n");
-        }
         if (templateFile == null || !templateFile.exists())
         {
             errors.append("- Šablóna podacieho hárku nebola najdená\n");
@@ -131,6 +189,8 @@ public class OutputSettingTabController
             showAlert(Alert.AlertType.ERROR, "Neplatné údaje", errors.toString());
             return false;
         }
+        // Uložiť údaje odosielateľa po úspešnej validácii
+        saveSenderData();
         return true;
     }
 
@@ -153,11 +213,6 @@ public class OutputSettingTabController
     public String getSenderCity()
     {
         return senderCityField.getText().trim();
-    }
-
-    public ExcelService.MailType getMailType()
-    {
-        return mailTypeComboBox.getValue();
     }
 
     public File getTemplateFile()

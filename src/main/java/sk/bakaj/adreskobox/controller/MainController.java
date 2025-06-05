@@ -230,7 +230,6 @@ public class MainController
                             outputSettingTabController.getSenderName(),
                             outputSettingTabController.getSenderStreet(),
                             outputSettingTabController.getSenderCity(),
-                            outputSettingTabController.getMailType(),
                             outputSettingTabController.getTemplateFile()
                     );
                 }

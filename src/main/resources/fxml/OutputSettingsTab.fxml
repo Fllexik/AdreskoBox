@@ -22,8 +22,12 @@
                 <Label text="PSČ a mesto:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                 <TextField fx:id="senderCityField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
+                <Label text="Poznámka: V šablóne je potrebne manuálne zaškrtnúť druh zásielky." GridPane.columnIndex="0" GridPane.rowIndex="3" wrapText="true"/>
+
+                <!--
                 <Label text="Druh zásielky:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                 <ComboBox fx:id="mailTypeComboBox" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                -->
 
                 <columnConstraints>
                     <ColumnConstraints minWidth="100"/>

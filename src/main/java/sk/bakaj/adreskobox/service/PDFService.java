@@ -24,8 +24,8 @@ public class PDFService
     public PDFService() {
         try {
             // Inicializácia fontu a BaseFont pre presné meranie
-            baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
-            defaultFont = new Font(Font.FontFamily.HELVETICA, DEFAULT_FONT_SIZE);
+            baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.EMBEDDED);
+            defaultFont = new Font(baseFont, DEFAULT_FONT_SIZE);
         } catch (Exception e) {
             defaultFont = new Font(Font.FontFamily.HELVETICA, DEFAULT_FONT_SIZE);
             try {
