@@ -1,38 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+<!-- Hlavné okno aplikácie AdreskoBox -->
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="sk.bakaj.adreskobox.controller.MainController"
-            prefHeight="600.0" prefWidth="800.0">
+            prefHeight="600.0"
+            prefWidth="800.0">
+
+    <!-- Horná časť - nadpis aplikácie -->
     <top>
         <VBox spacing="10" style="-fx-padding: 10;">
-            <Label text="Generátor adresných etikiet" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+            <Label text="Generátor adresných štítkov"
+                   style="-fx-font-size: 20; -fx-font-weight: bold;"/>
         </VBox>
     </top>
 
+    <!-- Stredná časť - hlavný obsah s tabmi -->
     <center>
         <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+
+            <!-- Tab 1: Import dát -->
             <Tab text="1. Import dát">
                 <fx:include fx:id="importTab" source="ImportTab.fxml"/>
                 </Tab>
+
+            <!-- Tab 2: Výber rodičov -->
             <Tab text="2. Výber rodičov">
                 <fx:include fx:id="parentsTab" source="ParentsTab.fxml" />
             </Tab>
+
+            <!-- Tab 3: Kontrola adries -->
             <Tab text="3. Kontrola adries">
                 <fx:include fx:id="adressCheckTab" source="AdressCheckTab.fxml"/>
             </Tab>
+
+            <!-- Tab 4: Nastavenie výstupu -->
             <Tab text="4. Nastavenie výstupu">
                 <fx:include fx:id="outputSettingTab" source="OutputSettingsTab.fxml"/>
             </Tab>
+
+            <!-- Tab 5: Generovanie -->
             <Tab text="5. Generovanie">
                 <fx:include fx:id="generateTab" source="GenerateTab.fxml"/>
             </Tab>
         </TabPane>
     </center>
 
+    <!-- Spodná časť - navigačné tlačidlá -->
     <bottom>
         <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
             <Button text="Späť" fx:id="prevButton"/>

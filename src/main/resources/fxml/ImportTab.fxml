@@ -4,45 +4,101 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="rootVbox" spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.bakaj.adreskobox.controller.ImportController">
+<!--
+    FXML súbor pre import dát a nastavenie štítkov
+    Obsahuje rozhranie pre výber súboru a konfiguráciu formátu štítkov
+-->
+<VBox fx:id="rootVbox"
+      spacing="15"
+      style="-fx-padding: 20;"
+      xmlns="http://javafx.com/javafx/17.0.12"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="sk.bakaj.adreskobox.controller.ImportController">
 
-    <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Import dát" />
+    <!-- Hlavička sekcie importu -->
+    <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
+           text="Import dát" />
 
+    <!-- Formulár pre nastavenie súboru -->
     <GridPane hgap="10.0" vgap="10.0">
-        <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="10" />
+        </padding>
 
-        <Label text="Zdrojový súbor:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="0">
-            <TextField fx:id="filePathField" editable="false" prefWidth="350" />
-            <Button onAction="#handleSelectFile" text="Vybrať súbor" />
+        <!-- Výber zdrojového súboru -->
+        <Label text="Zdrojový súbor:"
+               GridPane.columnIndex="0"
+               GridPane.rowIndex="0" />
+        <HBox spacing="10"
+              GridPane.columnIndex="1"
+              GridPane.rowIndex="0">
+            <TextField fx:id="filePathField"
+                       editable="false"
+                       prefWidth="350" />
+            <Button onAction="#handleSelectFile"
+                    text="Vybrať súbor" />
         </HBox>
 
-        <Label text="Typ súboru:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <Label fx:id="fileTypeLabel" text="" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        <!-- Zobrazenie typu súboru -->
+        <Label text="Typ súboru:"
+               GridPane.columnIndex="0"
+               GridPane.rowIndex="1" />
+        <Label fx:id="fileTypeLabel"
+               text=""
+               GridPane.columnIndex="1"
+               GridPane.rowIndex="1"/>
 
-        <Label text="Oddeľovač (CSV):" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-        <Label fx:id="delimiterLabel" text="" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        <!-- Nastavenie oddeľovača pre CSV -->
+        <Label text="Oddeľovač (CSV):"
+               GridPane.columnIndex="0"
+               GridPane.rowIndex="2"/>
+        <Label fx:id="delimiterLabel"
+               text=""
+               GridPane.columnIndex="1"
+               GridPane.rowIndex="2"/>
 
-        <Label text="Hlavička:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-        <HBox spacing="10" alignment="BASELINE_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="3">
-            <CheckBox fx:id="hasHeaderCheckBox" text="Súbor má hlavičku" selected="true"/>
-            <Label fx:id="headerStatusLabel" text=""/>
+        <!-- Nastavenie hlavičky -->
+        <Label text="Hlavička:"
+               GridPane.columnIndex="0"
+               GridPane.rowIndex="3"/>
+        <HBox spacing="10"
+              alignment="BASELINE_LEFT"
+              GridPane.columnIndex="1"
+              GridPane.rowIndex="3">
+            <CheckBox fx:id="hasHeaderCheckBox"
+                      text="Súbor má hlavičku"
+                      selected="true"/>
+            <Label fx:id="headerStatusLabel"
+                   text=""/>
         </HBox>
     </GridPane>
 
+    <!-- Oddeľovač sekcií -->
     <Separator />
-    <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Nastavenie štítkov"/>
 
+    <!-- Hlavička sekcie štítkov -->
+    <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
+           text="Nastavenie štítkov"/>
+
+    <!-- Formulár pre výber formátu štítkov -->
     <HBox spacing="15">
         <VBox spacing="10" HBox.hgrow="ALWAYS">
             <Label text="Prednastavené formáty:"/>
-            <ComboBox fx:id="predefinedFormatsComboBox" prefWidth="250" onAction="#handlePredefinedFormatSelection" promptText="Vyberte format štítku"/>
+            <ComboBox fx:id="predefinedFormatsComboBox"
+                      prefWidth="250"
+                      onAction="#handlePredefinedFormatSelection"
+                      promptText="Vyberte formát štítku"/>
 
+            <!-- Zobrazenie vybraného formátu -->
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label fx:id="selectedFormatLabel" text=""/>
+                <Label fx:id="selectedFormatLabel"
+                       text=""/>
             </HBox>
         </VBox>
 
-        <Button fx:id="customFormatButton" onAction="#handleCustomFormat" text="Vlastný formát"/>
+        <!-- Tlačidlo pre vlastný formát -->
+        <Button fx:id="customFormatButton"
+                onAction="#handleCustomFormat"
+                text="Vlastný formát"/>
     </HBox>
 </VBox>
