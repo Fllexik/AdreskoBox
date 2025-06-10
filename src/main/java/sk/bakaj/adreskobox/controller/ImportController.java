@@ -14,8 +14,13 @@ import sk.bakaj.adreskobox.service.FileService;
 import java.io.File;
 import java.util.List;
 
+/**
+ * Kontrolér pre záložku importu dát.
+ * Spravuje výber súboru, detekciu formátu a nastavenie formátu štítkov.
+ */
 public class ImportController
 {
+    // FXML komponenty
     @FXML
     private VBox rootVbox;
 
@@ -40,6 +45,7 @@ public class ImportController
     @FXML
     private Label selectedFormatLabel;
 
+    // Služby a dátové objekty
     private FileService fileService = new FileService();
     private File selectedFile;
     private String detectedFileType;
@@ -47,35 +53,25 @@ public class ImportController
     private boolean hasHeader = true;
     private LabelFormat selectedLabelFormat;
 
+    /**
+     * Inicializácia kontroléra - nastavenie ComboBox a event listenerov
+     */
     @FXML
     public void initialize()
     {
-        // Uložiť controller do properties
+        // Uloženie kontroléra do properties pre prístup z MainController
         rootVbox.getProperties().put("controller", this);
 
-        //naplnenie Comboboxu predefinovanymi formatami
+        // Naplnenie ComboBox predefinovanými formátmi
         predefinedFormatsComboBox.setItems(LabelFormat.getPredefinedFormats());
 
-        predefinedFormatsComboBox.setCellFactory(comboBox -> new ListCell<>() {
-            @Override
-            protected void updateItem(LabelFormat format, boolean empty) {
-                super.updateItem(format, empty);
-                setText((empty || format == null) ? null : format.getName());
-            }
-        });
+        // Nastavenie zobrazenia položiek v ComboBox
+        setupComboBoxCellFactory();
 
-        predefinedFormatsComboBox.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(LabelFormat format, boolean empty) {
-                super.updateItem(format, empty);
-                setText((empty || format == null) ? null : format.getName());
-            }
-        });
-
-        //Na začiatku predpokladame, že subor ma hlavičku
+        // Na začiatku predpokladáme, že súbor má hlavičku
         hasHeaderCheckBox.setSelected(true);
 
-        //Listener pre zmenu stavu checkboxu
+        // Listener pre zmenu stavu checkbox-u
         hasHeaderCheckBox.selectedProperty().addListener((observable, oldValue, newValue) ->
         {
             hasHeader = newValue;
@@ -86,13 +82,39 @@ public class ImportController
         });
     }
 
+    /**
+     * Nastavenie zobrazenia položiek v ComboBox
+     */
+    private void setupComboBoxCellFactory()
+    {
+        predefinedFormatsComboBox.setCellFactory(comboBox -> new ListCell<>()
+        {
+            @Override
+            protected void updateItem(LabelFormat format, boolean empty)
+            {
+                super.updateItem(format, empty);
+                setText((empty || format == null) ? null : format.getName());
+            }
+        });
 
-
+        predefinedFormatsComboBox.setButtonCell(new ListCell<>()
+        {
+            @Override
+            protected void updateItem(LabelFormat format, boolean empty)
+            {
+                super.updateItem(format, empty);
+                setText((empty || format == null) ? null : format.getName());
+            }
+        });
+    }
+    /**
+     * Obsluha výberu súboru cez FileChooser
+     */
     @FXML
     private void handleSelectFile()
     {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Vyber zdrojový suboru");
+        fileChooser.setTitle("Výber zdrojového súboru");
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Všetky podporované súbory", "*.csv", "*.xls", "*.xlsx"),
                 new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
@@ -108,29 +130,38 @@ public class ImportController
             detectHeaderRow(file);
         }
     }
+
+    /**
+     * Detekcia typu súboru a oddeľovača
+     * @param file vybraný súbor
+     */
     private void  detectedFileTypeAndDelimiter(File file)
     {
         detectedFileType = fileService.detectFileType(file);
         try
         {
-            //Automatická detekcia typu súboru
+            // Automatická detekcia typu súboru
             detectedDelimiter = fileService.detectFileDelimiter(file);
 
-            //Nastavenie detekovaného typu súboru
+            // Nastavenie detekovaného typu súboru
             if (detectedFileType != null)
             {
                 fileTypeLabel.setText(getFileTypeName(detectedFileType));
 
-                //pre CSV subory detekuje aj oddeľovač
+                // Pre CSV súbory detekuje aj oddeľovač
                 if ("CSV".equals(detectedFileType))
                 {
                     detectedDelimiter = fileService.detectFileDelimiter(file);
                     delimiterLabel.setText(getDelimiterName(detectedDelimiter));
-                }else {
+                }
+                else
+                {
                     detectedDelimiter = null;
                     delimiterLabel.setText("N/A (Excel súbor)");
                 }
-            }else {
+            }
+            else
+            {
                 fileTypeLabel.setText("Nepodporovaný formát");
                 delimiterLabel.setText("N/A");
                 showAlert(Alert.AlertType.ERROR, "Nepodporovaný súbor",
@@ -148,6 +179,10 @@ public class ImportController
         }
     }
 
+    /**
+     * Detekcia hlavičkového riadku v súbore
+     * @param file vybraný súbor
+     */
     private void detectHeaderRow(File file)
     {
         try
@@ -156,50 +191,69 @@ public class ImportController
             hasHeader = detectedHeader;
             hasHeaderCheckBox.setSelected(detectedHeader);
             updateHeaderStatusLabel();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             headerStatusLabel.setText("Nepodarilo sa detekovať hlavičku");
             headerStatusLabel.setStyle("-fx-text-fill: red");
         }
     }
 
+    /**
+     * Aktualizácia zobrazenia stavu hlavičky
+     */
     private void updateHeaderStatusLabel()
     {
         if (hasHeader)
         {
             headerStatusLabel.setText("Súbor obsahuje hlavičku");
             headerStatusLabel.setStyle("-fx-text-fill: green");
-        }else {
+        }
+        else
+        {
             headerStatusLabel.setText("Súbor neobsahuje hlavičku alebo nebola rozpoznaná");
             headerStatusLabel.setStyle("-fx-text-fill: orange");
         }
     }
 
+    /**
+     * Získanie popisného názvu typu súboru
+     * @param fileType detekovaný typ súboru
+     * @return popisný názov typu súboru
+     */
     private String getFileTypeName(String fileType)
     {
         if(fileType == null) return "Neznámy";
-        switch (fileType)
+        return switch (fileType)
         {
-            case "CSV": return "CSV (textový súbor)";
-            case "XLS": return "XLS (Excel 97-2003)";
-            case "XLSX": return "XLSX (Excel súbor)";
-            default: return fileType;
-        }
+            case "CSV" -> "CSV (textový súbor)";
+            case "XLS" -> "XLS (Excel 97-2003)";
+            case "XLSX" -> "XLSX (Excel súbor)";
+            default -> fileType;
+        };
     }
 
+    /**
+     * Získanie popisného názvu oddeľovača
+     * @param delimiter detekovaný oddeľovač
+     * @return popisný názov oddeľovača
+     */
     private String getDelimiterName(String delimiter)
     {
         if (delimiter == null) return "Neznámy";
-        switch (delimiter)
+        return switch (delimiter)
         {
-            case ",": return "Čiarka (,)";
-            case ";": return "Bodkočiarka (;)";
-            case "\t": return "Tabulátor";
-            case "|": return "Zvislá čiarka (|)";
-            default: return "Vlastný (" + delimiter + ")";
-        }
+            case "," -> "Čiarka (,)";
+            case ";" -> "Bodkočiarka (;)";
+            case "\t" -> "Tabulátor";
+            case "|" -> "Zvislá čiarka (|)";
+            default -> "Vlastný (" + delimiter + ")";
+        };
     }
 
+    /**
+     * Obsluha výberu predefinovaného formátu štítku
+     */
     @FXML
     private void handlePredefinedFormatSelection()
     {
@@ -210,6 +264,9 @@ public class ImportController
         }
     }
 
+    /**
+     * Obsluha vytvorenia vlastného formátu štítku
+     */
     @FXML
     private void handleCustomFormat()
     {
@@ -218,12 +275,12 @@ public class ImportController
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CustomLabelFormatDialog.fxml"));
             Scene scene = new Scene(loader.load());
 
-            CustomLabelFormatController controler = loader.getController();
+            CustomLabelFormatController controller = loader.getController();
 
-            //Ak je už nastavený nejaký formát, použijeme ho ako základ
+            // Ak je už nastavený nejaký formát, použijeme ho ako základ
             if (selectedLabelFormat != null)
             {
-                controler.initWithFormat(selectedLabelFormat);
+                controller.initWithFormat(selectedLabelFormat);
             }
 
             Stage stage = new Stage();
@@ -232,8 +289,8 @@ public class ImportController
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            //Po zatvorení dialogu získame nastavený formát
-            LabelFormat customFormat = controler.getCustomLabelFormat();
+            // Po zatvorení dialógu získame nastavený formát
+            LabelFormat customFormat = controller.getCustomLabelFormat();
             if (customFormat != null)
             {
                 selectedLabelFormat = customFormat;
@@ -245,35 +302,105 @@ public class ImportController
                                 customFormat.getColumns(),
                                 customFormat.getRows()));
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             showAlert(Alert.AlertType.ERROR,"Chyba",
                     "Nepodarilo sa otvoriť dialog vlastného formátu: " + e.getMessage());
         }
     }
 
+    /**
+     * Obsluha náhľadu dát (zatiaľ len validácia)
+     */
+    @FXML
+    private void handlePreviewData()
+    {
+        if (!isReadyToProceed())
+        {
+            showAlert(Alert.AlertType.WARNING, "Neuplné údaje",
+                    "Pred zobrazením náhľadu vyberte súbor a formát štítkov.");
+            return;
+        }
+
+        try
+        {
+            // Tu môžete implementovať logiku pre zobrazenie náhľadu
+            // Napríklad môžete otvoriť nové okno s náhľadom dát
+            showAlert(Alert.AlertType.INFORMATION, "Náhľad",
+                    "Funkcia náhľadu dát bude implementovaná v budúcej verzii.");
+        }
+        catch (Exception e)
+        {
+            showAlert(Alert.AlertType.ERROR,"Chyba",
+                    "Nepodarilo sa zobraziť náhľad:" + e.getMessage());
+        }
+    }
+
+    // Gettery pre prístup k dátam z MainController
+
+    /**
+     * Získanie vybraného súboru
+     * @return vybraný súbor alebo null
+     */
     public File getSelectedFile()
     {
         return selectedFile;
     }
 
-    public String getDetectedFileType() {return detectedFileType;}
+    /**
+     * Získanie detekovaného typu súboru
+     * @return typ súboru alebo null
+     */
+    public String getDetectedFileType()
+    {
+        return detectedFileType;
+    }
 
-    public String getDetectedDelimiter () {return detectedDelimiter;}
+    /**
+     * Získanie detekovaného oddeľovača
+     * @return oddeľovač alebo null
+     */
+    public String getDetectedDelimiter ()
+    {
+        return detectedDelimiter;
+    }
 
+    /**
+     * Zistenie, či súbor má hlavičku
+     * @return true ak má hlavičku, false inak
+     */
     public boolean hasHeader()
     {
         return hasHeader;
     }
 
-    public LabelFormat getSelectedLabelFormat(){return selectedLabelFormat;}
+    /**
+     * Získanie vybraného formátu štítku
+     * @return vybraný formát štítku alebo null
+     */
+    public LabelFormat getSelectedLabelFormat()
+    {
+        return selectedLabelFormat;
+    }
 
-    public boolean isReadyToProceed(){
+    /**
+     * Kontrola, či sú všetky potrebné údaje nastavené
+     * @return true ak je možné pokračovať, false inak
+     */
+    public boolean isReadyToProceed()
+    {
         return selectedFile != null &&
                 detectedFileType != null &&
                 selectedLabelFormat != null;
     }
 
+    /**
+     * Zobrazenie alert dialógu
+     * @param type typ alertu
+     * @param title titulok alertu
+     * @param content obsah alertu
+     */
     private void showAlert(Alert.AlertType type, String title, String content)
         {
             Alert alert = new Alert(type);
@@ -281,95 +408,4 @@ public class ImportController
             alert.setContentText(content);
             alert.showAndWait();
         }
-    @FXML
-    private void handlePreviewData()
-    {
-        //implementacia pre nahlad dat
-        if (!isReadyToProceed())
-        {
-            showAlert(Alert.AlertType.WARNING, "Neuplné údaje",
-                    "Pred zobrazením náhľadu vyberte súbor a formát štítkov.");
-            return;
-        }
-        //Tu može iplementovať logiku pre zobrazenie náhľadu
-        // Napriklád môžete otvoriť nove okno s náhľadom dat
-        try
-        {
-            //Implementacia pre zobrazenie náhľadu
-        } catch (Exception e)
-        {
-            showAlert(Alert.AlertType.ERROR,"Chyba",
-                    "Nepodarilo sa zobraziť náhľad:" + e.getMessage());
-        }
-    }
-    /**
-    @FXML
-    private void handleImportData()
-    {
-        //implementacia pre import dat
-        if (!isReadyToProceed())
-        {
-            showAlert(Alert.AlertType.WARNING, "Neúplné údaje",
-                    "Pred importom vyberte súbor a formát štítkov.");
-            return;
-        }
-
-        try
-        {
-            //Implementácia importu dát
-            showAlert(Alert.AlertType.INFORMATION, "Úspech",
-                    "Údaje boli úspešne importované.");
-        } catch (Exception e)
-        {
-            showAlert(Alert.AlertType.ERROR,"Chyba",
-                    "Nepodarilo sa importovať údaje:" + e.getMessage());
-        }
-    }*/
-
-    @FXML
-    private void handleImportData()
-    {
-        if (!isReadyToProceed())
-        {
-            showAlert(Alert.AlertType.WARNING, "Neúplné údaje",
-                    "Pred importom vyberte súbor a formát štítkov.");
-            return;
-        }
-
-        try
-        {
-            List<ImportedData> dataList = fileService.readFile(selectedFile, hasHeader());
-
-            // Získať ParentsTabController zo scény (ak rootVbox bol uložený s controllerom)
-            TabPane tabPane = (TabPane) rootVbox.getScene().lookup("#mainTabPane"); // alebo upraviť podľa tvojho ID
-
-            if (tabPane != null)
-            {
-                Tab parentsTab = tabPane.getTabs().stream()
-                        .filter(t -> t.getText().equalsIgnoreCase("Rodičia"))
-                        .findFirst().orElse(null);
-
-                if (parentsTab != null && parentsTab.getContent() instanceof VBox parentsVBox)
-                {
-                    Object controllerObj = parentsVBox.getProperties().get("controller");
-
-                    if (controllerObj instanceof ParentsTabController parentsTabController)
-                    {
-                        parentsTabController.loadData(dataList);
-                        showAlert(Alert.AlertType.INFORMATION, "Import hotový", "Údaje boli úspešne importované.");
-                    }
-                    else
-                    {
-                        System.err.println("Nebolo možné získať ParentsTabController.");
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Chyba", "Nepodarilo sa načítať dáta: " + e.getMessage());
-        }
-    }
-
 }

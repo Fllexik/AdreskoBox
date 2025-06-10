@@ -5,26 +5,32 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.canvas.Canvas?>
 
+<!-- Okno pre nastavenie vlastného formátu štítkov -->
 <HBox spacing="20"
       style="-fx-padding 20;"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.CustomLabelFormatController">
 
-    <!-- Ľavá strana: Formulár -->
+    <!-- Ľavá strana: Formulár pre nastavenie rozmerov -->
     <VBox spacing="15"
           prefWidth="450">
+
+        <!-- Nadpis -->
         <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
                text="Nastavenie vlastného formátu štítku"/>
 
+        <!-- Popis -->
         <Label text="Zadajte presné rozmery štítkov a ich usporiadanie na stránke A4 (210 x 297 mm)."
                wrapText="true"/>
 
+        <!-- Formulár s parametrami -->
         <GridPane hgap="10.0" vgap="10.0">
             <padding>
                 <Insets bottom="10" left="10" right="10" top="10" />
             </padding>
 
+            <!-- Názov formátu -->
             <Label text="Názov formátu:"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="0"/>
@@ -33,6 +39,7 @@
                        GridPane.columnIndex="1"
                        GridPane.rowIndex="0"/>
 
+            <!-- Rozmery štítku -->
             <Label text="Šírka štítku (mm):"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="1"/>
@@ -49,6 +56,7 @@
                        GridPane.columnIndex="1"
                        GridPane.rowIndex="2"/>
 
+            <!-- Usporiadanie na stránke -->
             <Label text="Počet stĺpcov:"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="3"/>
@@ -65,6 +73,7 @@
                        GridPane.columnIndex="1"
                        GridPane.rowIndex="4"/>
 
+            <!-- Okraje stránky -->
             <Label text="Ľavý okraj (mm):"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="5"/>
@@ -97,6 +106,7 @@
                        GridPane.columnIndex="1"
                        GridPane.rowIndex="8"/>
 
+            <!-- Medzery medzi štítkami -->
             <Label text="medzera medzi stĺpcami (mm):"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="9"/>
@@ -113,6 +123,7 @@
                        GridPane.columnIndex="1"
                        GridPane.rowIndex="10"/>
 
+            <!-- Maximálna dĺžka adresy -->
             <Label text="Max. dĺžka adresy (znakov):"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="11"/>
@@ -122,15 +133,17 @@
                        GridPane.rowIndex="11"/>
         </GridPane>
 
+        <!-- Chybové hlásenie -->
         <Label fx:id="errorLabel" style="-fx-text-fill: red;" visible="false" wrapText="true"/>
 
+        <!-- Tlačidlá -->
         <HBox alignment="CENTER_RIGHT" spacing="15">
             <Button text="Zrušiť" onAction="#handleCancel"/>
             <Button text="Uložiť" onAction="#handleSave" defaultButton="true"/>
         </HBox>
     </VBox>
 
-    <!-- Pravá strana: Náhľad -->
+    <!-- Pravá strana: Náhľad rozmiestnenia štítkov -->
     <TitledPane text="Náhľad rozmiestnenia na stránke" expanded="true">
         <VBox alignment="CENTER" spacing="10">
             <Canvas fx:id="previewCanvas" width="210" height="297"/>
