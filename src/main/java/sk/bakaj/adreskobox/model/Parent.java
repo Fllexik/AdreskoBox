@@ -43,8 +43,10 @@ public class Parent
     /**
      * Pokus o inteligentné rozdelenie plnej adresy na komponenty
      */
-    private void parseFullAddress(String fullAddr) {
-        if (fullAddr == null || fullAddr.trim().isEmpty()) {
+    private void parseFullAddress(String fullAddr)
+    {
+        if (fullAddr == null || fullAddr.trim().isEmpty())
+        {
             this.address = "";
             this.city = "";
             this.zipCode = "";
@@ -57,7 +59,8 @@ public class Parent
         Pattern zipPattern = Pattern.compile("\\b(\\d{3}\\s?\\d{2})\\b");
         Matcher zipMatcher = zipPattern.matcher(trimmedAddr);
 
-        if (zipMatcher.find()) {
+        if (zipMatcher.find())
+        {
             this.zipCode = zipMatcher.group(1).trim();
 
             // Rozdelenie na časti pred a po PSČ
@@ -65,19 +68,25 @@ public class Parent
             String afterZip = fullAddr.substring(zipMatcher.end()).trim();
 
             // Ulica je všetko pred PSČ
-            if (beforeZip.endsWith(",")) {
+            if (beforeZip.endsWith(","))
+            {
                 this.address = beforeZip.substring(0, beforeZip.length() - 1).trim();
-            } else {
+            }
+            else
+            {
                 this.address = beforeZip;
             }
 
             // Mesto je všetko po PSČ
             this.city = afterZip;
 
-        } else {
+        }
+        else
+        {
             // Ak sa PSČ nenašlo, pokus o rozdelenie podľa čiarok
             String[] parts = trimmedAddr.split(",");
-            if (parts.length >= 2) {
+            if (parts.length >= 2)
+            {
                 this.address = parts[0].trim();
                 // Posledná časť by mala byť mesto
                 this.city = parts[parts.length - 1].trim();
@@ -87,11 +96,14 @@ public class Parent
                 String lastPart = this.city;
                 Pattern zipInCityPattern = Pattern.compile("^(\\d{3}\\s?\\d{2})\\s+(.+)$");
                 Matcher cityMatcher = zipInCityPattern.matcher(lastPart);
-                if (cityMatcher.find()) {
+                if (cityMatcher.find())
+                {
                     this.zipCode = cityMatcher.group(1);
                     this.city = cityMatcher.group(2);
                 }
-            } else {
+            }
+            else
+            {
                 // Ak nie sú čiarky, celá adresa ide do address
                 this.address = trimmedAddr;
                 this.city = "";
@@ -153,18 +165,22 @@ public class Parent
 
         if (!zip.isEmpty() || !cty.isEmpty())
         {
-            if (sb.length() > 0) {
+            if (sb.length() > 0)
+            {
                 sb.append(", ");
             }
 
-            if (!zip.isEmpty()) {
+            if (!zip.isEmpty())
+            {
                 sb.append(zip);
-                if (!cty.isEmpty()) {
+                if (!cty.isEmpty())
+                {
                     sb.append(" ");
                 }
             }
 
-            if (!cty.isEmpty()) {
+            if (!cty.isEmpty())
+            {
                 sb.append(cty);
             }
         }
@@ -179,7 +195,8 @@ public class Parent
      * Riadok 3: PSČ a mesto
      */
 
-    public String getFormattedLabel() {
+    public String getFormattedLabel()
+    {
         StringBuilder sb = new StringBuilder();
 
         // Riadok 1: Meno a priezvisko
@@ -196,13 +213,16 @@ public class Parent
         String zipStr = getZipCode();
         String cityStr = getCity();
 
-        if (!zipStr.isEmpty()) {
+        if (!zipStr.isEmpty())
+        {
             sb.append(zipStr);
-            if (!cityStr.isEmpty()) {
+            if (!cityStr.isEmpty())
+            {
                 sb.append(" ");
             }
         }
-        if (!cityStr.isEmpty()) {
+        if (!cityStr.isEmpty())
+        {
             sb.append(cityStr);
         }
 
@@ -214,7 +234,8 @@ public class Parent
      * Index 1: Ulica a číslo
      * Index 2: PSČ a mesto
      */
-    public String[] getLabelLines() {
+    public String[] getLabelLines()
+    {
         String[] lines = new String[3];
 
         // Meno a priezvisko
@@ -226,15 +247,18 @@ public class Parent
         String city = getCity() != null ? getCity().trim() : "";
 
         // Ak adresa omylom obsahuje aj PSČ alebo mesto, odstránime to
-        if (!zip.isEmpty() && addressLine.contains(zip)) {
+        if (!zip.isEmpty() && addressLine.contains(zip))
+        {
             addressLine = addressLine.replace(zip, "").trim();
         }
-        if (!city.isEmpty() && addressLine.contains(city)) {
+        if (!city.isEmpty() && addressLine.contains(city))
+        {
             addressLine = addressLine.replace(city, "").trim();
         }
 
         // Taktiež odstrániť zvyšné čiarky a medzery na konci
-        if (addressLine.endsWith(",")) {
+        if (addressLine.endsWith(","))
+        {
             addressLine = addressLine.substring(0, addressLine.length() - 1).trim();
         }
 

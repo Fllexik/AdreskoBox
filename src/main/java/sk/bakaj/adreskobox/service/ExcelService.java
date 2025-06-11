@@ -114,7 +114,8 @@ public class ExcelService
 
         // DEBUG: Výpis prvých pár rodičov
         System.out.println("DEBUG - Prvých 3 rodičov pre Excel:");
-        for (int i = 0; i < Math.min(3, parents.size()); i++) {
+        for (int i = 0; i < Math.min(3, parents.size()); i++)
+        {
             Parent p = parents.get(i);
             System.out.println("  " + (i+1) + ". " + p.getFullName() + " - " + p.getFullAddress());
         }
@@ -192,7 +193,8 @@ public class ExcelService
      */
     private void fillSenderInfo(Sheet sheet, String senderName, String senderStreet, String senderCity)
     {
-        try {
+        try
+        {
             //Meno odosielateľa(B10-F10)
             Row nameRow = getOrCreateRow(sheet, SENDER_NAME_ROW);
             Cell nameCell = getOrCreateCell(nameRow, 1);//Stĺpec B
@@ -209,7 +211,9 @@ public class ExcelService
             cityCell.setCellValue(senderCity);
 
             System.out.println("    Odosielateľ vyplnený: " + senderName + ", " + senderStreet + ", " + senderCity);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             System.err.println("    CHYBA pri vyplňovaní odosielateľa: " + e.getMessage());
             throw e;
         }
@@ -221,7 +225,8 @@ public class ExcelService
      */
     private void fillRecipients(Sheet sheet, List<Parent> parents)
     {
-        try {
+        try
+        {
             for (int i = 0; i < parents.size(); i++)
             {
                 Parent parent = parents.get(i);
@@ -250,7 +255,8 @@ public class ExcelService
                 cityCell.setCellValue(city);
             }
             System.out.println("    Všetci príjemcovia vyplnení (" + parents.size() + ")");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             System.err.println("    CHYBA pri vyplňovaní príjemcov: " + e.getMessage());
             e.printStackTrace();
             throw e;
@@ -263,21 +269,24 @@ public class ExcelService
      */
     private String[] splitAddress(String fullAddress)
     {
-        if (fullAddress == null || fullAddress.trim().isEmpty()) {
+        if (fullAddress == null || fullAddress.trim().isEmpty())
+        {
             return new String[]{"", ""};
         }
 
         String street = fullAddress;
         String city = "";
 
-        try {
+        try
+        {
             //Skusíme nájsť oddeľovač medzi ulicou a mestom
             int commaIndex = fullAddress.lastIndexOf(",");
             if (commaIndex > 0 && commaIndex < fullAddress.length() - 1)
             {
                 street = fullAddress.substring(0, commaIndex).trim();
                 city = fullAddress.substring(commaIndex + 1).trim();
-            } else
+            }
+            else
             {
                 //Skusime detekciu PSČ (5 čislíc alebo 3+2 číslice)
                 String[] parts = fullAddress.split("\\s+");
@@ -311,7 +320,9 @@ public class ExcelService
                     city = cityPart.toString().trim();
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             System.err.println("CHYBA pri rozdeľovaní adresy '" + fullAddress + "': " + e.getMessage());
             // Ak sa rozdelenie nepodarí, celá adresa ide do ulica
             street = fullAddress;

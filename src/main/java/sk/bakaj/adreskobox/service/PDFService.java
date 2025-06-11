@@ -21,16 +21,22 @@ public class PDFService
     private Font defaultFont;
     private BaseFont baseFont;
 
-    public PDFService() {
+    public PDFService()
+    {
         try {
             // Inicializácia fontu a BaseFont pre presné meranie
             baseFont = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1250, BaseFont.EMBEDDED);
             defaultFont = new Font(baseFont, DEFAULT_FONT_SIZE);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             defaultFont = new Font(Font.FontFamily.HELVETICA, DEFAULT_FONT_SIZE);
-            try {
+            try
+            {
                 baseFont = BaseFont.createFont();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 // Fallback - použijeme odhad
                 baseFont = null;
             }
@@ -40,15 +46,20 @@ public class PDFService
     /**
      * Presné meranie šírky textu v bodoch
      */
-    private float getTextWidth(String text) {
-        if (text == null || text.isEmpty()) {
+    private float getTextWidth(String text)
+    {
+        if (text == null || text.isEmpty())
+        {
             return 0f;
         }
 
-        if (baseFont != null) {
+        if (baseFont != null)
+        {
             // Presné meranie pomocí BaseFont
             return baseFont.getWidthPoint(text, DEFAULT_FONT_SIZE);
-        } else {
+        }
+        else
+        {
             // Fallback - vylepšený odhad pre slovenské znaky
             float avgCharWidth = DEFAULT_FONT_SIZE * 0.55f; // Mierne znížené pre lepšiu presnosť
             return text.length() * avgCharWidth;
@@ -104,9 +115,12 @@ public class PDFService
                 StringBuilder labelText = new StringBuilder();
                 int validLines = 0;
 
-                for (String line : labelLines) {
-                    if (line != null && !line.trim().isEmpty()) {
-                        if (validLines > 0) {
+                for (String line : labelLines)
+                {
+                    if (line != null && !line.trim().isEmpty())
+                    {
+                        if (validLines > 0)
+                        {
                             labelText.append("\n");
                         }
                         labelText.append(line.trim());
@@ -114,7 +128,8 @@ public class PDFService
                     }
                 }
 
-                if (labelText.length() == 0) {
+                if (labelText.length() == 0)
+                {
                     System.out.println("  VAROVANIE: Prázdny štítok!");
                     labelText.append("Prázdny štítok");
                 }
@@ -144,14 +159,18 @@ public class PDFService
                 // Vyrenderovanie textu
                 int result = ct.go();
 
-                if (result == ColumnText.NO_MORE_TEXT) {
+                if (result == ColumnText.NO_MORE_TEXT)
+                {
                     System.out.println("  ✓ Štítok úspešne vytvorený");
-                } else {
+                }
+                else
+                {
                     System.out.println("  ⚠ Štítok nemusí byť kompletný (kód: " + result + ")");
                 }
 
                 // DEBUG: Nakreslenie rámčeka okolo štítka (voliteľné)
-                if (System.getProperty("debug.pdf.borders", "false").equals("true")) {
+                if (System.getProperty("debug.pdf.borders", "false").equals("true"))
+                {
                     canvas.rectangle(x, y, labelWidth, labelHeight);
                     canvas.stroke();
                 }
@@ -175,7 +194,9 @@ public class PDFService
             System.out.println("\n=== PDF DOKONČENÉ ===");
             System.out.println("Súbor uložený: " + outputFile.getAbsolutePath());
 
-        } catch (DocumentException | IOException e) {
+        }
+        catch (DocumentException | IOException e)
+        {
             System.err.println("CHYBA pri generovaní PDF: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Chyba pri generovaní PDF: " + e.getMessage(), e);
@@ -186,8 +207,10 @@ public class PDFService
      * Kontroluje, či sa text zmestí na štítok s danými rozmermi
      * OPRAVENÁ VERZIA - rozmery štítka sú už v mm, netreba ich konvertovať
      */
-    public boolean checkIfTextFitsOnLabel(String line1, String line2, String line3, LabelFormat format) {
-        try {
+    public boolean checkIfTextFitsOnLabel(String line1, String line2, String line3, LabelFormat format)
+    {
+        try
+        {
             // Rozmery štítka v mm konvertujeme na body
             float labelWidthPoints = (float) format.getWidth() * POINTS_PER_MM;
             float labelHeightPoints = (float) format.getHeight() * POINTS_PER_MM;
@@ -201,7 +224,8 @@ public class PDFService
             float widthReserve = 2f; // 6 bodov rezerva pre okraje (približne 2mm)
             float maxLineWidth = Math.max(Math.max(line1Width, line2Width), line3Width);
 
-            if (maxLineWidth > (labelWidthPoints - widthReserve)) {
+            if (maxLineWidth > (labelWidthPoints - widthReserve))
+            {
                 System.out.println("DEBUG: Štítok je príliš úzky");
                 System.out.println("  Najširší riadok: " + maxLineWidth + " bodov");
                 System.out.println("  Dostupná šírka: " + (labelWidthPoints - widthReserve) + " bodov");
@@ -217,7 +241,8 @@ public class PDFService
             float totalHeight = nonEmptyLines * LINE_HEIGHT;
             float heightReserve = 4f; // 4 body rezerva pre okraje
 
-            if (totalHeight > (labelHeightPoints - heightReserve)) {
+            if (totalHeight > (labelHeightPoints - heightReserve))
+            {
                 System.out.println("DEBUG: Štítok je príliš nízky");
                 System.out.println("  Potrebná výška: " + totalHeight + " bodov");
                 System.out.println("  Dostupná výška: " + (labelHeightPoints - heightReserve) + " bodov");
@@ -232,7 +257,9 @@ public class PDFService
 
             return true;
 
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             System.err.println("Chyba pri kontrole veľkosti štítka: " + e.getMessage());
             return false;
         }
@@ -241,7 +268,8 @@ public class PDFService
     /**
      * Kontroluje, či sa celý formátovaný text zmestí na štítok
      */
-    public boolean checkIfLabelFits(Parent parent, LabelFormat format) {
+    public boolean checkIfLabelFits(Parent parent, LabelFormat format)
+    {
         // Získanie jednotlivých riadkov štítka
         String[] lines = parent.getLabelLines();
 
@@ -251,12 +279,14 @@ public class PDFService
     /**
      * Získa najdlhší riadok z formátovaného štítka
      */
-    public String getLongestLine(Parent parent) {
+    public String getLongestLine(Parent parent)
+    {
         String[] lines = parent.getLabelLines();
 
         String longest = lines[0] != null ? lines[0] : "";
         for (int i = 1; i < lines.length; i++) {
-            if (lines[i] != null && getTextWidth(lines[i]) > getTextWidth(longest)) {
+            if (lines[i] != null && getTextWidth(lines[i]) > getTextWidth(longest))
+            {
                 longest = lines[i];
             }
         }
@@ -267,14 +297,18 @@ public class PDFService
     /**
      * Získa šírku najdlhšieho riadku v bodoch (pre debugging)
      */
-    public float getLongestLineWidth(Parent parent) {
+    public float getLongestLineWidth(Parent parent)
+    {
         String[] lines = parent.getLabelLines();
 
         float maxWidth = 0f;
-        for (String line : lines) {
-            if (line != null) {
+        for (String line : lines)
+        {
+            if (line != null)
+            {
                 float width = getTextWidth(line);
-                if (width > maxWidth) {
+                if (width > maxWidth)
+                {
                     maxWidth = width;
                 }
             }
@@ -305,18 +339,24 @@ public class PDFService
                 .replace("Trieda", "Tr.");
 
         // Ak je stále príliš dlhé, skúsime rozdeliť a skrátiť
-        if (result.length() > maxLength) {
+        if (result.length() > maxLength)
+        {
             String[] parts = result.split(",");
             StringBuilder shortened = new StringBuilder();
 
-            for (String part : parts) {
+            for (String part : parts)
+            {
                 String trimmed = part.trim();
-                if (shortened.length() + trimmed.length() + 2 <= maxLength) {
-                    if (shortened.length() > 0) {
+                if (shortened.length() + trimmed.length() + 2 <= maxLength)
+                {
+                    if (shortened.length() > 0)
+                    {
                         shortened.append(", ");
                     }
                     shortened.append(trimmed);
-                } else {
+                }
+                else
+                {
                     break;
                 }
             }
@@ -329,7 +369,8 @@ public class PDFService
     /**
      * Testovacia metóda pre debugging rozmerov štítka
      */
-    public void debugLabelSize(Parent parent, LabelFormat format) {
+    public void debugLabelSize(Parent parent, LabelFormat format)
+    {
         String[] lines = parent.getLabelLines();
 
         float labelWidthPoints = (float) format.getWidth() * POINTS_PER_MM;
@@ -350,9 +391,11 @@ public class PDFService
         float totalHeight = 0f;
         float maxLineWidth = 0f;
 
-        for (int i = 0; i < lines.length; i++) {
+        for (int i = 0; i < lines.length; i++)
+        {
             String line = lines[i] != null ? lines[i].trim() : "";
-            if (!line.isEmpty()) {
+            if (!line.isEmpty())
+            {
                 float width = getTextWidth(line);
                 totalHeight += LINE_HEIGHT;
                 maxLineWidth = Math.max(maxLineWidth, width);

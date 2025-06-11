@@ -125,20 +125,24 @@ public class FileService
     {
         List<String> allLines = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file)))
+        {
             String line;
             int lineCount = 0;
-            while ((line = br.readLine()) != null && lineCount < MAX_HEADER_SEARCH_ROWS) {
+            while ((line = br.readLine()) != null && lineCount < MAX_HEADER_SEARCH_ROWS)
+            {
                 allLines.add(line);
                 lineCount++;
             }
         }
 
         // Hľadáme hlavičku v prvých MAX_HEADER_SEARCH_ROWS riadkoch
-        for (int i = 0; i < allLines.size(); i++) {
+        for (int i = 0; i < allLines.size(); i++)
+        {
             String[] headers = parseCSVLine(allLines.get(i), delimiter);
 
-            if (containsExpectedColumns(headers)) {
+            if (containsExpectedColumns(headers))
+            {
                 return new HeaderInfo(true, i, headers);
             }
         }
@@ -157,16 +161,20 @@ public class FileService
             Sheet sheet = workbook.getSheetAt(0);
 
             // Hľadáme hlavičku v prvých MAX_HEADER_SEARCH_ROWS riadkoch
-            for (int rowIndex = 0; rowIndex < Math.min(MAX_HEADER_SEARCH_ROWS, sheet.getLastRowNum() + 1); rowIndex++) {
+            for (int rowIndex = 0; rowIndex < Math.min(MAX_HEADER_SEARCH_ROWS, sheet.getLastRowNum() + 1); rowIndex++)
+            {
                 Row row = sheet.getRow(rowIndex);
-                if (row != null) {
+                if (row != null)
+                {
                     String[] headers = new String[row.getLastCellNum()];
-                    for (int i = 0; i < row.getLastCellNum(); i++) {
+                    for (int i = 0; i < row.getLastCellNum(); i++)
+                    {
                         Cell cell = row.getCell(i);
                         headers[i] = getCellValueAsString(cell);
                     }
 
-                    if (containsExpectedColumns(headers)) {
+                    if (containsExpectedColumns(headers))
+                    {
                         return new HeaderInfo(true, rowIndex, headers);
                     }
                 }
@@ -265,27 +273,34 @@ public class FileService
         List<String> allLines = new ArrayList<>();
 
         // Načítanie všetkých riadkov
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file)))
+        {
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null)
+            {
                 allLines.add(line);
             }
         }
 
-        if (allLines.isEmpty()) {
+        if (allLines.isEmpty())
+        {
             throw new IOException("Súbor je prázdny.");
         }
 
         HeaderInfo headerInfo;
-        if (hasHeader) {
+        if (hasHeader)
+        {
             headerInfo = findCSVHeaderRow(file, delimiter);
-        } else {
+        }
+        else
+        {
             // Ak nie je hlavička, použijeme prvý riadok ako vzor štruktúry
             String[] firstRowColumns = parseCSVLine(allLines.get(0), delimiter);
             headerInfo = new HeaderInfo(false, -1, firstRowColumns);
         }
 
-        if (headerInfo.headers == null) {
+        if (headerInfo.headers == null)
+        {
             throw new IOException("Nepodarilo sa určiť štruktúru súboru.");
         }
 
@@ -293,13 +308,15 @@ public class FileService
         int startDataRowIndex = headerInfo.hasHeader ? headerInfo.rowIndex + 1 : 0;
 
         // Spracovanie dát
-        for (int i = startDataRowIndex; i < allLines.size(); i++) {
+        for (int i = startDataRowIndex; i < allLines.size(); i++)
+        {
             String line = allLines.get(i);
             if (line.trim().isEmpty()) continue;
 
             String[] values = parseCSVLine(line, delimiter);
             ImportedData data = createImportedData(values, columnIndexes);
-            if (data != null) {
+            if (data != null)
+            {
                 dataList.add(data);
             }
         }
@@ -318,22 +335,27 @@ public class FileService
             HeaderInfo headerInfo;
             if (hasHeader) {
                 headerInfo = findExcelHeaderRow(file);
-            } else {
+            }
+            else
+            {
                 // Ak nie je hlavička, použijeme prvý riadok ako vzor štruktúry
                 Row firstRow = sheet.getRow(0);
-                if (firstRow == null) {
+                if (firstRow == null)
+                {
                     throw new IOException("Súbor je prázdny alebo neobsahuje žiadne dáta.");
                 }
 
                 String[] firstRowColumns = new String[firstRow.getLastCellNum()];
-                for (int i = 0; i < firstRow.getLastCellNum(); i++) {
+                for (int i = 0; i < firstRow.getLastCellNum(); i++)
+                {
                     Cell cell = firstRow.getCell(i);
                     firstRowColumns[i] = getCellValueAsString(cell);
                 }
                 headerInfo = new HeaderInfo(false, -1, firstRowColumns);
             }
 
-            if (headerInfo.headers == null) {
+            if (headerInfo.headers == null)
+            {
                 throw new IOException("Nepodarilo sa určiť štruktúru súboru.");
             }
 
@@ -366,20 +388,26 @@ public class FileService
     /**
      * Bezpečné parsovanie CSV riadku s podporou úvodzoviek
      */
-    private String[] parseCSVLine(String line, String delimiter) {
+    private String[] parseCSVLine(String line, String delimiter)
+    {
         List<String> result = new ArrayList<>();
         boolean inQuotes = false;
         StringBuilder current = new StringBuilder();
 
-        for (int i = 0; i < line.length(); i++) {
+        for (int i = 0; i < line.length(); i++)
+        {
             char c = line.charAt(i);
 
-            if (c == '"') {
+            if (c == '"')
+            {
                 inQuotes = !inQuotes;
-            } else if (c == delimiter.charAt(0) && !inQuotes) {
+            } else if (c == delimiter.charAt(0) && !inQuotes)
+            {
                 result.add(current.toString().trim());
                 current.setLength(0);
-            } else {
+            }
+            else
+            {
                 current.append(c);
             }
         }
@@ -406,19 +434,24 @@ public class FileService
             if (cleanHeader.equalsIgnoreCase(STUDENT_FIRSTNAME_COLUMN))
             {
                 indexes[0] = i;
-            } else if (cleanHeader.equalsIgnoreCase(STUDENT_LASTNAME_COLUMN))
+            }
+            else if (cleanHeader.equalsIgnoreCase(STUDENT_LASTNAME_COLUMN))
             {
                 indexes[1] = i;
-            } else if (cleanHeader.equalsIgnoreCase(PARENT1_NAME_COLUMN))
+            }
+            else if (cleanHeader.equalsIgnoreCase(PARENT1_NAME_COLUMN))
             {
                 indexes[2] = i;
-            } else if (cleanHeader.equalsIgnoreCase(PARENT2_NAME_COLUMN))
+            }
+            else if (cleanHeader.equalsIgnoreCase(PARENT2_NAME_COLUMN))
             {
                 indexes[3] = i;
-            } else if (cleanHeader.equalsIgnoreCase(ADDRESS1_COLUMN))
+            }
+            else if (cleanHeader.equalsIgnoreCase(ADDRESS1_COLUMN))
             {
                 indexes[4] = i;
-            } else if (cleanHeader.equalsIgnoreCase(ADDRESS2_COLUMN))
+            }
+            else if (cleanHeader.equalsIgnoreCase(ADDRESS2_COLUMN))
             {
                 indexes[5] = i;
             }
@@ -434,16 +467,19 @@ public class FileService
             case STRING:
                 return cell.getStringCellValue().trim();
             case NUMERIC:
-                if (DateUtil.isCellDateFormatted(cell)) {
+                if (DateUtil.isCellDateFormatted(cell))
+                {
                     return cell.getDateCellValue().toString();
                 }
                 return String.valueOf((int) cell.getNumericCellValue()).trim();
             case BOOLEAN:
                 return String.valueOf(cell.getBooleanCellValue()).trim();
             case FORMULA:
-                try {
+                try
+                {
                     return cell.getStringCellValue().trim();
-                } catch (IllegalStateException e) {
+                } catch (IllegalStateException e)
+                {
                     return String.valueOf((int) cell.getNumericCellValue()).trim();
                 }
             case BLANK:
@@ -458,28 +494,35 @@ public class FileService
         if (values == null || values.length == 0) return null;
         ImportedData data = new ImportedData();
 
-        if (columnIndexes[0] != -1 && columnIndexes[0] < values.length) {
+        if (columnIndexes[0] != -1 && columnIndexes[0] < values.length)
+        {
             data.setStudentFirstName(cleanValue(values[columnIndexes[0]]));
         }
-        if (columnIndexes[1] != -1 && columnIndexes[1] < values.length) {
+        if (columnIndexes[1] != -1 && columnIndexes[1] < values.length)
+        {
             data.setStudentLastName(cleanValue(values[columnIndexes[1]]));
         }
-        if (columnIndexes[2] != -1 && columnIndexes[2] < values.length) {
+        if (columnIndexes[2] != -1 && columnIndexes[2] < values.length)
+        {
             data.setParent1Name(cleanValue(values[columnIndexes[2]]));
         }
-        if (columnIndexes[3] != -1 && columnIndexes[3] < values.length) {
+        if (columnIndexes[3] != -1 && columnIndexes[3] < values.length)
+        {
             data.setParent2Name(cleanValue(values[columnIndexes[3]]));
         }
-        if (columnIndexes[4] != -1 && columnIndexes[4] < values.length) {
+        if (columnIndexes[4] != -1 && columnIndexes[4] < values.length)
+        {
             data.setAddress1(cleanValue(values[columnIndexes[4]]));
         }
-        if (columnIndexes[5] != -1 && columnIndexes[5] < values.length) {
+        if (columnIndexes[5] != -1 && columnIndexes[5] < values.length)
+        {
             data.setAddress2(cleanValue(values[columnIndexes[5]]));
         }
 
         // Ak sú mená študentov prázdne, vráťte null
         if ((data.getStudentFirstName() == null || data.getStudentFirstName().isEmpty()) &&
-                (data.getStudentLastName() == null || data.getStudentLastName().isEmpty())) {
+                (data.getStudentLastName() == null || data.getStudentLastName().isEmpty()))
+        {
             return null;
         }
 
@@ -489,7 +532,8 @@ public class FileService
     /**
      * Vyčistí hodnotu - odstráni úvodzovky a zbytočné medzery
      */
-    private String cleanValue(String value) {
+    private String cleanValue(String value)
+    {
         if (value == null) return "";
         return value.replace("\"", "").trim();
     }
@@ -497,12 +541,14 @@ public class FileService
     /**
      * Pomocná trieda pre informácie o hlavičke
      */
-    private static class HeaderInfo {
+    private static class HeaderInfo
+    {
         final boolean hasHeader;
         final int rowIndex;
         final String[] headers;
 
-        HeaderInfo(boolean hasHeader, int rowIndex, String[] headers) {
+        HeaderInfo(boolean hasHeader, int rowIndex, String[] headers)
+        {
             this.hasHeader = hasHeader;
             this.rowIndex = rowIndex;
             this.headers = headers;

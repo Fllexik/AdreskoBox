@@ -112,7 +112,7 @@ public class CustomLabelFormatController
      */
     public void initWithFormat(LabelFormat format)
     {
-        if (format != null)
+        if (format == null)
         {
             return;
         }

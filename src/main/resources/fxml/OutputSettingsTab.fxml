@@ -4,30 +4,51 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="rootVbox" spacing="15" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.bakaj.adreskobox.controller.OutputSettingTabController">
+<VBox fx:id="rootVbox"
+      spacing="15"
+      style="-fx-padding: 20;"
+      xmlns="http://javafx.com/javafx/17.0.12"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="sk.bakaj.adreskobox.controller.OutputSettingTabController">
 
-    <Label style="-fx-font-size: 16; -fx-font-weight: bold;" text="Nastavenie výstupu" />
+    <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
+           text="Nastavenie výstupu" />
 
     <TitledPane text="Údaje odosielateľa" expanded="true">
         <VBox spacing="10">
             <GridPane hgap="10" vgap="10">
-                <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+                <padding>
+                    <Insets top="10"
+                            right="10"
+                            bottom="10"
+                            left="10"/>
+                </padding>
 
-                <Label text="Meno odosielateľa:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <TextField fx:id="senderNameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="Meno odosielateľa:"
+                       GridPane.columnIndex="0"
+                       GridPane.rowIndex="0"/>
+                <TextField fx:id="senderNameField"
+                           GridPane.columnIndex="1"
+                           GridPane.rowIndex="0"/>
 
-                <Label text="Ulica a číslo:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <TextField fx:id="senderStreetField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Ulica a číslo:"
+                       GridPane.columnIndex="0"
+                       GridPane.rowIndex="1"/>
+                <TextField fx:id="senderStreetField"
+                           GridPane.columnIndex="1"
+                           GridPane.rowIndex="1"/>
 
-                <Label text="PSČ a mesto:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <TextField fx:id="senderCityField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Label text="PSČ a mesto:"
+                       GridPane.columnIndex="0"
+                       GridPane.rowIndex="2"/>
+                <TextField fx:id="senderCityField"
+                           GridPane.columnIndex="1"
+                           GridPane.rowIndex="2"/>
 
-                <Label text="Poznámka: V šablóne je potrebne manuálne zaškrtnúť druh zásielky." GridPane.columnIndex="0" GridPane.rowIndex="3" wrapText="true"/>
-
-                <!--
-                <Label text="Druh zásielky:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                <ComboBox fx:id="mailTypeComboBox" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                -->
+                <Label text="Poznámka: V šablóne je potrebne manuálne zaškrtnúť druh zásielky."
+                       GridPane.columnIndex="0"
+                       GridPane.rowIndex="3"
+                       wrapText="true"/>
 
                 <columnConstraints>
                     <ColumnConstraints minWidth="100"/>
@@ -40,13 +61,23 @@
     <TitledPane text="Šablóna podacieho hárku" expanded="true">
         <VBox spacing="10">
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <TextField fx:id="templatePathField" HBox.hgrow="ALWAYS" editable="false" promptText="Cesta k šablóne podacieho hárku"/>
-                <Button fx:id="browseTemplateButton" text="Prehľadávať" onAction="#handleBrowseTemplate"/>
-                <Button fx:id="createTemplateButton" text="Vytvoriť novú šablónu" onAction="#handleCreateTemplate"/>
+                <TextField fx:id="templatePathField"
+                           HBox.hgrow="ALWAYS"
+                           editable="false"
+                           promptText="Cesta k šablóne podacieho hárku"/>
+                <Button fx:id="browseTemplateButton"
+                        text="Prehľadávať"
+                        onAction="#handleBrowseTemplate"/>
+                <Button fx:id="createTemplateButton"
+                        text="Vytvoriť novú šablónu"
+                        onAction="#handleCreateTemplate"/>
             </HBox>
-            <Label text="Poznámka: V šablóne sa vyplnia údaje odosielateľa, typ zásielky a zoznam príjemcov." wrapText="true"/>
+            <Label text="Poznámka: V šablóne sa vyplnia údaje odosielateľa, typ zásielky a zoznam príjemcov."
+                   wrapText="true"/>
         </VBox>
     </TitledPane>
 
-    <Label style="-fx-font-style: italic;" text="Pre pokračovanie vyplňte všetky povinné údaje. Tieto informácie budú použité pri generovaní podacieho hárka" wrapText="true"/>
+    <Label style="-fx-font-style: italic;"
+           text="Pre pokračovanie vyplňte všetky povinné údaje. Tieto informácie budú použité pri generovaní podacieho hárka"
+           wrapText="true"/>
 </VBox>

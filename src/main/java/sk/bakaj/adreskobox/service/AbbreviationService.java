@@ -18,7 +18,8 @@ public class AbbreviationService
         try
         {
             loadAbbreviationsFromProperties();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             System.err.println("Chyba pri načítaní skratiek: " + e.getMessage());
             //AK načitanie zlyha, inicializuje aspoň základne skratky
@@ -39,7 +40,8 @@ public class AbbreviationService
         try
         {
             saveAbbreviationsToProperties();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             System.err.println("Nepodarilo sa uložiť základné skratky: " + e.getMessage());
         }
@@ -66,7 +68,8 @@ public class AbbreviationService
                     abbreviations.put(key, props.getProperty(key));
                 }
             }
-        } else
+        }
+        else
         {
             //Ak súbor neexistuje, vytvoríme ho so zakladnými skratkami
             initDefaultAbbreviations();
@@ -111,7 +114,8 @@ public class AbbreviationService
         try
         {
             saveAbbreviationsToProperties();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             System.err.println("Chyba pri uložení skratky: " + e.getMessage());
         }
@@ -136,7 +140,8 @@ public class AbbreviationService
         try
         {
             saveAbbreviationsToProperties();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             System.err.println("Chyba pri odstranení skratky: " + e.getMessage());
         }
