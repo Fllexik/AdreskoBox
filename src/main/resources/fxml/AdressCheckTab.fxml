@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
+
+<!-- Hlavný kontajner pre kontrolu adries -->
 <VBox fx:id="rootVbox"
       spacing="15"
       style="-fx-padding: 20;"
@@ -12,14 +14,17 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.AdressCheckTabController">
 
+    <!-- Hlavný nadpis sekcie -->
     <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
            text="Kontrola adries"/>
 
+    <!-- Informačný text o automatickom skracovaní -->
     <HBox spacing="10" alignment="CENTER_LEFT">
         <Label text="Skratky adries sú automaticky aplikované podľa zvoleného formátu štítkov."
                wrapText="true"/>
     </HBox>
 
+    <!-- Ovládacie tlačidlá pre správu skratiek -->
     <HBox alignment="CENTER_RIGHT" spacing="10">
         <Button fx:id="manageAbbreviationsButton"
                 text="Spravovať skratky"/>
@@ -27,31 +32,38 @@
                 text="Pridať novú skratku"/>
     </HBox>
 
+    <!-- Hlavná tabuľka s adresami -->
     <TableView fx:id="addressTable" VBox.vgrow="ALWAYS">
         <columns>
+            <!-- Stĺpec pre meno -->
             <TableColumn fx:id="nameColumn"
                          text="Meno"
                          prefWidth="150"/>
+            <!-- Stĺpec pre pôvodnú adresu -->
             <TableColumn fx:id="originalAddressColumn"
                          text="Pôvodná adresa"
                          prefWidth="200"/>
+            <!-- Stĺpec pre skrátenú adresu -->
             <TableColumn fx:id="abbreviatedAddressColumn"
-                         text="Skrátena adresa"
+                         text="Skrátená adresa"
                          prefWidth="200"/>
+            <!-- Stĺpec pre stav adresy -->
             <TableColumn fx:id="statusColumn"
                          text="Stav"
                          prefWidth="100"/>
         </columns>
+        <!-- Zobrazenie keď nie sú k dispozícii žiadne dáta -->
         <placeholder>
             <Label text="Žiadné adresy na kontrolu"/>
         </placeholder>
     </TableView>
 
+    <!-- Sekcia s pomocnými poznámkami pre používateľa -->
     <VBox spacing="5">
         <Label style="-fx-font-style: italic;"
-               text="Poznámka: Červeným sú označené adresy, ktoré sa nezmestia na štítok."/>
+               text="Poznámka: Červenou farbou sú označené adresy, ktoré sa nezmestia na štítok."/>
         <Label style="-fx-font-style: italic;"
-               text="Pre pridannie vlastnej skratky kliknite pravým tlačidlom myši na riadok alebo použite tlačidlo 'Pridať novú skratku'."/>
+               text="Pre pridanie vlastnej skratky kliknite pravým tlačidlom myši na riadok alebo použite tlačidlo 'Pridať novú skratku'."/>
         <Label style="-fx-font-style: italic;"
                text="Všetky skratky sú automaticky uložené do súboru abbreviations.properties v adresári aplikácie."/>
     </VBox>

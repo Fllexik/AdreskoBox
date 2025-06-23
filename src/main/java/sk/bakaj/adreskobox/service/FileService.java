@@ -12,8 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Služba pre prácu so súbormi - import dát z CSV a Excel súborov
+ * Podporuje automatickú detekciu typu súboru, oddeľovačov a hlavičiek
+ */
 public class FileService
 {
+    // Konštanty pre názvy stĺpcov
     public static final String STUDENT_FIRSTNAME_COLUMN = "Meno";
     public static final String STUDENT_LASTNAME_COLUMN = "Priezvisko";
     public static final String PARENT1_NAME_COLUMN = "Rodič 1.";
@@ -21,10 +26,13 @@ public class FileService
     public static final String ADDRESS1_COLUMN = "Adresa 1.";
     public static final String ADDRESS2_COLUMN = "Adresa 2.";
 
-    private static final int MAX_HEADER_SEARCH_ROWS = 5; // Maximálny počet riadkov na hľadanie hlavičky
+    // Maximálny počet riadkov na hľadanie hlavičky
+    private static final int MAX_HEADER_SEARCH_ROWS = 5;
 
     /**
-     * Detekuje typ a vrati ho ako reťazec: "CSV", "XLS", XLXS" alebo null
+     * Detekuje typ súboru na základe prípony
+     * @param file súbor na analýzu
+     * @return typ súboru ako reťazec: "CSV", "XLS", "XLSX" alebo null
      */
     public String detectFileType(File file)
     {
@@ -48,20 +56,22 @@ public class FileService
     }
 
     /**
-     * Detekuje oddeľovač pre CSV súbor
+     * Detekuje oddeľovač pre CSV súbor analýzou prvých 10 riadkov
+     * @param file CSV súbor na analýzu
+     * @return najčastejšie používaný oddeľovač
+     * @throws IOException pri chybe čítania súboru
      */
-
     public String detectFileDelimiter(File file) throws IOException
     {
         String fileName = file.getName().toLowerCase();
 
-        //Ak to nie je CSV súbor, vratime null
+        // Ak to nie je CSV súbor, vrátime null
         if (!fileName.endsWith(".csv"))
         {
             return null;
         }
 
-        //Definujeme potencialne oddeľovače a ich počty v súbore
+        // Definujeme potenciálne oddeľovače a ich počty v súbore
         String[] commonDelimiters = {",", ";", "\t", "|"};
         Map<String, Integer> delimiterCounts = new HashMap<>();
 
@@ -70,7 +80,7 @@ public class FileService
             delimiterCounts.put(delimiter, 0);
         }
 
-        //Prečítame prvých 10 riadkov(alebo menej, ak je súbor kratši)
+        // Prečítame prvých 10 riadkov (alebo menej, ak je súbor kratší)
         try(BufferedReader br = new BufferedReader(new FileReader(file)))
         {
             String line;
@@ -85,8 +95,9 @@ public class FileService
                 lineCount++;
             }
         }
-        //Vyberiem oddeľovač s najväčším počtom vyskytov
-        String bestDelimiter = ","; //Predvolený oddeľovač je čiarka
+
+        // Vyberieme oddeľovač s najväčším počtom výskytov
+        String bestDelimiter = ","; // Predvolený oddeľovač je čiarka
         int maxCount = 0;
 
         for (Map.Entry<String, Integer> entry : delimiterCounts.entrySet())
@@ -97,14 +108,17 @@ public class FileService
                 bestDelimiter = entry.getKey();
             }
         }
-        // AK sme nenašli žiadený oddeľovač, vratime predvolený
+
+        // Ak sme nenašli žiadny oddeľovač, vrátime predvolený
         return maxCount > 0 ? bestDelimiter : ",";
     }
 
     /**
      * Počíta výskyty oddeľovača v reťazci
+     * @param text text na analýzu
+     * @param delimiter hľadaný oddeľovač
+     * @return počet výskytov oddeľovača
      */
-
     private int countOccurrences(String text, String delimiter)
     {
         int count = 0;
@@ -119,7 +133,10 @@ public class FileService
 
     /**
      * Nájde riadok s hlavičkou v CSV súbore
+     * @param file CSV súbor na analýzu
+     * @param delimiter oddeľovač používaný v súbore
      * @return HeaderInfo objekt obsahujúci informácie o hlavičke
+     * @throws IOException pri chybe čítania súboru
      */
     private HeaderInfo findCSVHeaderRow(File file, String delimiter) throws IOException
     {
@@ -153,6 +170,9 @@ public class FileService
 
     /**
      * Nájde riadok s hlavičkou v Excel súbore
+     * @param file Excel súbor na analýzu
+     * @return HeaderInfo objekt obsahujúci informácie o hlavičke
+     * @throws IOException pri chybe čítania súboru
      */
     private HeaderInfo findExcelHeaderRow(File file) throws IOException
     {
@@ -185,8 +205,11 @@ public class FileService
     }
 
     /**
-     * Overí či v súbore je hlavička
-     * Kontroluje, či obsahuje očakávané hlavičky stlpcov
+     * Overí či súbor obsahuje hlavičku
+     * Kontroluje, či obsahuje očakávané názvy stĺpcov
+     * @param file súbor na kontrolu
+     * @return true ak súbor obsahuje hlavičku, false inak
+     * @throws IOException pri chybe čítania súboru
      */
 
     public boolean hasHeaderRow(File file) throws IOException
@@ -206,7 +229,9 @@ public class FileService
     }
 
     /**
-     * Kontroluje, či pole hlavičiek obsahuje aspoň jeden očakávany stlpec
+     * Kontroluje, či pole hlavičiek obsahuje aspoň dva očakávané stĺpce
+     * @param headers pole názvov hlavičiek
+     * @return true ak obsahuje dostatočný počet rozpoznaných stĺpcov
      */
     private boolean containsExpectedColumns(String[] headers)
     {
@@ -238,7 +263,10 @@ public class FileService
     }
 
     /**
-     * Načíta data zo súboru s automatickou detekciou hlavičky
+     * Načíta dáta zo súboru s automatickou detekciou hlavičky
+     * @param file súbor na načítanie
+     * @return zoznam importovaných dát
+     * @throws IOException pri chybe čítania súboru
      */
     public List<ImportedData> readFile(File file) throws IOException
     {
@@ -246,7 +274,11 @@ public class FileService
     }
 
     /**
-     * Načíta data zo súboru
+     * Načíta dáta zo súboru
+     * @param file súbor na načítanie
+     * @param hasHeader určuje či súbor obsahuje hlavičku
+     * @return zoznam importovaných dát
+     * @throws IOException pri chybe čítania súboru alebo nepodporovanom type súboru
      */
     public List<ImportedData> readFile(File file, boolean hasHeader) throws IOException
     {
@@ -267,6 +299,14 @@ public class FileService
         }
     }
 
+    /**
+     * Načíta dáta z CSV súboru
+     * @param file CSV súbor
+     * @param delimiter oddeľovač stĺpcov
+     * @param hasHeader určuje či súbor obsahuje hlavičku
+     * @return zoznam importovaných dát
+     * @throws IOException pri chybe čítania súboru
+     */
     private List<ImportedData> readCSV(File file, String delimiter, boolean hasHeader) throws IOException
     {
         List<ImportedData> dataList = new ArrayList<>();
@@ -324,6 +364,13 @@ public class FileService
         return dataList;
     }
 
+    /**
+     * Načíta dáta z Excel súboru
+     * @param file Excel súbor
+     * @param hasHeader určuje či súbor obsahuje hlavičku
+     * @return zoznam importovaných dát
+     * @throws IOException pri chybe čítania súboru
+     */
     private List<ImportedData> readExcel(File file, boolean hasHeader) throws IOException
     {
         List<ImportedData> dataList = new ArrayList<>();
@@ -362,6 +409,7 @@ public class FileService
             int[] columnIndexes = findColumnIndexes(headerInfo.headers);
             int startRowForData = headerInfo.hasHeader ? headerInfo.rowIndex + 1 : 0;
 
+            // Spracovanie všetkých riadkov s dátami
             for (int i = startRowForData; i <= sheet.getLastRowNum(); i++)
             {
                 Row row = sheet.getRow(i);
@@ -387,6 +435,9 @@ public class FileService
 
     /**
      * Bezpečné parsovanie CSV riadku s podporou úvodzoviek
+     * @param line riadok na spracovanie
+     * @param delimiter oddeľovač stĺpcov
+     * @return pole hodnôt zo stĺpcov
      */
     private String[] parseCSVLine(String line, String delimiter)
     {
@@ -401,7 +452,8 @@ public class FileService
             if (c == '"')
             {
                 inQuotes = !inQuotes;
-            } else if (c == delimiter.charAt(0) && !inQuotes)
+            }
+            else if (c == delimiter.charAt(0) && !inQuotes)
             {
                 result.add(current.toString().trim());
                 current.setLength(0);
@@ -416,6 +468,11 @@ public class FileService
         return result.toArray(new String[0]);
     }
 
+    /**
+     * Nájde indexy stĺpcov pre jednotlivé typy dát
+     * @param headers pole názvov hlavičiek
+     * @return pole indexov pre jednotlivé stĺpce (-1 ak stĺpec nebol nájdený)
+     */
     private int[] findColumnIndexes(String[] headers)
     {
         int[] indexes = new int[6];
@@ -459,6 +516,11 @@ public class FileService
         return indexes;
     }
 
+    /**
+     * Konvertuje hodnotu bunky na reťazec
+     * @param cell bunka z Excel súboru
+     * @return textová hodnota bunky
+     */
     private String getCellValueAsString(Cell cell)
     {
         if (cell == null) return "";
@@ -489,11 +551,18 @@ public class FileService
         }
     }
 
+    /**
+     * Vytvorí objekt ImportedData z hodnôt riadku
+     * @param values hodnoty zo stĺpcov
+     * @param columnIndexes indexy jednotlivých typov stĺpcov
+     * @return ImportedData objekt alebo null ak sú údaje neúplné
+     */
     private ImportedData createImportedData(String[] values, int[] columnIndexes)
     {
         if (values == null || values.length == 0) return null;
         ImportedData data = new ImportedData();
 
+        // Nastavenie hodnôt do objektu na základe nájdených indexov
         if (columnIndexes[0] != -1 && columnIndexes[0] < values.length)
         {
             data.setStudentFirstName(cleanValue(values[columnIndexes[0]]));
@@ -519,7 +588,7 @@ public class FileService
             data.setAddress2(cleanValue(values[columnIndexes[5]]));
         }
 
-        // Ak sú mená študentov prázdne, vráťte null
+        // Ak sú mená študentov prázdne, vrátime null
         if ((data.getStudentFirstName() == null || data.getStudentFirstName().isEmpty()) &&
                 (data.getStudentLastName() == null || data.getStudentLastName().isEmpty()))
         {
@@ -531,6 +600,8 @@ public class FileService
 
     /**
      * Vyčistí hodnotu - odstráni úvodzovky a zbytočné medzery
+     * @param value hodnota na vyčistenie
+     * @return vyčistená hodnota
      */
     private String cleanValue(String value)
     {
@@ -539,14 +610,20 @@ public class FileService
     }
 
     /**
-     * Pomocná trieda pre informácie o hlavičke
+     * Pomocná trieda pre informácie o hlavičke súboru
      */
     private static class HeaderInfo
     {
-        final boolean hasHeader;
-        final int rowIndex;
-        final String[] headers;
+        final boolean hasHeader;    // či súbor obsahuje hlavičku
+        final int rowIndex;        // index riadku s hlavičkou
+        final String[] headers;   // názvy stĺpcov
 
+        /**
+         * Konštruktor pre HeaderInfo
+         * @param hasHeader určuje či súbor obsahuje hlavičku
+         * @param rowIndex index riadku s hlavičkou (-1 ak nie je hlavička)
+         * @param headers pole názvov stĺpcov
+         */
         HeaderInfo(boolean hasHeader, int rowIndex, String[] headers)
         {
             this.hasHeader = hasHeader;

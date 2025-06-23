@@ -1,0 +1,59 @@
+.root {
+    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-background-color: #f9f9f9;
+}
+
+/* Nadpis */
+.label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #333;
+}
+
+/* Prvý nadpis */
+.label:first-of-type {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1976d2;
+}
+
+/* Tlačidlá */
+.button {
+    -fx-background-color: #1976d2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #1565c0;
+}
+
+/* TabPane */
+.tab-pane {
+    -fx-tab-min-width: 130px;
+    -fx-tab-max-width: 200px;
+    -fx-background-color: white;
+}
+
+/* Tabs */
+.tab-header-area {
+    -fx-background-color: #e3f2fd;
+}
+
+.tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #1976d2;
+    -fx-border-width: 0 0 2px 0;
+}
+
+/* Navigačný panel */
+.hbox {
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-alignment: center-right;
+    -fx-background-color: #e3f2fd;
+    -fx-border-color: #bbdefb;
+    -fx-border-width: 1px 0 0 0;
+}

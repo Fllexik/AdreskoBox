@@ -267,13 +267,6 @@ public class Parent
         // PSČ a mesto do posledného riadku
         lines[2] = (!zip.isEmpty() || !city.isEmpty()) ? (zip + " " + city).trim() : "";
 
-        // DEBUG výpis
-        System.out.println("=== DEBUG Štítok ===");
-        System.out.println("Meno: " + lines[0]);
-        System.out.println("Adresa: " + lines[1]);
-        System.out.println("PSČ a mesto: " + lines[2]);
-        System.out.println("====================");
-
         return lines;
     }
 }

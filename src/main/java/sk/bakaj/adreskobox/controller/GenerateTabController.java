@@ -18,6 +18,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Kontrolér pre záložku generovania výstupných súborov.
+ * Spravuje proces generovania štítkov a podacích hárkov.
+ */
 public class GenerateTabController
 {
     private static final Log log = LogFactory.getLog(GenerateTabController.class);
@@ -35,7 +39,7 @@ public class GenerateTabController
     private Label submissionSheetsCountLabel;
 
     @FXML
-    private Button browseOutpuDirButton;
+    private Button browseOutputDirButton;
 
     @FXML
     private Button generateButton;
@@ -46,6 +50,7 @@ public class GenerateTabController
     @FXML
     private TextArea generationLogArea;
 
+    // Vstupné dáta pre generovanie
     private List<Parent> selectedParents;
     private LabelFormat selectedLabelFormat;
     private String senderName;
@@ -53,17 +58,20 @@ public class GenerateTabController
     private String senderCity;
     private File templateFile;
 
+    // Výstupné nastavenia a služby
     private File outputDirectory;
     private PDFService pdfService = new PDFService();
     private ExcelService excelService = new ExcelService();
 
     private List<File> generatedFiles = new ArrayList<>();
 
+    /**
+     * Inicializácia kontroléra po načítaní FXML.
+     */
     @FXML
     public void initialize()
     {
-        // DÔLEŽITÉ: Uložiť controller do properties root elementu
-        // Toto je kľúčové pre načítanie controllera v MainController
+        // Uloženie controllera do properties root elementu pre MainController
         if (rootVbox != null)
         {
             rootVbox.getProperties().put("controller", this);
@@ -78,6 +86,9 @@ public class GenerateTabController
         outputDirField.setText(outputDirectory.getAbsolutePath());
     }
 
+    /**
+     * Obsluha tlačidla pre výber výstupného adresára.
+     */
     @FXML
     private void handleBrowseOutputDir()
     {
@@ -97,6 +108,9 @@ public class GenerateTabController
         }
     }
 
+    /**
+     * Hlavná metóda pre generovanie výstupných súborov.
+     */
     @FXML
     private void handleGenerate()
     {
@@ -113,13 +127,7 @@ public class GenerateTabController
         {
             log("Začínam generovanie výstupných súborov...");
 
-            // DEBUGGING: Kontrola vstupných údajov
-            log("DEBUG - Kontrola vstupných údajov:");
-            log("- Počet vybraných rodičov: " + (selectedParents != null ? selectedParents.size() : "NULL"));
-            log("- Formát štítkov: " + (selectedLabelFormat != null ? selectedLabelFormat.getName() : "NULL"));
-            log("- Odosielateľ: " + senderName);
-            log("- Šablóna: " + (templateFile != null ? templateFile.getAbsolutePath() : "NULL"));
-
+            // Kontrola vstupných údajov
             if (selectedParents == null || selectedParents.isEmpty()) {
                 throw new IllegalStateException("Žiadni rodičia nie sú vybraní!");
             }
@@ -149,7 +157,6 @@ public class GenerateTabController
                 log("- ✓ Štítky boli úspešne vygenerované do súboru: " + labelsFile.getName());
             } catch (Exception e) {
                 log("- ✗ CHYBA pri generovaní štítkov: " + e.getMessage());
-                e.printStackTrace(); // Pre detailné ladenie
                 throw e;
             }
 
@@ -158,7 +165,7 @@ public class GenerateTabController
             log("- Počet príjemcov: " + selectedParents.size());
             log("- Šablóna: " + (templateFile != null && templateFile.exists() ? "OK" : "CHÝBA"));
 
-            // DÔLEŽITÉ: Nastavenie výstupného adresára pre ExcelService
+            // Nastavenie výstupného adresára pre ExcelService
             excelService.setOutputDirectory(outputDirectory);
 
             if (templateFile == null || !templateFile.exists()) {
@@ -209,8 +216,6 @@ public class GenerateTabController
         } catch (Exception e)
         {
             log("\n✗ KRITICKÁ CHYBA pri generovaní: " + e.getMessage());
-            log("Stack trace:");
-            e.printStackTrace();
 
             showAlert(Alert.AlertType.ERROR, "Chyba pri generovaní",
                     "Nastala chyba pri generovaní súborov:\n\n" +
@@ -219,6 +224,9 @@ public class GenerateTabController
         }
     }
 
+    /**
+     * Obsluha tlačidla "Začať odznova".
+     */
     @FXML
     private void handleStartOver()
     {
@@ -227,6 +235,9 @@ public class GenerateTabController
                 "Táto funkcionalita bude implementovaná v ďalšej verzii.");
     }
 
+    /**
+     * Otvorí výstupný adresár v systémovom správcovi súborov.
+     */
     @FXML
     private void handleOpenOutputDir()
     {
@@ -243,6 +254,16 @@ public class GenerateTabController
         }
     }
 
+    /**
+     * Nastaví vstupné dáta potrebné pre generovanie.
+     *
+     * @param parents Zoznam rodičov
+     * @param labelFormat Formát štítkov
+     * @param senderName Meno odosielateľa
+     * @param senderStreet Ulica odosielateľa
+     * @param senderCity Mesto odosielateľa
+     * @param templateFile Súbor šablóny pre podacie hárky
+     */
     public void setData(List<Parent> parents, LabelFormat labelFormat,
                         String senderName, String senderStreet, String senderCity,
                         File templateFile)
@@ -253,12 +274,6 @@ public class GenerateTabController
         this.senderStreet = senderStreet;
         this.senderCity = senderCity;
         this.templateFile = templateFile;
-
-        // DEBUG výpis
-        log("setData() volaná:");
-        log("- Rodičia: " + (parents != null ? parents.size() : "NULL"));
-        log("- Formát: " + (labelFormat != null ? labelFormat.getName() : "NULL"));
-        log("- Odosielateľ: " + senderName);
 
         //Aktualizácia počítadiel
         if (selectedLabelFormat != null && selectedParents != null) {
@@ -271,12 +286,18 @@ public class GenerateTabController
         }
     }
 
+    /**
+     * Pridá správu do logu aplikácie aj konzoly.
+     */
     private void log(String message)
     {
-        System.out.println(message); // Aj do konzoly pre ladenie
+        System.out.println(message); // Pre ladenie v konzole
         generationLogArea.appendText(message + "\n");
     }
 
+    /**
+     * Zobrazí alert dialóg.
+     */
     private void showAlert(Alert.AlertType type, String title, String content)
     {
         Alert alert = new Alert(type);

@@ -14,23 +14,30 @@ import javafx.scene.control.Label;
 import java.util.List;
 import java.io.File;
 
+/**
+ * Controller pre okno náhľadu a tlače štítkov.
+ * Zobrazuje tabuľku s rodičmi a ich adresami, umožňuje export do PDF
+ * a priamu tlač štítkov v zvolenom formáte.
+ */
 public class PrintPreviewController
 {
+    // FXML komponenty pre zobrazenie údajov
     @FXML
-    private TableView<Parent> labelsTable;
+    private TableView<Parent> labelsTable;  // Tabuľka so zoznamom štítkov
 
     @FXML
-    private TableColumn<Parent, String> nameColumn;
+    private TableColumn<Parent, String> nameColumn; // Stĺpеc s menami rodičov
 
     @FXML
-    private TableColumn<Parent, String> addressColumn;
+    private TableColumn<Parent, String> addressColumn;  // Stĺpec s adresami
 
     @FXML
-    private Label totalLabelsLabel;
+    private Label totalLabelsLabel; // Label zobrazujúci celkový počet štítkov
 
-    private  List<Parent> parents;
-    private LabelFormat format;
-    private PDFService pdfService = new PDFService();
+    // Dáta pre generovanie štítkov
+    private  List<Parent> parents;                      // Zoznam rodičov na tlač
+    private LabelFormat format;                         // Formát štítkov
+    private PDFService pdfService = new PDFService();   // Služba pre generovanie PDF
 
     @FXML
     public void initialize()

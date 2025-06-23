@@ -7,6 +7,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextArea?>
 
+<!-- Hlavný kontajner pre generovanie výstupných súborov -->
 <VBox fx:id="rootVbox"
       spacing="15"
       style="-fx-padding: 20;"
@@ -14,25 +15,31 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.GenerateTabController">
 
+    <!-- Hlavný nadpis sekcie -->
     <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
            text="Generovanie výstupných súborov"/>
 
+    <!-- Sekcia pre výber výstupného adresára -->
     <TitledPane text="Výstupný adresár" expanded="true">
         <VBox spacing="10">
             <HBox spacing="10" alignment="CENTER_LEFT">
+                <!-- Pole zobrazujúce cestu k výstupnému adresáru -->
                 <TextField fx:id="outputDirField"
                            HBox.hgrow="ALWAYS"
                            editable="false"
                            promptText="Cesta k výstupnému adresáru"/>
-                <Button fx:id="browseOutpuDirButton"
+                <!-- Tlačidlo pre zmenu výstupného adresára -->
+                <Button fx:id="browseOutputDirButton"
                         text="Zmeniť adresár"
                         onAction="#handleBrowseOutputDir"/>
             </HBox>
         </VBox>
     </TitledPane>
 
+    <!-- Sekcia so súhrnom generovania -->
     <TitledPane text="Súhrn" expanded="true">
         <GridPane hgap="15" vgap="10">
+            <!-- Odsadenie obsahu GridPane -->
             <padding>
                 <Insets top="10"
                         right="10"
@@ -40,6 +47,7 @@
                         left="10"/>
             </padding>
 
+            <!-- Zobrazenie počtu strán so štítkami -->
             <Label text="Počet strán so štítkami:"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="0"/>
@@ -48,6 +56,7 @@
                    GridPane.columnIndex="1"
                    GridPane.rowIndex="0"/>
 
+            <!-- Zobrazenie počtu podacích hárkov -->
             <Label text="Počet podacích hárkov:"
                    GridPane.columnIndex="0"
                    GridPane.rowIndex="1"/>
@@ -57,6 +66,7 @@
                    GridPane.columnIndex="1"
                    GridPane.rowIndex="1"/>
 
+            <!-- Nastavenie rozloženia stĺpcov -->
             <columnConstraints>
                 <ColumnConstraints minWidth="150" />
                 <ColumnConstraints hgrow="ALWAYS" />
@@ -64,7 +74,9 @@
         </GridPane>
     </TitledPane>
 
+    <!-- Sekcia s protokolom generovania -->
     <TitledPane text="Protokol generovania" expanded="true" VBox.vgrow="ALWAYS">
+        <!-- Textová oblasť pre zobrazenie protokolu generovania -->
         <TextArea fx:id="generationLogArea"
                   editable="false"
                   wrapText="true"
@@ -72,14 +84,18 @@
                   minHeight="150"/>
     </TitledPane>
 
+    <!-- Sekcia s ovládacími tlačidlami -->
     <HBox spacing="15" alignment="CENTER_RIGHT">
+        <!-- Tlačidlo pre otvorenie výstupného adresára -->
         <Button fx:id="openOutputDirButton"
                 text="Otvoriť výstupný adresár"
                 onAction="#handleOpenOutputDir"/>
+        <!-- Hlavné tlačidlo pre generovanie súborov -->
         <Button fx:id="generateButton"
-                text="Generovť súbory"
+                text="Generovať súbory"
                 onAction="#handleGenerate"
                 defaultButton="true"/>
+        <!-- Tlačidlo pre reštart procesu -->
         <Button fx:id="startOverButton"
                 text="Začať odznova"
                 onAction="#handleStartOver"/>

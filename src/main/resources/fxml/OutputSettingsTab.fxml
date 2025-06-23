@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<!-- Hlavný kontajner pre nastavenie výstupu -->
 <VBox fx:id="rootVbox"
       spacing="15"
       style="-fx-padding: 20;"
@@ -11,12 +12,15 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.OutputSettingTabController">
 
+    <!-- Hlavný nadpis sekcie -->
     <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
            text="Nastavenie výstupu" />
 
+    <!-- Sekcia pre údaje odosielateľa -->
     <TitledPane text="Údaje odosielateľa" expanded="true">
         <VBox spacing="10">
             <GridPane hgap="10" vgap="10">
+                <!-- Odsadenie obsahu GridPane -->
                 <padding>
                     <Insets top="10"
                             right="10"
@@ -24,6 +28,7 @@
                             left="10"/>
                 </padding>
 
+                <!-- Pole pre meno odosielateľa -->
                 <Label text="Meno odosielateľa:"
                        GridPane.columnIndex="0"
                        GridPane.rowIndex="0"/>
@@ -31,6 +36,7 @@
                            GridPane.columnIndex="1"
                            GridPane.rowIndex="0"/>
 
+                <!-- Pole pre ulicu a číslo -->
                 <Label text="Ulica a číslo:"
                        GridPane.columnIndex="0"
                        GridPane.rowIndex="1"/>
@@ -38,6 +44,7 @@
                            GridPane.columnIndex="1"
                            GridPane.rowIndex="1"/>
 
+                <!-- Pole pre PSČ a mesto -->
                 <Label text="PSČ a mesto:"
                        GridPane.columnIndex="0"
                        GridPane.rowIndex="2"/>
@@ -45,11 +52,13 @@
                            GridPane.columnIndex="1"
                            GridPane.rowIndex="2"/>
 
-                <Label text="Poznámka: V šablóne je potrebne manuálne zaškrtnúť druh zásielky."
+                <!-- Informačná poznámka o manuálnom označení druhu zásielky -->
+                <Label text="Poznámka: V šablóne je potrebné manuálne označiť druh zásielky."
                        GridPane.columnIndex="0"
                        GridPane.rowIndex="3"
                        wrapText="true"/>
 
+                <!-- Nastavenie rozloženia stĺpcov -->
                 <columnConstraints>
                     <ColumnConstraints minWidth="100"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
@@ -58,8 +67,10 @@
         </VBox>
     </TitledPane>
 
+    <!-- Sekcia pre nastavenie šablóny podacieho hárku -->
     <TitledPane text="Šablóna podacieho hárku" expanded="true">
         <VBox spacing="10">
+            <!-- Ovládacie prvky pre výber a vytvorenie šablóny -->
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <TextField fx:id="templatePathField"
                            HBox.hgrow="ALWAYS"
@@ -72,12 +83,15 @@
                         text="Vytvoriť novú šablónu"
                         onAction="#handleCreateTemplate"/>
             </HBox>
-            <Label text="Poznámka: V šablóne sa vyplnia údaje odosielateľa, typ zásielky a zoznam príjemcov."
+
+            <!-- Informačná poznámka o automatickom vyplňovaní šablóny -->
+            <Label text="Poznámka: V šablóne sa automaticky vyplnia údaje odosielateľa, typ zásielky a zoznam príjemcov."
                    wrapText="true"/>
         </VBox>
     </TitledPane>
 
+    <!-- Záverečná poznámka pre používateľa -->
     <Label style="-fx-font-style: italic;"
-           text="Pre pokračovanie vyplňte všetky povinné údaje. Tieto informácie budú použité pri generovaní podacieho hárka"
+           text="Pre pokračovanie vyplňte všetky povinné údaje. Tieto informácie budú použité pri generovaní podacieho hárku."
            wrapText="true"/>
 </VBox>

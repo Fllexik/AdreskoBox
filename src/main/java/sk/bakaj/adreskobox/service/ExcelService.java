@@ -88,10 +88,6 @@ public class ExcelService
                                              String senderStreet, String senderCity,
                                              String templatePath) throws IOException
     {
-        System.out.println("ExcelService.createSubmissionSheets() - ZAČIATOK");
-        System.out.println("- Počet rodičov: " + (parents != null ? parents.size() : "NULL"));
-        System.out.println("- Šablóna: " + templatePath);
-        System.out.println("- Výstupný adresár: " + (outputDirectory != null ? outputDirectory.getAbsolutePath() : "NULL"));
 
         //Kontrola existencie šablony
         File templateFile = new File(templatePath);
@@ -112,17 +108,13 @@ public class ExcelService
 
         List<File> createdFiles = new ArrayList<>();
 
-        // DEBUG: Výpis prvých pár rodičov
-        System.out.println("DEBUG - Prvých 3 rodičov pre Excel:");
         for (int i = 0; i < Math.min(3, parents.size()); i++)
         {
             Parent p = parents.get(i);
-            System.out.println("  " + (i+1) + ". " + p.getFullName() + " - " + p.getFullAddress());
         }
 
         //Rozdelenie rodičov do skupín po 12 (maximálny počet na jeden hárok)
         int totalGroups = (int) Math.ceil(parents.size() / (double) MAX_RECIPIENTS_PER_PAGE);
-        System.out.println("- Celkový počet skupín: " + totalGroups);
 
         for (int groupIndex = 0; groupIndex < totalGroups; groupIndex++)
         {
@@ -130,17 +122,12 @@ public class ExcelService
             int startIndex = groupIndex * MAX_RECIPIENTS_PER_PAGE;
             int endIndex = Math.min(startIndex + MAX_RECIPIENTS_PER_PAGE, parents.size());
 
-            System.out.println("- Spracovávam skupinu " + (groupIndex + 1) + " (indexy " + startIndex + "-" + (endIndex-1) + ")");
-
             //Vytvorenie súboru podacieho hárku
             File sheetFile = createSingleSubmissionSheet(parents.subList(startIndex, endIndex),
                     senderName, senderStreet, senderCity, templateFile, groupIndex + 1);
 
             createdFiles.add(sheetFile);
-            System.out.println("- Vytvorený súbor: " + sheetFile.getName());
         }
-
-        System.out.println("ExcelService.createSubmissionSheets() - KONIEC, vytvorených " + createdFiles.size() + " súborov");
         return createdFiles;
     }
 
@@ -157,8 +144,6 @@ public class ExcelService
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         File outputFile = new File(outputDirectory, "Podaci_harok_" + groupNumber + "_" + timestamp + ".xlsx");
 
-        System.out.println("  Vytváram Excel súbor: " + outputFile.getAbsolutePath());
-
         //Kopirovanie šablóny
         try (FileInputStream fis = new FileInputStream(templateFile);
              Workbook templateWorkbook = WorkbookFactory.create(fis);
@@ -167,21 +152,16 @@ public class ExcelService
             Sheet sheet = templateWorkbook.getSheetAt(0);
 
             //Vyplnenie údajov odosieľateľa
-            System.out.println("  Vyplňujem odosielateľa: " + senderName);
             fillSenderInfo(sheet, senderName, senderStreet, senderCity);
 
             //Vyplnenie údajov o prijemcoch
-            System.out.println("  Vyplňujem " + groupParents.size() + " príjemcov");
             fillRecipients(sheet, groupParents);
 
             //Uloženie workbooku
             templateWorkbook.write(fos);
-            System.out.println("  Excel súbor úspešne uložený");
         }
         catch (Exception e)
         {
-            System.err.println("  CHYBA pri vytváraní Excel súboru: " + e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 
@@ -209,12 +189,9 @@ public class ExcelService
             Row cityRow = getOrCreateRow(sheet, SENDER_CITY_ROW);
             Cell cityCell = getOrCreateCell(cityRow, 1);//Stĺpec B
             cityCell.setCellValue(senderCity);
-
-            System.out.println("    Odosielateľ vyplnený: " + senderName + ", " + senderStreet + ", " + senderCity);
         }
         catch (Exception e)
         {
-            System.err.println("    CHYBA pri vyplňovaní odosielateľa: " + e.getMessage());
             throw e;
         }
     }
@@ -232,14 +209,10 @@ public class ExcelService
                 Parent parent = parents.get(i);
                 int rowIndex = RECIPIENTS_START_ROW + i;
 
-                System.out.println("    Vyplňujem príjemcu " + (i+1) + ": " + parent.getFullName());
-
                 //Rozdelenie adresy na časti (ulica, mesto s PČS)
                 String[] addressParts = splitAddress(parent.getFullAddress());
                 String street = addressParts[0];
                 String city = addressParts[1];
-
-                System.out.println("      Adresa rozdelená: ulica='" + street + "', mesto='" + city + "'");
 
                 //Meno príjemcu(C-D)
                 Row row = getOrCreateRow(sheet, rowIndex);
@@ -254,11 +227,9 @@ public class ExcelService
                 Cell cityCell = getOrCreateCell(row, RECIPIENTS_CITY_START_COLUMN);
                 cityCell.setCellValue(city);
             }
-            System.out.println("    Všetci príjemcovia vyplnení (" + parents.size() + ")");
         }
-        catch (Exception e) {
-            System.err.println("    CHYBA pri vyplňovaní príjemcov: " + e.getMessage());
-            e.printStackTrace();
+        catch (Exception e)
+        {
             throw e;
         }
     }
@@ -323,7 +294,6 @@ public class ExcelService
         }
         catch (Exception e)
         {
-            System.err.println("CHYBA pri rozdeľovaní adresy '" + fullAddress + "': " + e.getMessage());
             // Ak sa rozdelenie nepodarí, celá adresa ide do ulica
             street = fullAddress;
             city = "";
@@ -363,13 +333,11 @@ public class ExcelService
      */
     public File createNewSubmissionTemplate() throws IOException
     {
-        System.out.println("Vytváram novú šablónu podacieho hárku...");
 
         File templateDir = new File("templates");
         if (!templateDir.exists())
         {
             templateDir.mkdirs();
-            System.out.println("Vytvorený adresár templates");
         }
 
         File templateFile = new File(templateDir, "Podaci_harok_template.xlsx");
@@ -435,12 +403,9 @@ public class ExcelService
 
             //Uloženie workbooku
             workbook.write(fos);
-            System.out.println("Šablóna úspešne vytvorená: " + templateFile.getAbsolutePath());
         }
         catch (Exception e)
         {
-            System.err.println("CHYBA pri vytváraní šablóny: " + e.getMessage());
-            e.printStackTrace();
             throw e;
         }
 

@@ -86,27 +86,18 @@ public class PDFService
             // Získame priamy prístup k obsahu PDF
             PdfContentByte canvas = writer.getDirectContent();
 
-            System.out.println("=== PDF GENEROVANIE ===");
-            System.out.println("Počet štítkov: " + parents.size());
-            System.out.println("Rozmery štítka: " + format.getWidth() + "x" + format.getHeight() + " mm");
-            System.out.println("Rozmery v bodoch: " + labelWidth + "x" + labelHeight);
-            System.out.println("Stĺpce x riadky: " + format.getColumns() + "x" + format.getRows());
-
             for (int parentIndex = 0; parentIndex < parents.size(); parentIndex++)
             {
                 Parent parent = parents.get(parentIndex);
 
-                // Výpočet pozície štítka - OPRAVENÝ
+                // Výpočet pozície štítka
                 float x = (float) (format.getLeftMargin() * POINTS_PER_MM +
                         currentColumn * (labelWidth + format.getHorizontalGap() * POINTS_PER_MM));
 
-                // OPRAVA: Y súradnica - správny výpočet zhora dole
+                // Y súradnica - správny výpočet zhora dole
                 float y = (float) (842 - format.getTopMargin() * POINTS_PER_MM -
                         currentRow * (labelHeight + format.getVerticalGap() * POINTS_PER_MM) - labelHeight);
 
-                System.out.println("\nŠtítok " + (parentIndex + 1) + " (" + parent.getFullName() + "):");
-                System.out.println("  Pozícia: [" + currentColumn + "," + currentRow + "]");
-                System.out.println("  Súradnice: x=" + x + ", y=" + y);
 
                 // Získanie riadkov štítka
                 String[] labelLines = parent.getLabelLines();
@@ -130,12 +121,8 @@ public class PDFService
 
                 if (labelText.length() == 0)
                 {
-                    System.out.println("  VAROVANIE: Prázdny štítok!");
                     labelText.append("Prázdny štítok");
                 }
-
-                System.out.println("  Text štítka (" + validLines + " riadky):");
-                System.out.println("    " + labelText.toString().replace("\n", "\n    "));
 
                 // Vytvorenie odstavca
                 Paragraph label = new Paragraph(labelText.toString(), defaultFont);
@@ -159,22 +146,6 @@ public class PDFService
                 // Vyrenderovanie textu
                 int result = ct.go();
 
-                if (result == ColumnText.NO_MORE_TEXT)
-                {
-                    System.out.println("  ✓ Štítok úspešne vytvorený");
-                }
-                else
-                {
-                    System.out.println("  ⚠ Štítok nemusí byť kompletný (kód: " + result + ")");
-                }
-
-                // DEBUG: Nakreslenie rámčeka okolo štítka (voliteľné)
-                if (System.getProperty("debug.pdf.borders", "false").equals("true"))
-                {
-                    canvas.rectangle(x, y, labelWidth, labelHeight);
-                    canvas.stroke();
-                }
-
                 // Presun na ďalší štítok
                 currentColumn++;
                 if (currentColumn >= format.getColumns())
@@ -185,20 +156,15 @@ public class PDFService
                 if (currentRow >= format.getRows())
                 {
                     currentRow = 0;
-                    System.out.println("\n=== NOVÁ STRÁNKA ===");
                     document.newPage();
                 }
             }
 
             document.close();
-            System.out.println("\n=== PDF DOKONČENÉ ===");
-            System.out.println("Súbor uložený: " + outputFile.getAbsolutePath());
 
         }
         catch (DocumentException | IOException e)
         {
-            System.err.println("CHYBA pri generovaní PDF: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Chyba pri generovaní PDF: " + e.getMessage(), e);
         }
     }
@@ -226,9 +192,6 @@ public class PDFService
 
             if (maxLineWidth > (labelWidthPoints - widthReserve))
             {
-                System.out.println("DEBUG: Štítok je príliš úzky");
-                System.out.println("  Najširší riadok: " + maxLineWidth + " bodov");
-                System.out.println("  Dostupná šírka: " + (labelWidthPoints - widthReserve) + " bodov");
                 return false;
             }
 
@@ -243,24 +206,14 @@ public class PDFService
 
             if (totalHeight > (labelHeightPoints - heightReserve))
             {
-                System.out.println("DEBUG: Štítok je príliš nízky");
-                System.out.println("  Potrebná výška: " + totalHeight + " bodov");
-                System.out.println("  Dostupná výška: " + (labelHeightPoints - heightReserve) + " bodov");
                 return false;
             }
-
-            System.out.println("DEBUG: Štítok vyhovuje");
-            System.out.println("  Rozmery štítka: " + format.getWidth() + "x" + format.getHeight() + " mm");
-            System.out.println("  V bodoch: " + labelWidthPoints + "x" + labelHeightPoints);
-            System.out.println("  Najširší riadok: " + maxLineWidth + " bodov");
-            System.out.println("  Potrebná výška: " + totalHeight + " bodov");
 
             return true;
 
         }
         catch (Exception e)
         {
-            System.err.println("Chyba pri kontrole veľkosti štítka: " + e.getMessage());
             return false;
         }
     }
@@ -365,57 +318,4 @@ public class PDFService
 
         return result;
     }
-
-    /**
-     * Testovacia metóda pre debugging rozmerov štítka
-     */
-    public void debugLabelSize(Parent parent, LabelFormat format)
-    {
-        String[] lines = parent.getLabelLines();
-
-        float labelWidthPoints = (float) format.getWidth() * POINTS_PER_MM;
-        float labelHeightPoints = (float) format.getHeight() * POINTS_PER_MM;
-        float widthReserve = 6f;  // rezervy ako v checkIfTextFitsOnLabel
-        float heightReserve = 4f;
-
-        float allowedWidth = labelWidthPoints - widthReserve;
-        float allowedHeight = labelHeightPoints - heightReserve;
-
-        System.out.println("=== DEBUG INFO PRE ŠTÍTOK ===");
-        System.out.println("Meno: " + parent.getFullName());
-        System.out.printf("Rozmery štítka: %.2f mm x %.2f mm\n", format.getWidth(), format.getHeight());
-        System.out.printf("Rozmery v bodoch: %.2f x %.2f (šírka x výška)\n", labelWidthPoints, labelHeightPoints);
-        System.out.printf("Dostupná šírka (bez rezervy): %.2f bodov\n", allowedWidth);
-        System.out.printf("Dostupná výška (bez rezervy): %.2f bodov\n\n", allowedHeight);
-
-        float totalHeight = 0f;
-        float maxLineWidth = 0f;
-
-        for (int i = 0; i < lines.length; i++)
-        {
-            String line = lines[i] != null ? lines[i].trim() : "";
-            if (!line.isEmpty())
-            {
-                float width = getTextWidth(line);
-                totalHeight += LINE_HEIGHT;
-                maxLineWidth = Math.max(maxLineWidth, width);
-                System.out.printf("Riadok %d: '%s' → %.2f bodov\n", i + 1, line, width);
-            }
-        }
-
-        System.out.println();
-        System.out.printf("Najširší riadok: %.2f bodov\n", maxLineWidth);
-        System.out.printf("Celková výška: %.2f bodov\n", totalHeight);
-
-        boolean fitsWidth = maxLineWidth <= allowedWidth;
-        boolean fitsHeight = totalHeight <= allowedHeight;
-        boolean fits = fitsWidth && fitsHeight;
-
-        System.out.println("\nVýsledok kontroly:");
-        System.out.println(" - Šírka " + (fitsWidth ? "VYHOVUJE ✅" : "NEVYHOVUJE ❌"));
-        System.out.println(" - Výška " + (fitsHeight ? "VYHOVUJE ✅" : "NEVYHOVUJE ❌"));
-        System.out.println("CELKOVÝ STAV: " + (fits ? "VYHOVUJE ✅" : "NEVYHOVUJE ❌"));
-        System.out.println("===========================\n");
-    }
-
 }
