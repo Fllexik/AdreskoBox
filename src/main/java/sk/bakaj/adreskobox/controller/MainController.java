@@ -30,6 +30,9 @@ public class MainController
     @FXML
     private TabPane tabPane;
 
+    @FXML
+    private Button themeToggleButton;
+
     // Vnorené kontroléry pre jednotlivé záložky
     private ImportController importController;
     private ParentsTabController parentsTabController;
@@ -46,6 +49,9 @@ public class MainController
     // Služby
     private FileService fileService = new FileService();
 
+    // Dark mode stav
+    private boolean isDarkMode = false;
+
     /**
      * Inicializácia kontroléra - nastavenie event listenerov a načítanie vnorených kontrolérov
      */
@@ -53,6 +59,7 @@ public class MainController
     private void initialize()
     {
         setupEventListeners();
+        setupThemeToggle();
         updateButtonStates();
         loadNestedControllers();
     }
@@ -70,6 +77,54 @@ public class MainController
         // Listener pre zmenu záložky - aktualizuje stav tlačidiel
         tabPane.getSelectionModel().selectedIndexProperty().addListener(
                 (observable, oldValue, newValue) -> updateButtonStates());
+    }
+
+    /**
+     * Nastavenie dark mode tlačidla
+     */
+    private void setupThemeToggle()
+    {
+        themeToggleButton.setOnAction(event -> toggleDarkMode());
+        updateThemeButtonText();
+    }
+
+    /**
+     * Prepínanie medzi light a dark režimom
+     */
+    private void toggleDarkMode()
+    {
+        isDarkMode = !isDarkMode;
+
+        // Získanie root node (BorderPane)
+        Node root = tabPane.getScene().getRoot();
+
+        if (isDarkMode)
+        {
+            // Aktivácia dark mode
+            root.getStyleClass().add("dark-mode");
+        }
+        else
+        {
+            // Deaktivácia dark mode
+            root.getStyleClass().remove("dark-mode");
+        }
+
+        updateThemeButtonText();
+    }
+
+    /**
+     * Aktualizácia textu na theme toggle tlačidle
+     */
+    private void updateThemeButtonText()
+    {
+        if (isDarkMode)
+        {
+            themeToggleButton.setText("☀️ Light Mode");
+        }
+        else
+        {
+            themeToggleButton.setText("🌙 Dark Mode");
+        }
     }
 
     /**
@@ -386,5 +441,26 @@ public class MainController
     public List<Parent> getProcessedParents()
     {
         return processedParents;
+    }
+
+    /**
+     * Získanie aktuálneho stavu dark mode
+     * @return true ak je aktivovaný dark mode, false inak
+     */
+    public boolean isDarkMode()
+    {
+        return isDarkMode;
+    }
+
+    /**
+     * Nastavenie dark mode programaticky
+     * @param darkMode true pre aktiváciu dark mode, false pre deaktiváciu
+     */
+    public void setDarkMode(boolean darkMode)
+    {
+        if (this.isDarkMode != darkMode)
+        {
+            toggleDarkMode();
+        }
     }
 }

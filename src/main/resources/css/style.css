@@ -1,59 +1,429 @@
+/* ==============================================
+   LIGHT MODE (Predvolený)
+   ============================================== */
+
+/* Základné nastavenie pre celú aplikáciu */
 .root {
-    -fx-font-family: 'Segoe UI', sans-serif;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-background-color: #f9f9f9;
+    -fx-font-size: 14px;
+}
+
+/* Hlavný BorderPane */
+.border-pane {
     -fx-background-color: #f9f9f9;
 }
 
-/* Nadpis */
-.label {
-    -fx-font-size: 18px;
-    -fx-text-fill: #333;
+/* Horná časť - VBox s nadpisom */
+.title-vbox {
+    -fx-padding: 20 20 10 20;
+    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #f9f9f9);
+    -fx-border-color: #bbdefb;
+    -fx-border-width: 0 0 1 0;
 }
 
-/* Prvý nadpis */
-.label:first-of-type {
+/* Hlavný nadpis aplikácie */
+.title-label {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
     -fx-text-fill: #1976d2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
 }
 
-/* Tlačidlá */
+/* Všetky ostatné labely */
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+/* TabPane styling */
+.tab-pane {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+/* Tab header area */
+.tab-pane .tab-header-area {
+    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #f5f5f5);
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 5 10 0 10;
+}
+
+/* Jednotlivé taby */
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 8 16 8 16;
+    -fx-min-width: 140px;
+    -fx-max-width: 200px;
+}
+
+/* Tab hover efekt */
+.tab-pane .tab:hover {
+    -fx-background-color: rgba(25, 118, 210, 0.1);
+}
+
+/* Vybratý tab */
+.tab-pane .tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #1976d2;
+    -fx-border-width: 0 0 3 0;
+    -fx-font-weight: bold;
+}
+
+/* Text v taboch */
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #666666;
+    -fx-font-size: 13px;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #1976d2;
+    -fx-font-weight: bold;
+}
+
+/* Obsah tabov */
+.tab-pane .tab-content-area {
+    -fx-background-color: #ffffff;
+    -fx-padding: 20;
+    -fx-background-radius: 0 0 8 8;
+}
+
+/* Navigačné tlačidlá - spodná časť */
+.navigation-hbox {
+    -fx-padding: 15 20 15 20;
+    -fx-spacing: 15;
+    -fx-alignment: center-right;
+    -fx-background-color: linear-gradient(to top, #e3f2fd, #f9f9f9);
+    -fx-border-color: #bbdefb;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* Základné tlačidlá */
 .button {
     -fx-background-color: #1976d2;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 6px;
-    -fx-padding: 8 16;
+    -fx-font-size: 13px;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 10 20 10 20;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
+    -fx-min-width: 80px;
 }
 
+/* Hover efekt pre tlačidlá */
 .button:hover {
     -fx-background-color: #1565c0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 2);
+    -fx-scale-y: 1.02;
+    -fx-scale-x: 1.02;
 }
 
-/* TabPane */
-.tab-pane {
-    -fx-tab-min-width: 130px;
-    -fx-tab-max-width: 200px;
-    -fx-background-color: white;
+/* Stlačené tlačidlo */
+.button:pressed {
+    -fx-background-color: #0d47a1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 1);
+    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.98;
 }
 
-/* Tabs */
-.tab-header-area {
-    -fx-background-color: #e3f2fd;
+/* Disabled tlačidlo */
+.button:disabled {
+    -fx-background-color: #cccccc;
+    -fx-text-fill: #666666;
+    -fx-effect: none;
+    -fx-opacity: 0.6;
 }
 
-.tab:selected {
-    -fx-background-color: #ffffff;
+/* Sekundárne tlačidlá */
+.button.secondary {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #1976d2;
     -fx-border-color: #1976d2;
-    -fx-border-width: 0 0 2px 0;
+    -fx-border-width: 1;
 }
 
-/* Navigačný panel */
-.hbox {
-    -fx-padding: 10;
-    -fx-spacing: 10;
-    -fx-alignment: center-right;
+.button.secondary:hover {
     -fx-background-color: #e3f2fd;
-    -fx-border-color: #bbdefb;
-    -fx-border-width: 1px 0 0 0;
+}
+
+/* Tlačidlo pre Dark Mode toggle */
+.theme-toggle-button {
+    -fx-background-color: #424242;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-padding: 5 15 5 15;
+    -fx-cursor: hand;
+    -fx-min-width: 100px;
+}
+
+.theme-toggle-button:hover {
+    -fx-background-color: #616161;
+}
+
+/* Formulárové prvky */
+.text-field {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.text-field:focused {
+    -fx-border-color: #1976d2;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(25, 118, 210, 0.3), 3, 0, 0, 0);
+}
+
+/* ComboBox */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.combo-box:focused {
+    -fx-border-color: #1976d2;
+    -fx-border-width: 2;
+}
+
+/* CheckBox */
+.check-box {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+}
+
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #1976d2;
+    -fx-border-color: #1976d2;
+}
+
+/* TableView */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #e0e0e0;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #1976d2;
+}
+
+/* Scrollbars */
+.scroll-bar {
+    -fx-background-color: #f5f5f5;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #cccccc;
+    -fx-background-radius: 10;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #999999;
+}
+
+/* ==============================================
+   DARK MODE
+   ============================================== */
+
+.root.dark-mode {
+    -fx-background-color: #121212;
+}
+
+.dark-mode .border-pane {
+    -fx-background-color: #121212;
+}
+
+.dark-mode .title-vbox {
+    -fx-background-color: linear-gradient(to bottom, #1e1e1e, #121212);
+    -fx-border-color: #333333;
+}
+
+.dark-mode .title-label {
+    -fx-text-fill: #64b5f6;
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.1), 2, 0, 0, 1);
+}
+
+.dark-mode .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .tab-pane {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #333333;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 2);
+}
+
+.dark-mode .tab-pane .tab-header-area {
+    -fx-background-color: linear-gradient(to bottom, #2e2e2e, #1e1e1e);
+    -fx-border-color: #333333;
+}
+
+.dark-mode .tab-pane .tab {
+    -fx-background-color: transparent;
+}
+
+.dark-mode .tab-pane .tab:hover {
+    -fx-background-color: rgba(100, 181, 246, 0.1);
+}
+
+.dark-mode .tab-pane .tab:selected {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #64b5f6;
+}
+
+.dark-mode .tab-pane .tab .tab-label {
+    -fx-text-fill: #b0b0b0;
+}
+
+.dark-mode .tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #64b5f6;
+}
+
+.dark-mode .tab-pane .tab-content-area {
+    -fx-background-color: #1e1e1e;
+}
+
+.dark-mode .navigation-hbox {
+    -fx-background-color: linear-gradient(to top, #2e2e2e, #121212);
+    -fx-border-color: #333333;
+}
+
+.dark-mode .button {
+    -fx-background-color: #64b5f6;
+    -fx-text-fill: #121212;
+}
+
+.dark-mode .button:hover {
+    -fx-background-color: #42a5f5;
+}
+
+.dark-mode .button:pressed {
+    -fx-background-color: #1e88e5;
+}
+
+.dark-mode .button:disabled {
+    -fx-background-color: #424242;
+    -fx-text-fill: #757575;
+}
+
+.dark-mode .button.secondary {
+    -fx-background-color: #2e2e2e;
+    -fx-text-fill: #64b5f6;
+    -fx-border-color: #64b5f6;
+}
+
+.dark-mode .button.secondary:hover {
+    -fx-background-color: #3e3e3e;
+}
+
+.dark-mode .theme-toggle-button {
+    -fx-background-color: #ffa726;
+    -fx-text-fill: #121212;
+}
+
+.dark-mode .theme-toggle-button:hover {
+    -fx-background-color: #ff9800;
+}
+
+.dark-mode .text-field {
+    -fx-background-color: #2e2e2e;
+    -fx-border-color: #424242;
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .text-field:focused {
+    -fx-border-color: #64b5f6;
+}
+
+.dark-mode .combo-box {
+    -fx-background-color: #2e2e2e;
+    -fx-border-color: #424242;
+}
+
+.dark-mode .combo-box:focused {
+    -fx-border-color: #64b5f6;
+}
+
+.dark-mode .check-box {
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .check-box .box {
+    -fx-background-color: #2e2e2e;
+    -fx-border-color: #424242;
+}
+
+.dark-mode .check-box:selected .box {
+    -fx-background-color: #64b5f6;
+    -fx-border-color: #64b5f6;
+}
+
+.dark-mode .table-view {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #333333;
+}
+
+.dark-mode .table-view .column-header {
+    -fx-background-color: #2e2e2e;
+    -fx-border-color: #424242;
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .table-view .table-row-cell {
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .table-view .table-row-cell:selected {
+    -fx-background-color: #2e2e2e;
+    -fx-text-fill: #64b5f6;
+}
+
+.dark-mode .scroll-bar {
+    -fx-background-color: #2e2e2e;
+}
+
+.dark-mode .scroll-bar .thumb {
+    -fx-background-color: #424242;
+}
+
+.dark-mode .scroll-bar .thumb:pressed {
+    -fx-background-color: #616161;
 }

@@ -8,19 +8,29 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="sk.bakaj.adreskobox.controller.MainController"
             prefHeight="700.0"
-            prefWidth="1024.0">
+            prefWidth="1024.0"
+            styleClass="border-pane"
+            stylesheets="@../css/style.css">
 
     <!-- Horná časť - nadpis aplikácie -->
     <top>
-        <VBox spacing="10" style="-fx-padding: 10;">
+        <VBox spacing="10" styleClass="title-vbox">
+            <HBox spacing="10" alignment="CENTER_LEFT">
             <Label text="Generátor adresných štítkov"
-                   style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+                   styleClass="title-label"/>
+            <Button text="🌙 Dark Mode"
+                    fx:id="themeToggleButton"
+                    styleClass="theme-toggle-button"/>
+            </HBox>
         </VBox>
     </top>
 
     <!-- Stredná časť - hlavný obsah s tabmi -->
     <center>
-        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+        <TabPane fx:id="tabPane"
+                 tabClosingPolicy="UNAVAILABLE"
+                 styleClass="tab-pane">
+
 
             <!-- Tab 1: Import dát -->
             <Tab text="1. Import dát">
@@ -51,7 +61,10 @@
 
     <!-- Spodná časť - navigačné tlačidlá -->
     <bottom>
-        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+        <HBox spacing="10"
+              alignment="CENTER_RIGHT"
+              styleClass="navigation-hbox">
+
             <Button text="Späť" fx:id="prevButton"/>
             <Button text="Ďalej" fx:id="nextButton"/>
         </HBox>

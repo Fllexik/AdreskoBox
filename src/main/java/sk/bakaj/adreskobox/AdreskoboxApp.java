@@ -29,8 +29,6 @@ public class AdreskoboxApp extends Application
 
         // Vytvorenie scény a nastavenie okna
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-
         primaryStage.setTitle("AdreskoBox - Generátor štítkov");
         primaryStage.setScene(scene);
         primaryStage.show();
