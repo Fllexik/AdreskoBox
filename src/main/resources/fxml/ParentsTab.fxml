@@ -13,8 +13,7 @@
 -->
 
 <VBox fx:id="rootVbox"
-      spacing="15"
-      style="-fx-padding: 20;"
+      styleClass="tab-content-area;"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.ParentsTabController">
@@ -26,7 +25,7 @@
     <!-- Hlavná tabuľka rodičov -->
     <TableView fx:id="parentsTable"
                VBox.vgrow="ALWAYS"
-               style="-fx-selection-bar: #3f51b5; -fx-selection-bar-non-focused: #9fa8da;">
+               styleClass="table-view">
         <columns>
             <!-- Stĺpec pre výber (checkbox) -->
             <TableColumn fx:id="selectColumn"
@@ -65,19 +64,19 @@
     <!-- Spodná lišta s tlačidlami a počítadlom -->
     <HBox alignment="CENTER_RIGHT"
           spacing="10"
-          style="-fx-padding: 10 0 0 0;">
+          styleClass="navigation-hbox">
 
         <!-- Tlačidlá pre hromadné operácie -->
         <HBox spacing="10" alignment="CENTER_LEFT">
         <Button text="Vybrať všetkých"
                 onAction="#handleSelectAll"
                 style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;"
-                prefWidth="120"/>
+                prefWidth="140"/>
 
         <Button text="Zrušiť výber"
                 onAction="#handleUnselectAll"
                 style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold;"
-                prefWidth="120"/>
+                prefWidth="140"/>
         </HBox>
 
         <!-- Rozdeľovač pre priestor -->

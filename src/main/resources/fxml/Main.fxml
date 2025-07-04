@@ -2,40 +2,38 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <!-- Hlavné okno aplikácie AdreskoBox -->
-<BorderPane xmlns="http://javafx.com/javafx/17.0.12"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="sk.bakaj.adreskobox.controller.MainController"
-            prefHeight="700.0"
-            prefWidth="1024.0"
+
+<BorderPane prefHeight="800.0"
+            prefWidth="1280.0"
             styleClass="border-pane"
-            stylesheets="@../css/style.css">
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sk.bakaj.adreskobox.controller.MainController">
 
     <!-- Horná časť - nadpis aplikácie -->
     <top>
         <VBox spacing="10" styleClass="title-vbox">
-            <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="Generátor adresných štítkov"
-                   styleClass="title-label"/>
-            <Button text="🌙 Dark Mode"
-                    fx:id="themeToggleButton"
-                    styleClass="theme-toggle-button"/>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label alignment="TOP_CENTER"  styleClass="title-label" text="Generátor adresných štítkov"/>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="themeToggleButton" styleClass="theme-toggle-button" text="🌙 Dark Mode" />
             </HBox>
         </VBox>
     </top>
 
     <!-- Stredná časť - hlavný obsah s tabmi -->
     <center>
-        <TabPane fx:id="tabPane"
-                 tabClosingPolicy="UNAVAILABLE"
-                 styleClass="tab-pane">
+        <ScrollPane fitToWidth="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
+        <TabPane fx:id="tabPane" styleClass="tab-pane" tabClosingPolicy="UNAVAILABLE">
 
 
             <!-- Tab 1: Import dát -->
             <Tab text="1. Import dát">
-                <fx:include fx:id="importTab" source="ImportTab.fxml"/>
-                </Tab>
+                <fx:include fx:id="importTab" source="ImportTab.fxml" />
+            </Tab>
 
             <!-- Tab 2: Výber rodičov -->
             <Tab text="2. Výber rodičov">
@@ -44,29 +42,28 @@
 
             <!-- Tab 3: Kontrola adries -->
             <Tab text="3. Kontrola adries">
-                <fx:include fx:id="adressCheckTab" source="AdressCheckTab.fxml"/>
+                <fx:include fx:id="adressCheckTab" source="AdressCheckTab.fxml" />
             </Tab>
 
             <!-- Tab 4: Nastavenie výstupu -->
             <Tab text="4. Nastavenie výstupu">
-                <fx:include fx:id="outputSettingTab" source="OutputSettingsTab.fxml"/>
+                <fx:include fx:id="outputSettingTab" source="OutputSettingsTab.fxml" />
             </Tab>
 
             <!-- Tab 5: Generovanie -->
             <Tab text="5. Generovanie">
-                <fx:include fx:id="generateTab" source="GenerateTab.fxml"/>
+                <fx:include fx:id="generateTab" source="GenerateTab.fxml" />
             </Tab>
         </TabPane>
+        </ScrollPane>
     </center>
 
     <!-- Spodná časť - navigačné tlačidlá -->
     <bottom>
-        <HBox spacing="10"
-              alignment="CENTER_RIGHT"
-              styleClass="navigation-hbox">
+        <HBox alignment="CENTER_RIGHT" spacing="10" styleClass="navigation-hbox">
 
-            <Button text="Späť" fx:id="prevButton"/>
-            <Button text="Ďalej" fx:id="nextButton"/>
+            <Button fx:id="prevButton" text="Späť" />
+            <Button fx:id="nextButton" text="Ďalej" />
         </HBox>
     </bottom>
 </BorderPane>

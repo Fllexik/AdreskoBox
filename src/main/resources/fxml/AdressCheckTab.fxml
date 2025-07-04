@@ -9,7 +9,7 @@
 <!-- Hlavný kontajner pre kontrolu adries -->
 <VBox fx:id="rootVbox"
       spacing="15"
-      style="-fx-padding: 20;"
+      styleClass="tab-content-area;"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.AdressCheckTabController">
@@ -33,7 +33,9 @@
     </HBox>
 
     <!-- Hlavná tabuľka s adresami -->
-    <TableView fx:id="addressTable" VBox.vgrow="ALWAYS">
+    <TableView fx:id="addressTable"
+               VBox.vgrow="ALWAYS"
+               styleClass="table-view">
         <columns>
             <!-- Stĺpec pre meno -->
             <TableColumn fx:id="nameColumn"

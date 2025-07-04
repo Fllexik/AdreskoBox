@@ -1,42 +1,50 @@
 /* ==============================================
-   LIGHT MODE (Predvolený)
+   ZÁKLADNÉ NASTAVENIA A PREMENNÉ
    ============================================== */
 
-/* Základné nastavenie pre celú aplikáciu */
 .root {
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-background-color: #f9f9f9;
+    -fx-font-family: "Segoe UI", "Arial", "Roboto", sans-serif;
     -fx-font-size: 14px;
+    -fx-background-color: #f8fafc;
 }
 
-/* Hlavný BorderPane */
+/* ==============================================
+   LAYOUT KOMPONENTY
+   ============================================== */
+
 .border-pane {
-    -fx-background-color: #f9f9f9;
+    -fx-background-color: #f8fafc;
 }
 
-/* Horná časť - VBox s nadpisom */
+/* Horná časť s nadpisom */
 .title-vbox {
-    -fx-padding: 20 20 10 20;
-    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #f9f9f9);
-    -fx-border-color: #bbdefb;
-    -fx-border-width: 0 0 1 0;
+    -fx-padding: 15 25;
+    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #f8fafc);
+    -fx-border-color: #e1e7ef;
+    -fx-border-width: 0 0 2 0;
 }
 
-/* Hlavný nadpis aplikácie */
 .title-label {
-    -fx-font-size: 24px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-text-fill: #1976d2;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
 }
 
-/* Všetky ostatné labely */
-.label {
-    -fx-font-size: 14px;
-    -fx-text-fill: #333333;
+/* Spodná navigačná časť */
+.navigation-hbox {
+    -fx-padding: 15 20;
+    -fx-spacing: 15;
+    -fx-alignment: center-right;
+    -fx-background-color: linear-gradient(to top, #e3f2fd, #f8fafc);
+    -fx-border-color: #bbdefb;
+    -fx-border-width: 1 0 0 0;
 }
 
-/* TabPane styling */
+/* ==============================================
+   TABY A OBSAH
+   ============================================== */
+
 .tab-pane {
     -fx-background-color: #ffffff;
     -fx-border-color: #e0e0e0;
@@ -46,7 +54,6 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
 }
 
-/* Tab header area */
 .tab-pane .tab-header-area {
     -fx-background-color: linear-gradient(to bottom, #e3f2fd, #f5f5f5);
     -fx-border-color: #e0e0e0;
@@ -54,30 +61,23 @@
     -fx-padding: 5 10 0 10;
 }
 
-/* Jednotlivé taby */
 .tab-pane .tab {
     -fx-background-color: transparent;
-    -fx-border-color: transparent;
     -fx-background-radius: 8 8 0 0;
-    -fx-padding: 8 16 8 16;
+    -fx-padding: 8 16;
     -fx-min-width: 140px;
-    -fx-max-width: 200px;
 }
 
-/* Tab hover efekt */
 .tab-pane .tab:hover {
     -fx-background-color: rgba(25, 118, 210, 0.1);
 }
 
-/* Vybratý tab */
 .tab-pane .tab:selected {
     -fx-background-color: #ffffff;
     -fx-border-color: #1976d2;
     -fx-border-width: 0 0 3 0;
-    -fx-font-weight: bold;
 }
 
-/* Text v taboch */
 .tab-pane .tab .tab-label {
     -fx-text-fill: #666666;
     -fx-font-size: 13px;
@@ -88,38 +88,28 @@
     -fx-font-weight: bold;
 }
 
-/* Obsah tabov */
 .tab-pane .tab-content-area {
     -fx-background-color: #ffffff;
     -fx-padding: 20;
     -fx-background-radius: 0 0 8 8;
 }
 
-/* Navigačné tlačidlá - spodná časť */
-.navigation-hbox {
-    -fx-padding: 15 20 15 20;
-    -fx-spacing: 15;
-    -fx-alignment: center-right;
-    -fx-background-color: linear-gradient(to top, #e3f2fd, #f9f9f9);
-    -fx-border-color: #bbdefb;
-    -fx-border-width: 1 0 0 0;
-}
+/* ==============================================
+   TLAČIDLÁ
+   ============================================== */
 
-/* Základné tlačidlá */
 .button {
     -fx-background-color: #1976d2;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 13px;
     -fx-background-radius: 6;
-    -fx-border-radius: 6;
-    -fx-padding: 10 20 10 20;
+    -fx-padding: 10 20;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
     -fx-min-width: 80px;
 }
 
-/* Hover efekt pre tlačidlá */
 .button:hover {
     -fx-background-color: #1565c0;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 2);
@@ -127,15 +117,12 @@
     -fx-scale-x: 1.02;
 }
 
-/* Stlačené tlačidlo */
 .button:pressed {
     -fx-background-color: #0d47a1;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 1);
     -fx-scale-y: 0.98;
     -fx-scale-x: 0.98;
 }
 
-/* Disabled tlačidlo */
 .button:disabled {
     -fx-background-color: #cccccc;
     -fx-text-fill: #666666;
@@ -155,15 +142,14 @@
     -fx-background-color: #e3f2fd;
 }
 
-/* Tlačidlo pre Dark Mode toggle */
+/* Tlačidlo pre prepínanie témy */
 .theme-toggle-button {
     -fx-background-color: #424242;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 12px;
     -fx-background-radius: 20;
-    -fx-border-radius: 20;
-    -fx-padding: 5 15 5 15;
+    -fx-padding: 5 15;
     -fx-cursor: hand;
     -fx-min-width: 100px;
 }
@@ -172,15 +158,21 @@
     -fx-background-color: #616161;
 }
 
-/* Formulárové prvky */
+/* ==============================================
+   FORMULÁROVÉ PRVKY
+   ============================================== */
+
+.label {
+    -fx-text-fill: #333333;
+}
+
 .text-field {
     -fx-background-color: white;
     -fx-border-color: #e0e0e0;
     -fx-border-width: 1;
     -fx-border-radius: 4;
     -fx-background-radius: 4;
-    -fx-padding: 8 12 8 12;
-    -fx-font-size: 14px;
+    -fx-padding: 8 12;
     -fx-text-fill: #333333;
 }
 
@@ -190,7 +182,6 @@
     -fx-effect: dropshadow(gaussian, rgba(25, 118, 210, 0.3), 3, 0, 0, 0);
 }
 
-/* ComboBox */
 .combo-box {
     -fx-background-color: white;
     -fx-border-color: #e0e0e0;
@@ -204,9 +195,25 @@
     -fx-border-width: 2;
 }
 
-/* CheckBox */
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+}
+
+.combo-box-popup .list-cell {
+    -fx-text-fill: #333333;
+    -fx-background-color: white;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #e3f2fd;
+}
+
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #1976d2;
+    -fx-text-fill: white;
+}
+
 .check-box {
-    -fx-font-size: 14px;
     -fx-text-fill: #333333;
 }
 
@@ -223,7 +230,10 @@
     -fx-border-color: #1976d2;
 }
 
-/* TableView */
+/* ==============================================
+   TABUĽKY
+   ============================================== */
+
 .table-view {
     -fx-background-color: white;
     -fx-border-color: #e0e0e0;
@@ -244,7 +254,10 @@
     -fx-text-fill: #1976d2;
 }
 
-/* Scrollbars */
+/* ==============================================
+   SCROLLBARY
+   ============================================== */
+
 .scroll-bar {
     -fx-background-color: #f5f5f5;
 }
@@ -256,6 +269,44 @@
 
 .scroll-bar .thumb:pressed {
     -fx-background-color: #999999;
+}
+
+/* ==============================================
+   ŠPECIÁLNE KOMPONENTY
+   ============================================== */
+
+/* TitledPane pre náhľady */
+.titled-pane {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.titled-pane .title {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-padding: 8 12;
+}
+
+.titled-pane .content {
+    -fx-padding: 15;
+}
+
+/* GridPane pre formuláre */
+.form-grid {
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 10;
+}
+
+/* Canvas pre náhľady */
+.preview-canvas {
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-background-color: white;
 }
 
 /* ==============================================
@@ -280,8 +331,9 @@
     -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.1), 2, 0, 0, 1);
 }
 
-.dark-mode .label {
-    -fx-text-fill: #e0e0e0;
+.dark-mode .navigation-hbox {
+    -fx-background-color: linear-gradient(to top, #2e2e2e, #121212);
+    -fx-border-color: #333333;
 }
 
 .dark-mode .tab-pane {
@@ -293,10 +345,6 @@
 .dark-mode .tab-pane .tab-header-area {
     -fx-background-color: linear-gradient(to bottom, #2e2e2e, #1e1e1e);
     -fx-border-color: #333333;
-}
-
-.dark-mode .tab-pane .tab {
-    -fx-background-color: transparent;
 }
 
 .dark-mode .tab-pane .tab:hover {
@@ -314,15 +362,16 @@
 
 .dark-mode .tab-pane .tab:selected .tab-label {
     -fx-text-fill: #64b5f6;
+    -fx-text-fill: #90caf9;
+    -fx-font-weight: bold;
 }
 
 .dark-mode .tab-pane .tab-content-area {
     -fx-background-color: #1e1e1e;
 }
 
-.dark-mode .navigation-hbox {
-    -fx-background-color: linear-gradient(to top, #2e2e2e, #121212);
-    -fx-border-color: #333333;
+.dark-mode .label {
+    -fx-text-fill: #e0e0e0;
 }
 
 .dark-mode .button {
@@ -375,10 +424,52 @@
 .dark-mode .combo-box {
     -fx-background-color: #2e2e2e;
     -fx-border-color: #424242;
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .combo-box .list-view {
+    -fx-background-color: #2e2e2e;
+}
+
+.dark-mode .combo-box .list-cell {
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .combo-box .list-cell:hover {
+    -fx-background-color: #424242;
+}
+
+.dark-mode .combo-box .list-cell:selected {
+    -fx-background-color: #64b5f6;
+    -fx-text-fill: #121212;
+}
+
+.dark-mode .vbox .label,
+.dark-mode .hbox .label,
+.dark-mode .grid-pane .label {
+    -fx-text-fill: #e0e0e0;
 }
 
 .dark-mode .combo-box:focused {
     -fx-border-color: #64b5f6;
+}
+
+.dark-mode .combo-box-popup .list-view {
+    -fx-background-color: #2e2e2e;
+}
+
+.dark-mode .combo-box-popup .list-cell {
+    -fx-text-fill: #e0e0e0;
+    -fx-background-color: #2e2e2e;
+}
+
+.dark-mode .combo-box-popup .list-cell:hover {
+    -fx-background-color: #424242;
+}
+
+.dark-mode .combo-box-popup .list-cell:selected {
+    -fx-background-color: #64b5f6;
+    -fx-text-fill: #121212;
 }
 
 .dark-mode .check-box {
@@ -411,6 +502,10 @@
     -fx-text-fill: #e0e0e0;
 }
 
+.dark-mode .table-view .table-cell {
+    -fx-text-fill: #e0e0e0;
+}
+
 .dark-mode .table-view .table-row-cell:selected {
     -fx-background-color: #2e2e2e;
     -fx-text-fill: #64b5f6;
@@ -426,4 +521,262 @@
 
 .dark-mode .scroll-bar .thumb:pressed {
     -fx-background-color: #616161;
+}
+
+.dark-mode .titled-pane {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #333333;
+}
+
+.dark-mode .titled-pane .title {
+    -fx-background-color: #2e2e2e;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #424242;
+    -fx-border-width: 0 0 1 0;
+}
+
+.dark-mode .titled-pane .content {
+    -fx-background-color: #1e1e1e;
+}
+
+/* Šípka v TitledPane pre dark mode */
+.dark-mode .titled-pane .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.dark-mode .titled-pane .arrow {
+    -fx-background-color: #e0e0e0;
+}
+
+.dark-mode .titled-pane:expanded .arrow {
+    -fx-background-color: #64b5f6;
+}
+
+/* Hover a focus efekty pre TitledPane */
+.dark-mode .titled-pane .title:hover {
+    -fx-background-color: #3e3e3e;
+}
+
+.dark-mode .titled-pane:focused .title {
+    -fx-border-color: #64b5f6;
+    -fx-border-width: 2;
+}
+
+/* Vnorené komponenty v TitledPane pre dark mode */
+.dark-mode .titled-pane .content .vbox,
+.dark-mode .titled-pane .content .hbox,
+.dark-mode .titled-pane .content .grid-pane {
+    -fx-background-color: transparent;
+}
+
+.dark-mode .titled-pane .content .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.dark-mode .titled-pane .content .text-area {
+    -fx-background-color: #2e2e2e;
+    -fx-control-inner-background: #2e2e2e;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #424242;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.dark-mode .titled-pane .content .text-field {
+    -fx-background-color: #2e2e2e;
+    -fx-border-color: #424242;
+    -fx-text-fill: #e0e0e0;
+    -fx-prompt-text-fill: #757575;
+}
+
+.dark-mode .titled-pane .content .text-field:focused {
+    -fx-border-color: #64b5f6;
+    -fx-border-width: 2;
+}
+
+.dark-mode .titled-pane .content .button {
+    -fx-background-color: #64b5f6;
+    -fx-text-fill: #121212;
+}
+
+.dark-mode .titled-pane .content .button:hover {
+    -fx-background-color: #42a5f5;
+}
+
+/* Alternatívne riešenie s !important pre problematické prípady */
+.dark-mode .titled-pane > .title {
+    -fx-background-color: #2e2e2e !important;
+    -fx-text-fill: #e0e0e0 !important;
+}
+
+.dark-mode .titled-pane > .content {
+    -fx-background-color: #1e1e1e !important;
+}
+
+.dark-mode .preview-canvas {
+    -fx-border-color: #424242;
+    -fx-background-color: #2e2e2e;
+}
+
+/* ==============================================
+   DIALOG PANE SUPPORT
+   ============================================== */
+
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.dark-mode .dialog-pane {
+    -fx-background-color: #1e1e1e;
+}
+
+.dark-mode .dialog-pane .header-panel {
+    -fx-background-color: #2e2e2e;
+}
+
+.dark-mode .dialog-pane .content {
+    -fx-background-color: #1e1e1e;
+}
+
+.dark-mode .dialog-pane .button-bar {
+    -fx-background-color: #2e2e2e;
+}
+
+/* ==============================================
+   HBOX A VBOX V DARK MODE
+   ============================================== */
+
+.dark-mode .hbox {
+    -fx-background-color: transparent;
+}
+
+.dark-mode .vbox {
+    -fx-background-color: transparent;
+}
+
+/* ==============================================
+   GRIDPANE V DARK MODE
+   ============================================== */
+
+.dark-mode .grid-pane {
+    -fx-background-color: transparent;
+}
+
+/* ==============================================
+   TITLEDPANE ROZŠÍRENIE
+   ============================================== */
+
+.dark-mode .titled-pane .arrow {
+    -fx-background-color: #e0e0e0;
+}
+
+.dark-mode .titled-pane:expanded .arrow {
+    -fx-background-color: #64b5f6;
+}
+
+.dark-mode .titled-pane > .title > .text {
+    -fx-fill: #e0e0e0;
+}
+
+/* ==============================================
+   CANVAS V DARK MODE
+   ============================================== */
+
+.dark-mode .canvas {
+    -fx-background-color: #2e2e2e;
+}
+
+/* ==============================================
+   SEPARATOR V DARK MODE
+   ============================================== */
+
+.separator {
+    -fx-background-color: #e0e0e0;
+}
+
+.dark-mode .separator {
+    -fx-background-color: #424242;
+}
+
+.separator .line {
+    -fx-border-color: #e0e0e0;
+}
+
+.dark-mode .separator .line {
+    -fx-border-color: #424242;
+}
+
+/* ==============================================
+   CONTEXT MENU V DARK MODE
+   ============================================== */
+
+.context-menu {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+}
+
+.dark-mode .context-menu {
+    -fx-background-color: #2e2e2e;
+    -fx-border-color: #424242;
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+}
+
+.dark-mode .context-menu .menu-item {
+    -fx-text-fill: #e0e0e0;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: #e3f2fd;
+}
+
+.dark-mode .context-menu .menu-item:focused {
+    -fx-background-color: #424242;
+}
+
+/* ==============================================
+   TOOLTIP V DARK MODE
+   ============================================== */
+
+.tooltip {
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+    -fx-border-color: #666666;
+}
+
+.dark-mode .tooltip {
+    -fx-background-color: #424242;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #666666;
+}
+
+/* ==============================================
+   PROGRESS BAR A PROGRESS INDICATOR
+   ============================================== */
+
+.progress-bar {
+    -fx-background-color: #e0e0e0;
+}
+
+.progress-bar .bar {
+    -fx-background-color: #1976d2;
+}
+
+.dark-mode .progress-bar {
+    -fx-background-color: #424242;
+}
+
+.dark-mode .progress-bar .bar {
+    -fx-background-color: #64b5f6;
+}
+
+.progress-indicator {
+    -fx-progress-color: #1976d2;
+}
+
+.dark-mode .progress-indicator {
+    -fx-progress-color: #64b5f6;
 }

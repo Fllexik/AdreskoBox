@@ -1,10 +1,14 @@
 package sk.bakaj.adreskobox.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import sk.bakaj.adreskobox.model.LabelFormat;
@@ -15,6 +19,15 @@ import sk.bakaj.adreskobox.model.LabelFormat;
  */
 public class CustomLabelFormatController
 {
+    @FunctionalInterface
+    public interface FormatSavedCallback
+    {
+        void onFormatSaved(LabelFormat format);
+    }
+
+    // Field pre callback
+    private FormatSavedCallback onFormatSavedCallback;
+
     // Konštanty pre rozmer A4 papiera v milimetroch
     private static final double A4_WIDTH_MM = 210.0;
     private static final double A4_HEIGHT_MM = 297.0;
@@ -58,6 +71,19 @@ public class CustomLabelFormatController
     // Výsledný formát štítkov
     private LabelFormat customLabelFormat;
 
+    @FXML
+    private VBox previewContainer;  // Rodičovský VBox okolo previewCanvas
+
+
+    /**
+     * Nastavenie callback funkcie pre uloženie formátu
+     * @param callback callback funkcia
+     */
+    public void setOnFormatSaved(FormatSavedCallback callback)
+    {
+        this.onFormatSavedCallback = callback;
+    }
+
     /**
      * Inicializácia controllera - nastavenie predvolených hodnôt a listenerov.
      */
@@ -67,6 +93,17 @@ public class CustomLabelFormatController
         initializeDefaultValues();
         attachUpdateListeners();
         updatePreview();
+        // Aplikovanie témy po načítaní
+        Platform.runLater(() ->
+        {
+            applyCurrentTheme();
+            setupPreviewCanvas();
+            resizeCanvas();
+
+            previewContainer.widthProperty().addListener((obs, oldVal, newVal) -> resizeCanvas());
+            previewContainer.heightProperty().addListener((obs, oldVal, newVal) -> resizeCanvas());
+        });
+
     }
 
     /**
@@ -183,6 +220,12 @@ public class CustomLabelFormatController
                     leftMargin, rightMargin, topMargin, bottomMargin, horizontalGap,
                     verticalGap, maxAddressLength);
 
+            // NOVÉ: Volanie callback funkcie
+            if (onFormatSavedCallback != null)
+            {
+                onFormatSavedCallback.onFormatSaved(customLabelFormat);
+            }
+
             closeDialog();
         }
         catch (NumberFormatException e)
@@ -246,6 +289,50 @@ public class CustomLabelFormatController
         }
 
         return true;
+    }
+
+    /**
+     * Inicializácia a nastavenie preview canvas komponenty
+     */
+    private void setupPreviewCanvas()
+    {
+        if (previewCanvas != null)
+        {
+
+            // Počiatočné vykreslenie náhľadu
+            updatePreview();
+
+        }
+        else
+        {
+            System.err.println("Preview canvas is null - check FXML binding");
+        }
+    }
+
+    private void resizeCanvas() {
+        // Zväčšenie dostupného priestoru
+        double availableWidth = previewContainer.getWidth() - 20; // menší padding
+        double availableHeight = previewContainer.getHeight() - 40; // priestor pre label
+
+        // Pomery A4
+        double aspectRatio = 210.0 / 297.0;
+
+        double newWidth = availableWidth;
+        double newHeight = newWidth / aspectRatio;
+
+        if (newHeight > availableHeight) {
+            newHeight = availableHeight;
+            newWidth = newHeight * aspectRatio;
+        }
+
+        // Zväčšenie max. limitov
+        newWidth = Math.min(newWidth, 800);  // zväčšené z 600
+        newHeight = Math.min(newHeight, 1000); // zväčšené z 850
+
+        previewCanvas.setWidth(newWidth);
+        previewCanvas.setHeight(newHeight);
+
+        updatePreview();
     }
 
     /**
@@ -334,6 +421,48 @@ public class CustomLabelFormatController
                 gc.strokeRect(x, y, labelWidth, labelHeight);
             }
         }
+    }
+
+    /**
+     * Aplikuje aktuálnu tému z hlavného kontroléra
+     */
+    private void applyCurrentTheme()
+    {
+        MainController mainController = MainController.getInstance();
+        if (mainController != null && mainController.isDarkMode())
+        {
+            // Získanie root node
+            Scene scene = previewCanvas.getScene(); // alebo iný FXML komponent
+            if (scene != null && scene.getRoot() != null)
+            {
+                Node root = scene.getRoot();
+                if (!root.getStyleClass().contains("dark-mode"))
+                {
+                    root.getStyleClass().add("dark-mode");
+                }
+            }
+        }
+    }
+
+    /**
+     * Alternatívne riešenie - volajte túto metódu z ImportController
+     * po vytvorení a zobrazení custom format okna
+     */
+    public void applyTheme(boolean isDarkMode)
+    {
+        Platform.runLater(() -> {
+            Scene scene = previewCanvas.getScene();
+            if (scene != null && scene.getRoot() != null)
+            {
+                Node root = scene.getRoot();
+                root.getStyleClass().remove("dark-mode");
+
+                if (isDarkMode)
+                {
+                    root.getStyleClass().add("dark-mode");
+                }
+            }
+        });
     }
 
     /**

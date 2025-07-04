@@ -9,8 +9,8 @@
 
 <!-- Hlavný kontajner pre generovanie výstupných súborov -->
 <VBox fx:id="rootVbox"
-      spacing="15"
-      style="-fx-padding: 20;"
+      spacing="10"
+      styleClass="title-vbox"
       xmlns="http://javafx.com/javafx/17.0.13"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.GenerateTabController">
@@ -20,7 +20,7 @@
            text="Generovanie výstupných súborov"/>
 
     <!-- Sekcia pre výber výstupného adresára -->
-    <TitledPane text="Výstupný adresár" expanded="true">
+    <TitledPane text="Výstupný adresár" expanded="true" styleClass="titled-pane">
         <VBox spacing="10">
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <!-- Pole zobrazujúce cestu k výstupnému adresáru -->
@@ -37,15 +37,8 @@
     </TitledPane>
 
     <!-- Sekcia so súhrnom generovania -->
-    <TitledPane text="Súhrn" expanded="true">
+    <TitledPane text="Súhrn" expanded="true" styleClass="titled-pane">
         <GridPane hgap="15" vgap="10">
-            <!-- Odsadenie obsahu GridPane -->
-            <padding>
-                <Insets top="10"
-                        right="10"
-                        bottom="10"
-                        left="10"/>
-            </padding>
 
             <!-- Zobrazenie počtu strán so štítkami -->
             <Label text="Počet strán so štítkami:"
@@ -75,13 +68,13 @@
     </TitledPane>
 
     <!-- Sekcia s protokolom generovania -->
-    <TitledPane text="Protokol generovania" expanded="true" VBox.vgrow="ALWAYS">
+    <TitledPane text="Protokol generovania" expanded="true" styleClass="titled-pane">
         <!-- Textová oblasť pre zobrazenie protokolu generovania -->
         <TextArea fx:id="generationLogArea"
                   editable="false"
                   wrapText="true"
                   VBox.vgrow="ALWAYS"
-                  minHeight="150"/>
+                  minHeight="50"/>
     </TitledPane>
 
     <!-- Sekcia s ovládacími tlačidlami -->

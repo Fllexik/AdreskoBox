@@ -24,14 +24,34 @@ public class AdreskoboxApp extends Application
     @Override
     public void start(Stage primaryStage) throws Exception
     {
-        // Načítanie FXML súboru pre hlavné okno
-        javafx.scene.Parent root = FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
+        try
+        {
+            // Načítanie FXML súboru pre hlavné okno
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
+            Parent root = loader.load();
 
-        // Vytvorenie scény a nastavenie okna
-        Scene scene = new Scene(root);
-        primaryStage.setTitle("AdreskoBox - Generátor štítkov");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+            // Vytvorenie scény
+            Scene scene = new Scene(root, 1024, 700);
+
+            // Načítanie CSS súboru
+            String cssPath = getClass().getResource("/css/style.css").toExternalForm();
+            scene.getStylesheets().add(cssPath);
+
+            // Nastavenie okna
+            primaryStage.setTitle("AdreskoBox - Generátor štítkov");
+            primaryStage.setScene(scene);
+            primaryStage.setMinWidth(800);
+            primaryStage.setMinHeight(600);
+
+            // Zobrazenie okna
+            primaryStage.show();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Chyba pri spustení aplikácie: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     /**

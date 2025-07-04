@@ -9,8 +9,7 @@
     Obsahuje rozhranie pre výber súboru a konfiguráciu formátu štítkov
 -->
 <VBox fx:id="rootVbox"
-      spacing="15"
-      style="-fx-padding: 20;"
+      styleClass="tab-content-area;"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.ImportController">
@@ -20,10 +19,7 @@
            text="Import dát" />
 
     <!-- Formulár pre nastavenie súboru -->
-    <GridPane hgap="10.0" vgap="10.0">
-        <padding>
-            <Insets bottom="10" left="10" right="10" top="10" />
-        </padding>
+    <GridPane styleClass="form-grid">
 
         <!-- Výber zdrojového súboru -->
         <Label text="Zdrojový súbor:"

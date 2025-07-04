@@ -7,28 +7,27 @@
 
 <!-- Okno pre nastavenie vlastného formátu štítkov -->
 <HBox spacing="20"
-      style="-fx-padding 20;"
+      styleClass="tab-content-area"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.CustomLabelFormatController">
 
     <!-- Ľavá strana: Formulár pre nastavenie rozmerov -->
-    <VBox spacing="15"
+    <VBox spacing="5"
           prefWidth="450">
 
         <!-- Nadpis -->
         <Label style="-fx-font-size: 16; -fx-font-weight: bold;"
-               text="Nastavenie vlastného formátu štítku"/>
+               text="Nastavenie vlastného formátu štítku"
+               wrapText="true"
+               maxWidth="Infinity"/>
 
         <!-- Popis -->
         <Label text="Zadajte presné rozmery štítkov a ich usporiadanie na stránke A4 (210 x 297 mm)."
                wrapText="true"/>
 
         <!-- Formulár s parametrami -->
-        <GridPane hgap="10.0" vgap="10.0">
-            <padding>
-                <Insets bottom="10" left="10" right="10" top="10" />
-            </padding>
+        <GridPane  styleClass="form-grid">
 
             <!-- Názov formátu -->
             <Label text="Názov formátu:"
@@ -137,17 +136,32 @@
         <Label fx:id="errorLabel" style="-fx-text-fill: red;" visible="false" wrapText="true"/>
 
         <!-- Tlačidlá -->
-        <HBox alignment="CENTER_RIGHT" spacing="15">
+        <HBox alignment="CENTER_RIGHT" spacing="20">
             <Button text="Zrušiť" onAction="#handleCancel"/>
             <Button text="Uložiť" onAction="#handleSave" defaultButton="true"/>
         </HBox>
     </VBox>
 
     <!-- Pravá strana: Náhľad rozmiestnenia štítkov -->
-    <TitledPane text="Náhľad rozmiestnenia na stránke" expanded="true">
-        <VBox alignment="CENTER" spacing="10">
-            <Canvas fx:id="previewCanvas" width="210" height="297"/>
-            <Label text="Biele obdĺžniky reprezentujú jednotlivé štítky na stránke A4"/>
+    <VBox spacing="10" HBox.hgrow="ALWAYS">
+        <Label text="Náhľad rozmiestnenia na stránke"
+               style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+
+        <!-- Container pre náhľad s plným využitím priestoru -->
+        <VBox fx:id="previewContainer"
+              alignment="CENTER"
+              spacing="10"
+              styleClass="titled-pane"
+              VBox.vgrow="ALWAYS"
+              minHeight="400"
+              prefHeight="600">
+
+            <Canvas fx:id="previewCanvas"
+                    styleClass="preview-canvas"/>
+
+            <Label text="Modré obdĺžniky reprezentujú jednotlivé štítky na stránke A4"
+                   style="-fx-font-size: 11; -fx-text-fill: #666666;"
+                   wrapText="true"/>
         </VBox>
-    </TitledPane>
+    </VBox>
 </HBox>

@@ -6,8 +6,8 @@
 
 <!-- Hlavný kontajner pre nastavenie výstupu -->
 <VBox fx:id="rootVbox"
-      spacing="15"
-      style="-fx-padding: 20;"
+      spacing="10"
+      styleClass="tab-content-area;"
       xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="sk.bakaj.adreskobox.controller.OutputSettingTabController">
@@ -17,16 +17,9 @@
            text="Nastavenie výstupu" />
 
     <!-- Sekcia pre údaje odosielateľa -->
-    <TitledPane text="Údaje odosielateľa" expanded="true">
+    <TitledPane text="Údaje odosielateľa" expanded="true" styleClass="titled-pane">
         <VBox spacing="10">
-            <GridPane hgap="10" vgap="10">
-                <!-- Odsadenie obsahu GridPane -->
-                <padding>
-                    <Insets top="10"
-                            right="10"
-                            bottom="10"
-                            left="10"/>
-                </padding>
+            <GridPane styleClass="form-grid">
 
                 <!-- Pole pre meno odosielateľa -->
                 <Label text="Meno odosielateľa:"
@@ -68,7 +61,7 @@
     </TitledPane>
 
     <!-- Sekcia pre nastavenie šablóny podacieho hárku -->
-    <TitledPane text="Šablóna podacieho hárku" expanded="true">
+    <TitledPane text="Šablóna podacieho hárku" expanded="true" styleClass="titled-pane">
         <VBox spacing="10">
             <!-- Ovládacie prvky pre výber a vytvorenie šablóny -->
             <HBox spacing="10" alignment="CENTER_LEFT">

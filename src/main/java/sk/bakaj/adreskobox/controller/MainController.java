@@ -3,10 +3,12 @@ package sk.bakaj.adreskobox.controller;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import sk.bakaj.adreskobox.model.ImportedData;
 import sk.bakaj.adreskobox.model.Parent;
 import sk.bakaj.adreskobox.service.FileService;
@@ -52,16 +54,50 @@ public class MainController
     // Dark mode stav
     private boolean isDarkMode = false;
 
+    // Statická referencia pre prístup k hlavnému kontroléru z iných okien
+    private static MainController instance;
+
     /**
      * Inicializácia kontroléra - nastavenie event listenerov a načítanie vnorených kontrolérov
      */
     @FXML
     private void initialize()
     {
-        setupEventListeners();
-        setupThemeToggle();
-        updateButtonStates();
-        loadNestedControllers();
+        // Nastavenie statickej referencie
+        instance = this;
+
+        // Zabezpečenie, že CSS je aplikované
+        Platform.runLater(() -> {
+            ensureCSSLoaded();
+            setupEventListeners();
+            setupThemeToggle();
+            updateButtonStates();
+            loadNestedControllers();
+        });
+    }
+
+    /**
+     * Zabezpečuje, že CSS súbor je načítaný
+     */
+    private void ensureCSSLoaded()
+    {
+        Scene scene = tabPane.getScene();
+        if (scene != null)
+        {
+            String cssPath = getClass().getResource("/css/style.css").toExternalForm();
+            if (!scene.getStylesheets().contains(cssPath))
+            {
+                scene.getStylesheets().add(cssPath);
+            }
+        }
+    }
+
+    /**
+     * Getter pre statickú referenciu
+     */
+    public static MainController getInstance()
+    {
+        return instance;
     }
 
     /**
@@ -96,20 +132,110 @@ public class MainController
         isDarkMode = !isDarkMode;
 
         // Získanie root node (BorderPane)
-        Node root = tabPane.getScene().getRoot();
+        Scene scene = tabPane.getScene();
+        if (scene != null)
+        {
+            Node root = scene.getRoot();
 
-        if (isDarkMode)
-        {
-            // Aktivácia dark mode
-            root.getStyleClass().add("dark-mode");
-        }
-        else
-        {
-            // Deaktivácia dark mode
-            root.getStyleClass().remove("dark-mode");
+            if (isDarkMode)
+            {
+                // Aktivácia dark mode
+                if (!root.getStyleClass().contains("dark-mode"))
+                {
+                    root.getStyleClass().add("dark-mode");
+                }
+            }
+            else
+            {
+                // Deaktivácia dark mode
+                root.getStyleClass().remove("dark-mode");
+            }
         }
 
         updateThemeButtonText();
+
+        // Aplikovanie dark mode na všetky otvorené okná
+        applyThemeToAllWindows();
+    }
+
+    /**
+     * Aplikuje aktuálnu tému na všetky otvorené okná
+     */
+    private void applyThemeToAllWindows()
+    {
+        Platform.runLater(() ->
+        {
+            Stage.getWindows().forEach(window ->
+            {
+                if (window instanceof Stage && window.getScene() != null)
+                {
+                    applyThemeToScene(window.getScene());
+                }
+            });
+        });
+    }
+
+    /**
+     * Aplikuje tému na konkrétnu scénu
+     */
+    public void applyThemeToScene(Scene scene)
+    {
+        if (scene != null && scene.getRoot() != null)
+        {
+            Node root = scene.getRoot();
+
+            // Odstránenie existujúcich class
+            root.getStyleClass().remove("dark-mode");
+
+            // Pridanie CSS súboru ak nie je už pridaný
+            String cssPath = getClass().getResource("/css/style.css").toExternalForm();
+            if (!scene.getStylesheets().contains(cssPath))
+            {
+                scene.getStylesheets().add(cssPath);
+            }
+
+            // Aplikovanie dark mode ak je aktívny
+            if (isDarkMode)
+            {
+                root.getStyleClass().add("dark-mode");
+            }
+        }
+    }
+
+    /**
+     * Metóda na aplikovanie témy na nové okno - volá sa pri vytváraní nových okien
+     * @param stage nové okno/stage
+     */
+    public void applyThemeToNewWindow(Stage stage)
+    {
+        if (stage != null && stage.getScene() != null)
+        {
+            applyThemeToScene(stage.getScene());
+        }
+    }
+
+    /**
+     * Vytvorí a nakonfiguruje nové okno s aplikovanou témou
+     * @param scene scéna pre nové okno
+     * @param title titulok okna
+     * @return nakonfigurované stage
+     */
+    public Stage createThemedWindow(Scene scene, String title)
+    {
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setTitle(title);
+
+        // Aplikovanie aktuálnej témy
+        applyThemeToScene(scene);
+
+        // Nastavenie vlastníka okna
+        if (tabPane.getScene() != null && tabPane.getScene().getWindow() != null)
+        {
+            stage.initOwner(tabPane.getScene().getWindow());
+        }
+
+        return stage;
     }
 
     /**
@@ -156,11 +282,18 @@ public class MainController
      */
     private void loadImportController()
     {
-        Node importTabContent = tabPane.getTabs().get(0).getContent();
-        if (importTabContent instanceof VBox)
+        if (tabPane.getTabs().size() > 0)
         {
-            VBox vbox = (VBox) importTabContent;
-            importController = (ImportController) vbox.getProperties().get("controller");
+            Node importTabContent = tabPane.getTabs().get(0).getContent();
+            if (importTabContent instanceof VBox)
+            {
+                VBox vbox = (VBox) importTabContent;
+                Object controller = vbox.getProperties().get("controller");
+                if (controller instanceof ImportController)
+                {
+                    importController = (ImportController) controller;
+                }
+            }
         }
     }
 
@@ -169,13 +302,16 @@ public class MainController
      */
     private void loadParentsTabController()
     {
-        Node parentsTabContent = tabPane.getTabs().get(1).getContent();
-        if (parentsTabContent != null)
+        if (tabPane.getTabs().size() > 1)
         {
-            Object controller = parentsTabContent.getProperties().get("controller");
-            if (controller instanceof ParentsTabController)
+            Node parentsTabContent = tabPane.getTabs().get(1).getContent();
+            if (parentsTabContent != null)
             {
-                parentsTabController = (ParentsTabController) controller;
+                Object controller = parentsTabContent.getProperties().get("controller");
+                if (controller instanceof ParentsTabController)
+                {
+                    parentsTabController = (ParentsTabController) controller;
+                }
             }
         }
     }
@@ -185,13 +321,16 @@ public class MainController
      */
     private void loadAddressCheckTabController()
     {
-        Node addressCheckContent = tabPane.getTabs().get(2).getContent();
-        if (addressCheckContent != null)
+        if (tabPane.getTabs().size() > 2)
         {
-            Object controller = addressCheckContent.getProperties().get("controller");
-            if (controller instanceof AdressCheckTabController)
+            Node addressCheckContent = tabPane.getTabs().get(2).getContent();
+            if (addressCheckContent != null)
             {
-                adressCheckTabController = (AdressCheckTabController) controller;
+                Object controller = addressCheckContent.getProperties().get("controller");
+                if (controller instanceof AdressCheckTabController)
+                {
+                    adressCheckTabController = (AdressCheckTabController) controller;
+                }
             }
         }
     }

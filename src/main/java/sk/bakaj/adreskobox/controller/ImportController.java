@@ -13,6 +13,7 @@ import sk.bakaj.adreskobox.model.LabelFormat;
 import sk.bakaj.adreskobox.service.FileService;
 import java.io.File;
 import java.util.List;
+import javafx.scene.Parent;
 
 /**
  * Kontrolér pre záložku importu dát.
@@ -272,41 +273,72 @@ public class ImportController
     {
         try
         {
+            // Načítanie FXML súboru
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CustomLabelFormatDialog.fxml"));
-            Scene scene = new Scene(loader.load());
+            Parent root = loader.load();
 
             CustomLabelFormatController controller = loader.getController();
 
-            // Ak je už nastavený nejaký formát, použijeme ho ako základ
-            if (selectedLabelFormat != null)
+            // Vytvorenie scény
+            Scene scene = new Scene(root);
+
+            // Získanie MainController inštancie a vytvorenie tematizovaného okna
+            MainController mainController = MainController.getInstance();
+            Stage stage;
+
+            if (mainController != null)
             {
-                controller.initWithFormat(selectedLabelFormat);
+                // Použitie metódy z MainController pre vytvorenie tematizovaného okna
+                stage = mainController.createThemedWindow(scene, "Nastavenie vlastného formátu štítku");
+            }
+            else
+            {
+                // Fallback ak MainController nie je dostupný
+                stage = new Stage();
+                stage.setScene(scene);
+                stage.setTitle("Nastavenie vlastného formátu štítku");
+
+                // Manuálne pridanie CSS
+                String cssPath = getClass().getResource("/css/style.css").toExternalForm();
+                scene.getStylesheets().add(cssPath);
             }
 
-            Stage stage = new Stage();
-            stage.setTitle("Vlastný formát štítku");
-            stage.setScene(scene);
+            // Nastavenie modality
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
 
-            // Po zatvorení dialógu získame nastavený formát
-            LabelFormat customFormat = controller.getCustomLabelFormat();
-            if (customFormat != null)
+            // Nastavenie callback pre uloženie formátu
+            controller.setOnFormatSaved(format ->
             {
-                selectedLabelFormat = customFormat;
-                predefinedFormatsComboBox.getSelectionModel().clearSelection();
-                selectedFormatLabel.setText("Vlastný Formát: " +
-                        String.format("%.1f x %.1f mm(%dx%d ks)",
-                                customFormat.getWidth(),
-                                customFormat.getHeight(),
-                                customFormat.getColumns(),
-                                customFormat.getRows()));
-            }
+                if (format != null)
+                {
+                    // Pridanie nového formátu do ComboBox
+                    predefinedFormatsComboBox.getItems().add(format);
+                    predefinedFormatsComboBox.setValue(format);
+                    updateSelectedFormatLabel();
+                }
+            });
+
+            // Zobrazenie okna a čakanie na zatvorenie
+            stage.showAndWait();
         }
         catch (Exception e)
         {
-            showAlert(Alert.AlertType.ERROR,"Chyba",
-                    "Nepodarilo sa otvoriť dialog vlastného formátu: " + e.getMessage());
+            System.err.println("Chyba pri otváraní vlastného formátu: " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Chyba");
+            alert.setHeaderText("Nepodarilo sa otvoriť okno pre vlastný formát");
+            alert.setContentText("Chyba: " + e.getMessage());
+
+            // Aplikovanie témy na alert
+            MainController mainController = MainController.getInstance();
+            if (mainController != null && alert.getDialogPane().getScene() != null)
+            {
+                mainController.applyThemeToScene(alert.getDialogPane().getScene());
+            }
+
+            alert.showAndWait();
         }
     }
 
@@ -382,6 +414,23 @@ public class ImportController
     public LabelFormat getSelectedLabelFormat()
     {
         return selectedLabelFormat;
+    }
+
+    /**
+     * Aktualizácia zobrazenia vybraného formátu štítku
+     */
+    private void updateSelectedFormatLabel()
+    {
+        if (selectedLabelFormat != null)
+        {
+            selectedFormatLabel.setText("Vybraný formát: " + selectedLabelFormat.getName());
+            selectedFormatLabel.setStyle("-fx-text-fill: green");
+        }
+        else
+        {
+            selectedFormatLabel.setText("Nie je vybraný žiadny formát");
+            selectedFormatLabel.setStyle("-fx-text-fill: orange");
+        }
     }
 
     /**
