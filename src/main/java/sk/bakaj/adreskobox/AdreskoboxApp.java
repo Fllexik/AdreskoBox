@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 
@@ -42,6 +43,14 @@ public class AdreskoboxApp extends Application
             primaryStage.setScene(scene);
             primaryStage.setMinWidth(800);
             primaryStage.setMinHeight(600);
+
+            // PRIDANIE IKONY
+            try {
+                Image icon = new Image(getClass().getResourceAsStream("/images/adreskobox_icon_64x64.png"));
+                primaryStage.getIcons().add(icon);
+            } catch (Exception e) {
+                System.err.println("Nepodarilo sa načítať ikonu: " + e.getMessage());
+            }
 
             // Zobrazenie okna
             primaryStage.show();
