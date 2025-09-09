@@ -134,12 +134,62 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>sk.bakaj.adreskobox.AdreskoboxApp</mainClass>
-                            <launcher>app</launcher>
-                            <jlinkZipName>app</jlinkZipName>
-                            <jlinkImageName>app</jlinkImageName>
+                            <launcher>AdreskoBox</launcher>
+                            <jlinkZipName>AdreskoBox</jlinkZipName>
+                            <jlinkImageName>AdreskoBox</jlinkImageName>
                             <noManPages>true</noManPages>
                             <stripDebug>true</stripDebug>
                             <noHeaderFiles>true</noHeaderFiles>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- jpackage Maven Plugin -->
+            <plugin>
+                <groupId>org.panteleyev</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>1.6.5</version>
+                <configuration>
+                    <!-- Základné nastavenia -->
+                    <n>AdreskoBox</n>
+                    <appVersion>1.0.0</appVersion>
+                    <vendor>sk.bakaj</vendor>
+                    <description>AdreskoBox - Správa adries a kontaktov</description>
+                    <copyright>Copyright © 2025 sk.bakaj</copyright>
+
+                    <!-- Cesty -->
+                    <destination>target/installer</destination>
+                    <runtimeImage>target/AdreskoBox</runtimeImage>
+                    <mainClass>sk.bakaj.adreskobox.AdreskoboxApp</mainClass>
+
+                    <!-- Ikona -->
+                    <icon>src/main/resources/images/adreskobox_icon_64x64.ico</icon>
+
+                    <!-- Windows špecifické nastavenia -->
+                    <winConsole>false</winConsole>
+                    <winDirChooser>true</winDirChooser>
+                    <winMenu>true</winMenu>
+                    <winMenuGroup>Aplikácie</winMenuGroup>
+                    <winShortcut>true</winShortcut>
+                    <winShortcutPrompt>true</winShortcutPrompt>
+                    <winPerUserInstall>true</winPerUserInstall>
+
+                    <!-- Java options -->
+                    <javaOptions>
+                        <option>-Dfile.encoding=UTF-8</option>
+                        <option>-Duser.language=sk</option>
+                        <option>-Duser.country=SK</option>
+                    </javaOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>win-msi</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jpackage</goal>
+                        </goals>
+                        <configuration>
+                            <type>msi</type>
                         </configuration>
                     </execution>
                 </executions>
