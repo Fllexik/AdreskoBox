@@ -69,12 +69,12 @@
               <goal>jpackage</goal>
             </goals>
             <configuration>
-              <type>msi</type>
+              <type>MSI</type>
             </configuration>
           </execution>
         </executions>
         <configuration>
-          <n>AdreskoBox</n>
+          <name>AdreskoBox</name>
           <appVersion>1.0.0</appVersion>
           <vendor>sk.bakaj</vendor>
           <description>AdreskoBox - Správa adries a kontaktov</description>

@@ -208,12 +208,12 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>win-msi</id>
+                        <id>win-exe</id>
                         <goals>
                             <goal>jpackage</goal>
                         </goals>
                         <configuration>
-                            <type>MSI</type>
+                            <type>exe</type>
                         </configuration>
                     </execution>
                 </executions>
