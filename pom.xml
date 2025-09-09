@@ -133,7 +133,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>sk.bakaj.adreskobox/sk.bakaj.adreskobox.AdreskoboxApp</mainClass>
+                            <mainClass>sk.bakaj.adreskobox.AdreskoboxApp</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
